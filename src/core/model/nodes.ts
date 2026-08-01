@@ -82,6 +82,8 @@ export interface ImageNode extends NodeBase {
   caption: string;
   /** Gfx file/name passed to cImGuiGfx("..."). */
   gfx: string;
+  /** When true, emit ImGui_DoImageCorrectAspect to preserve the image ratio. */
+  correctAspect: boolean;
 }
 
 export interface GaugeNode extends NodeBase {

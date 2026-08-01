@@ -198,7 +198,7 @@ export function makeNode(
       node = { ...base, type, caption, text: "BodyTextEntry" };
       break;
     case "image":
-      node = { ...base, type, caption, gfx: "my_image" };
+      node = { ...base, type, caption, gfx: "my_image", correctAspect: false };
       break;
     case "gauge":
       node = { ...base, type, caption, fillExpr: "0.5f" };

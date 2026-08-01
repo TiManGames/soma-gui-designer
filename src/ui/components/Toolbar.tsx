@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useStore } from "../state/store";
 import { generate } from "@core/codegen/generateHps";
-import type { SomaDocument } from "@core/model/document";
+import { migrateToV4 } from "@core/model/migrate";
 
 async function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard?.writeText) {
@@ -48,11 +48,12 @@ export function Toolbar() {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const parsed = JSON.parse(String(reader.result)) as SomaDocument;
-        if (parsed.schemaVersion === 4 && Array.isArray(parsed.nodes)) {
-          loadDocument(parsed);
+        const parsed = JSON.parse(String(reader.result));
+        const migrated = migrateToV4(parsed);
+        if (migrated) {
+          loadDocument(migrated);
         } else {
-          alert("Unsupported document (expected schemaVersion 4).");
+          alert("Unsupported document — expected a SOMA GUI Designer JSON (v3 or v4).");
         }
       } catch {
         alert("Could not parse the selected file.");

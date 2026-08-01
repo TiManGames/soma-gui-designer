@@ -99,8 +99,9 @@ export const EMITTERS: EmitterMap = {
 
   image: {
     emit(ctx, n: ImageNode) {
+      const fn = n.correctAspect ? "ImGui_DoImageCorrectAspect" : "ImGui_DoImage";
       ctx.lines.push(
-        `${ctx.indent}ImGui_DoImage(cImGuiGfx("${escapeString(n.gfx || n.caption)}"), ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)});`
+        `${ctx.indent}${fn}(cImGuiGfx("${escapeString(n.gfx || n.caption)}"), ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)});`
       );
     }
   },

@@ -1,9 +1,10 @@
 import { useStore } from "../state/store";
 import { validateDocument } from "@core/validate/validateDocument";
+import { validateAgainstSchema } from "@core/validate/validateSchema";
 
 export function ValidationList() {
   const doc = useStore((s) => s.doc);
-  const errors = validateDocument(doc);
+  const errors = [...validateDocument(doc), ...validateAgainstSchema(doc)];
 
   if (errors.length === 0) {
     return (

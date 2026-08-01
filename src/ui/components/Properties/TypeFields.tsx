@@ -44,6 +44,18 @@ export function TypeFields({ node }: { node: WidgetNode }) {
       {node.type === "station-text-reader-single" &&
         textField("Body text entry", "text", node.text)}
       {node.type === "image" && textField("Gfx file/name", "gfx", node.gfx)}
+      {node.type === "image" && (
+        <div className="checkbox-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={node.correctAspect}
+              onChange={(e) => updateNode(node.id, { correctAspect: e.target.checked })}
+            />
+            Preserve aspect ratio (DoImageCorrectAspect)
+          </label>
+        </div>
+      )}
       {node.type === "gauge" && textField("Fill expression", "fillExpr", node.fillExpr)}
       {node.type === "label" && numField("Font size mul", "fontSizeMul", node.fontSizeMul, 0.1)}
       {node.type === "station-numpad" && numField("Digits", "digits", node.digits)}
