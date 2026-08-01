@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useStore } from "../state/store";
 import { generate } from "@core/codegen/generateHps";
-import { migrateToV4 } from "@core/model/migrate";
+import { isSomaDocument, CURRENT_SCHEMA_VERSION } from "@core/model/document";
 
 async function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard?.writeText) {
@@ -49,11 +49,10 @@ export function Toolbar() {
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result));
-        const migrated = migrateToV4(parsed);
-        if (migrated) {
-          loadDocument(migrated);
+        if (isSomaDocument(parsed)) {
+          loadDocument(parsed);
         } else {
-          alert("Unsupported document — expected a SOMA GUI Designer JSON (v3 or v4).");
+          alert(`Unsupported document — expected a SOMA GUI Designer project (schema v${CURRENT_SCHEMA_VERSION}).`);
         }
       } catch {
         alert("Could not parse the selected file.");

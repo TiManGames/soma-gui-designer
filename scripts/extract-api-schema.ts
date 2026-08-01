@@ -8,7 +8,7 @@
  *
  * Run: npm run extract  (also wired as predev/prebuild)
  */
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
 import { dirname } from "node:path";
 import type {
@@ -207,6 +207,24 @@ function parsePalette(src: string): PaletteColor[] {
 }
 
 function main() {
+  const outPath = p("src/data/api-schema.json");
+
+  // soma_scripts/ is gitignored ground truth. On a fresh clone without it, fall
+  // back to the already-committed schema rather than failing the build.
+  if (!existsSync(p(SOURCES.api))) {
+    if (existsSync(outPath)) {
+      console.log(
+        `soma_scripts/ not found; keeping committed ${outPath}. ` +
+          `Add the SOMA source and re-run \`npm run extract\` to regenerate.`
+      );
+      return;
+    }
+    throw new Error(
+      `soma_scripts/ not found and no committed api-schema.json exists. ` +
+        `Add the SOMA source at ${SOURCES.api} and re-run \`npm run extract\`.`
+    );
+  }
+
   const api = readFileSync(p(SOURCES.api), "utf8");
   const wrapper = readFileSync(p(SOURCES.wrapper), "utf8");
   const station = readFileSync(p(SOURCES.station), "utf8");
@@ -226,7 +244,6 @@ function main() {
     paletteColors: parsePalette(station)
   };
 
-  const outPath = p("src/data/api-schema.json");
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, JSON.stringify(schema, null, 2) + "\n", "utf8");
 

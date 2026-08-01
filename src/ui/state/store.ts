@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { SomaDocument, Target } from "@core/model/document";
-import { detectPreset, RESOLUTION_PRESETS } from "@core/model/document";
+import { detectPreset, RESOLUTION_PRESETS, isSomaDocument } from "@core/model/document";
 import type { Override, WidgetNode, WidgetType } from "@core/model/nodes";
 import { ROOT } from "@core/model/nodes";
 import { makeNode, isContainerType } from "@core/model/defaults";
@@ -100,9 +100,7 @@ function loadPersisted(): SomaDocument {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.schemaVersion === 4 && Array.isArray(parsed.nodes)) {
-        return parsed as SomaDocument;
-      }
+      if (isSomaDocument(parsed)) return parsed;
     }
   } catch {
     // ignore

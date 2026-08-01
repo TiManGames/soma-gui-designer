@@ -2,8 +2,15 @@ import type { WidgetNode } from "./nodes";
 
 export type Target = "terminal-on-gui" | "map-on-gui" | "helper-function";
 
+/**
+ * Current document schema version. There is intentionally NO migration between
+ * versions — a document whose schemaVersion differs is rejected on load. Bump
+ * this when the document shape changes.
+ */
+export const CURRENT_SCHEMA_VERSION = 4 as const;
+
 export interface SomaDocument {
-  schemaVersion: 4;
+  schemaVersion: typeof CURRENT_SCHEMA_VERSION;
   target: Target;
   functionName: string;
   translationCategory: string;
@@ -12,6 +19,13 @@ export interface SomaDocument {
   gridSize: number;
   snapToGrid: boolean;
   nodes: WidgetNode[];
+}
+
+/** Runtime guard: is `value` a current-version document? */
+export function isSomaDocument(value: unknown): value is SomaDocument {
+  if (!value || typeof value !== "object") return false;
+  const doc = value as Partial<SomaDocument>;
+  return doc.schemaVersion === CURRENT_SCHEMA_VERSION && Array.isArray(doc.nodes);
 }
 
 export interface ResolutionPreset {
