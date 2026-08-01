@@ -8,17 +8,22 @@ export function ValidationList() {
 
   if (errors.length === 0) {
     return (
-      <ul className="validation-list ok">
-        <li>No validation issues.</li>
-      </ul>
+      <div className="validation">
+        <div className="v-ok">
+          <span>✓</span> No validation issues.
+        </div>
+      </div>
     );
   }
 
   return (
-    <ul className="validation-list">
+    <div className="validation">
       {errors.map((err, i) => (
-        <li key={i}>{err}</li>
+        <div className="v-item" key={i}>
+          <span aria-hidden>▸</span>
+          <span>{err}</span>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }

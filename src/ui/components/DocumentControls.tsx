@@ -8,9 +8,7 @@ export function DocumentControls() {
   const setPreviewSize = useStore((s) => s.setPreviewSize);
 
   return (
-    <section>
-      <h2>Document</h2>
-
+    <>
       <label>
         Target callback
         <select
@@ -89,6 +87,6 @@ export function DocumentControls() {
           </label>
         </div>
       </div>
-    </section>
+    </>
   );
 }

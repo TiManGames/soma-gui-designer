@@ -65,7 +65,9 @@ export function OverridesSection({ node }: { node: WidgetNode }) {
     return (
       <div className="field-group">
         <h3>Overrides ({meta.dataClass})</h3>
-        <p className="empty-selection">No struct schema; edit method calls below.</p>
+        <p style={{ color: "var(--text-faint)", fontSize: 11.5, margin: "0 0 var(--s2)" }}>
+          No struct schema; edit method calls below.
+        </p>
         {calls.map(({ index, call }) => (
           <div className="override-row" key={index}>
             <input value={call} onChange={(e) => updateCall(index, e.target.value)} />

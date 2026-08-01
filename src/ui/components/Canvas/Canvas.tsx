@@ -63,10 +63,12 @@ export function Canvas() {
   return (
     <>
       <div className="canvas-toolbar">
-        <span>
-          {size.x}×{size.y} · scale {Math.round(scale * 100)}%
+        <span className="scale-chip">
+          {size.x}×{size.y} · {Math.round(scale * 100)}%
         </span>
-        <span className="hint">Drag to move · corner handle to resize · drag into a window/group to reparent</span>
+        <span className="canvas-hint">
+          Drag to move · corner to resize · drop into a window/group to reparent
+        </span>
       </div>
       <div className="canvas-scroller" ref={scrollerRef}>
         <div

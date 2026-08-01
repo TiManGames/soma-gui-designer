@@ -1,5 +1,6 @@
 import { useStore } from "../../state/store";
 import { getNode } from "@core/model/tree";
+import { WIDGETS } from "@core/model/defaults";
 import { CommonProps } from "./CommonProps";
 import { TypeFields } from "./TypeFields";
 import { OverridesSection } from "./OverridesSection";
@@ -14,16 +15,21 @@ export function PropertyPanel() {
 
   if (!node) {
     return (
-      <section>
-        <h2>Selected Block</h2>
-        <p className="empty-selection">Select a block on the canvas or in the hierarchy to edit it.</p>
-      </section>
+      <div className="empty-state">
+        <div className="es-icon" aria-hidden>
+          ⌖
+        </div>
+        <div>Select a widget on the canvas or in the hierarchy to edit its properties.</div>
+      </div>
     );
   }
 
   return (
-    <section>
-      <h2>Selected Block</h2>
+    <>
+      <div className="prop-title">
+        <span className="pt-kind">{WIDGETS[node.type].label}</span>
+        <strong>{node.id}</strong>
+      </div>
       <CommonProps node={node} />
       <TypeFields node={node} />
       <OverridesSection node={node} />
@@ -33,6 +39,6 @@ export function PropertyPanel() {
           Delete
         </button>
       </div>
-    </section>
+    </>
   );
 }

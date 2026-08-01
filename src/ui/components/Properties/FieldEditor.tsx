@@ -146,6 +146,7 @@ function ColorEditor({ value, onChange }: { value: string | undefined; onChange:
         />
         <input
           type="number"
+          className="color-alpha"
           min={0}
           max={1}
           step="0.05"
@@ -158,6 +159,7 @@ function ColorEditor({ value, onChange }: { value: string | undefined; onChange:
         {paletteColors.map((c) => (
           <button
             key={c.name}
+            className="swatch-btn"
             title={c.name}
             style={{ background: rgbaToHex(c) }}
             onClick={() => onChange(c.name)}

@@ -64,19 +64,27 @@ export function Toolbar() {
 
   return (
     <header className="topbar">
-      <div>
-        <h1>SOMA GUI Designer</h1>
-        <p>Visual composer for HPL3 ImGui terminal screens</p>
+      <div className="brand">
+        <div className="brand-mark" aria-hidden />
+        <div>
+          <h1>SOMA GUI Designer</h1>
+          <p>Visual composer for HPL3 ImGui terminal screens</p>
+        </div>
       </div>
       <div className="topbar-actions">
-        <button onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
-          Undo
+        <button className="ghost icon-btn" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
+          ↶ Undo
         </button>
-        <button onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)">
-          Redo
+        <button className="ghost icon-btn" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)">
+          ↷ Redo
         </button>
-        <button onClick={() => newDocument()}>New</button>
-        <button onClick={() => fileInput.current?.click()}>Import</button>
+        <span className="toolbar-divider" />
+        <button className="ghost" onClick={() => newDocument()}>
+          New
+        </button>
+        <button className="ghost" onClick={() => fileInput.current?.click()}>
+          Import
+        </button>
         <input
           ref={fileInput}
           type="file"
@@ -84,7 +92,10 @@ export function Toolbar() {
           style={{ display: "none" }}
           onChange={onImportFile}
         />
-        <button onClick={onExport}>Export</button>
+        <button className="ghost" onClick={onExport}>
+          Export
+        </button>
+        <span className="toolbar-divider" />
         <button className="primary" onClick={onCopy}>
           Copy Code
         </button>

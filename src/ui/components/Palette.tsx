@@ -18,17 +18,19 @@ export function Palette() {
         const types = (Object.keys(WIDGETS) as WidgetType[]).filter(
           (t) => WIDGETS[t].category === category
         );
+        if (types.length === 0) return null;
         return (
-          <section key={category}>
-            <h2>{title}</h2>
+          <div className="palette-group" key={category}>
+            <div className="palette-group-label">{title}</div>
             <div className="palette-grid">
               {types.map((t) => (
-                <button key={t} onClick={() => addNode(t)}>
-                  {WIDGETS[t].label}
+                <button className="palette-card" key={t} onClick={() => addNode(t)}>
+                  <span className="pc-name">{WIDGETS[t].label}</span>
+                  <span className="pc-kind">{WIDGETS[t].category}</span>
                 </button>
               ))}
             </div>
-          </section>
+          </div>
         );
       })}
     </>

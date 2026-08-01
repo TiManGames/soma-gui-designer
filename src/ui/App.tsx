@@ -7,6 +7,7 @@ import { ValidationList } from "./components/ValidationList";
 import { PropertyPanel } from "./components/Properties/PropertyPanel";
 import { CodePanel } from "./components/CodeOutput/CodePanel";
 import { DocumentControls } from "./components/DocumentControls";
+import { Section } from "./components/Section";
 import { useStore } from "./state/store";
 
 export function App() {
@@ -29,31 +30,38 @@ export function App() {
   }, [undo, redo]);
 
   return (
-    <>
+    <div className="app">
       <Toolbar />
-      <main className="app-shell">
-        <aside className="panel palette-panel">
-          <DocumentControls />
-          <Palette />
-          <section>
-            <h2>Blocks</h2>
+      <div className="workspace">
+        <aside className="rail left">
+          <Section title="Document">
+            <DocumentControls />
+          </Section>
+          <Section title="Add Widget">
+            <Palette />
+          </Section>
+          <Section title="Hierarchy">
             <HierarchyTree />
-          </section>
-          <section>
-            <h2>Validation</h2>
+          </Section>
+          <Section title="Validation">
             <ValidationList />
-          </section>
+          </Section>
         </aside>
 
         <section className="canvas-panel">
           <Canvas />
         </section>
 
-        <aside className="panel properties-panel">
-          <PropertyPanel />
-          <CodePanel />
+        <aside className="rail right">
+          <Section title="Inspector">
+            <PropertyPanel />
+          </Section>
+          <Section title="Generated Code">
+            <CodePanel />
+          </Section>
         </aside>
-      </main>
-    </>
+      </div>
+    </div>
   );
 }
+
