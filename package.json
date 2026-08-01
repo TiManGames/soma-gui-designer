@@ -4,7 +4,6 @@
   "publisher": "soma-modding",
   "private": true,
   "version": "0.3.0",
-  "type": "module",
   "description": "Visual builder for SOMA (HPL3) ImGui terminal GUIs — drag-and-drop widgets, generate AngelScript .hps code.",
   "license": "MIT",
   "repository": {
