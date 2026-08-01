@@ -89,6 +89,36 @@ export function TypeFields({ node }: { node: WidgetNode }) {
           </select>
         </label>
       )}
+
+      {node.type === "bg-scanlines" && (
+        <>
+          {textField("Z depth", "zDepth", node.zDepth)}
+          {textField("Texture file", "file", node.file)}
+        </>
+      )}
+      {node.type === "bg-backdrop" && (
+        <>
+          {textField("Texture file", "file", node.file)}
+          {textField("Rel. pos X", "relPosX", node.relPosX)}
+          {textField("Rel. pos Y", "relPosY", node.relPosY)}
+          {textField("Rel. size", "relSize", node.relSize)}
+          {textField("Z depth", "zDepth", node.zDepth)}
+        </>
+      )}
+      {node.type === "bg-flat-color" && (
+        <>
+          {textField("Z depth", "zDepth", node.zDepth)}
+          {textField("Color (cColor expr)", "color", node.color)}
+        </>
+      )}
+      {(node.type === "bg-ornament-tl" || node.type === "bg-ornament-tr" ||
+        node.type === "bg-ornament-br" || node.type === "bg-ornament-bl") && (
+        <>
+          {textField("Texture file", "file", node.file)}
+          {textField("Z depth", "zDepth", node.zDepth)}
+          {textField("Color (cColor expr)", "color", node.color)}
+        </>
+      )}
     </div>
   );
 }

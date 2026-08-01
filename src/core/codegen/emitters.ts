@@ -233,44 +233,44 @@ export const EMITTERS: EmitterMap = {
   // ---- Background / overlay (no pos/size — call the helper directly) ----
 
   "bg-scanlines": {
-    emit(ctx, _n: BgScanlinesNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_Scanlines();`);
+    emit(ctx, n: BgScanlinesNode) {
+      ctx.lines.push(`${ctx.indent}StationGuiBG_Scanlines(${n.zDepth || "10.0f"}, "${escapeString(n.file || "station/scanlines/standard_tileable")}");`);
     }
   },
 
   "bg-backdrop": {
-    emit(ctx, _n: BgBackdropNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_Backdrop();`);
+    emit(ctx, n: BgBackdropNode) {
+      ctx.lines.push(`${ctx.indent}StationGuiBG_Backdrop("${escapeString(n.file || "background_logo_pathOS")}", cVector2f(${n.relPosX || "0.1f"}, ${n.relPosY || "0.45f"}), ${n.relSize || "0.5f"}, ${n.zDepth || "0.0f"});`);
     }
   },
 
   "bg-flat-color": {
-    emit(ctx, _n: BgFlatColorNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_FlatColor();`);
+    emit(ctx, n: BgFlatColorNode) {
+      ctx.lines.push(`${ctx.indent}StationGuiBG_FlatColor(${n.zDepth || "0.0f"}, ${n.color || "cColor(0,1.0f)"});`);
     }
   },
 
   "bg-ornament-tl": {
-    emit(ctx, _n: BgOrnamentTLNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopLeft();`);
+    emit(ctx, n: BgOrnamentTLNode) {
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopLeft("${escapeString(n.file || "station/ornament/corner_topleft")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor_White"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
     }
   },
 
   "bg-ornament-tr": {
-    emit(ctx, _n: BgOrnamentTRNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopRight();`);
+    emit(ctx, n: BgOrnamentTRNode) {
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopRight("${escapeString(n.file || "station/ornament/corner_topright")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor(1.0f,0.75f,0.75f,1.0f)"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
     }
   },
 
   "bg-ornament-br": {
-    emit(ctx, _n: BgOrnamentBRNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomRight();`);
+    emit(ctx, n: BgOrnamentBRNode) {
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomRight("${escapeString(n.file || "station/ornament/corner_bottomright")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor(1.0f,0.75f,0.75f,1.0f)"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
     }
   },
 
   "bg-ornament-bl": {
-    emit(ctx, _n: BgOrnamentBLNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomLeft();`);
+    emit(ctx, n: BgOrnamentBLNode) {
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomLeft("${escapeString(n.file || "station/ornament/corner_bottomleft")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor(1.0f,0.75f,0.75f,1.0f)"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
     }
   },
 

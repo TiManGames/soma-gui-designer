@@ -177,13 +177,13 @@ export function makeNode(type: WidgetType, id: string, patch: Partial<WidgetNode
     case "gauge":                   node = { ...base, type, caption, fillExpr: "0.5f" }; break;
     case "fill":                    node = { ...base, type, caption }; break;
     case "frame":                   node = { ...base, type, caption }; break;
-    case "bg-scanlines":            node = { ...base, type, caption }; break;
-    case "bg-backdrop":             node = { ...base, type, caption }; break;
-    case "bg-flat-color":           node = { ...base, type, caption }; break;
-    case "bg-ornament-tl":          node = { ...base, type, caption }; break;
-    case "bg-ornament-tr":          node = { ...base, type, caption }; break;
-    case "bg-ornament-br":          node = { ...base, type, caption }; break;
-    case "bg-ornament-bl":          node = { ...base, type, caption }; break;
+    case "bg-scanlines":   node = { ...base, type, caption, zDepth: "10.0f", file: "station/scanlines/standard_tileable" }; break;
+    case "bg-backdrop":    node = { ...base, type, caption, file: "background_logo_pathOS", relPosX: "0.1f", relPosY: "0.45f", relSize: "0.5f", zDepth: "0.0f" }; break;
+    case "bg-flat-color":  node = { ...base, type, caption, zDepth: "0.0f", color: "cColor(0,1.0f)" }; break;
+    case "bg-ornament-tl": node = { ...base, type, caption, file: "station/ornament/corner_topleft",    zDepth: "0.2f", color: "cColor_White" }; break;
+    case "bg-ornament-tr": node = { ...base, type, caption, file: "station/ornament/corner_topright",   zDepth: "0.2f", color: "cColor(1.0f, 0.75f, 0.75f, 1.0f)" }; break;
+    case "bg-ornament-br": node = { ...base, type, caption, file: "station/ornament/corner_bottomright",zDepth: "0.2f", color: "cColor(1.0f, 0.75f, 0.75f, 1.0f)" }; break;
+    case "bg-ornament-bl": node = { ...base, type, caption, file: "station/ornament/corner_bottomleft", zDepth: "0.2f", color: "cColor(1.0f, 0.75f, 0.75f, 1.0f)" }; break;
     case "station-numpad":          node = { ...base, type, caption, digits: 4 }; break;
     case "station-text-reader-single":
       node = { ...base, type, caption, text: "SystemStatusBody", overrides: [...TEXT_READER_DEFAULT_OVERRIDES] };
