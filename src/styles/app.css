@@ -616,7 +616,7 @@ label textarea {
   background: rgba(10, 18, 28, 0.6);
   border-color: rgba(143, 255, 210, 0.5);
 }
-/* Background/overlay widgets — visually distinct, dashed outline */
+/* Background/overlay widgets — visually distinct, dashed outline, non-interactive */
 .widget-bg {
   background: repeating-linear-gradient(
     45deg,
@@ -626,7 +626,12 @@ label textarea {
     transparent 12px
   );
   border: 1px dashed rgba(63, 182, 201, 0.3);
-  pointer-events: auto;
+  pointer-events: none;
+}
+.widget-bg.selected {
+  /* Allow selected highlight to show even though pointer-events is off */
+  outline: 2px dashed var(--accent-2);
+  pointer-events: none;
 }
 
 .resize-handle {

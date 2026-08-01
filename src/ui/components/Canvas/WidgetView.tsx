@@ -3,34 +3,42 @@ import type { WidgetNode, WidgetType } from "@core/model/nodes";
 import type { Rect } from "@core/model/geometry";
 
 const CSS_TYPE: Record<WidgetType, string> = {
-  "station-window":           "widget-window",
-  group:                      "widget-frame",
-  layout:                     "widget-frame",
-  "station-button":           "widget-button",
-  "station-toggle-button":    "widget-button",
-  "repeat-button":            "widget-button",
-  checkbox:                   "widget-checkbox",
-  "slider-h":                 "widget-gauge",
-  "slider-v":                 "widget-gauge",
-  "multi-toggle":             "widget-button",
-  "multi-select":             "widget-textbox",
-  label:                      "widget-label",
-  "text-frame":               "widget-textbox",
-  image:                      "widget-image",
-  gauge:                      "widget-gauge",
-  fill:                       "widget-frame",
-  frame:                      "widget-frame",
-  "bg-scanlines":             "widget-bg",
-  "bg-backdrop":              "widget-bg",
-  "bg-flat-color":            "widget-bg",
-  "bg-ornament-tl":           "widget-bg",
-  "bg-ornament-tr":           "widget-bg",
-  "bg-ornament-br":           "widget-bg",
-  "bg-ornament-bl":           "widget-bg",
-  "station-numpad":           "widget-frame",
+  "station-window":            "widget-window",
+  group:                       "widget-frame",
+  layout:                      "widget-frame",
+  "station-button":            "widget-button",
+  "station-toggle-button":     "widget-button",
+  "repeat-button":             "widget-button",
+  checkbox:                    "widget-checkbox",
+  "slider-h":                  "widget-gauge",
+  "slider-v":                  "widget-gauge",
+  "multi-toggle":              "widget-button",
+  "multi-select":              "widget-textbox",
+  label:                       "widget-label",
+  "text-frame":                "widget-textbox",
+  image:                       "widget-image",
+  gauge:                       "widget-gauge",
+  fill:                        "widget-frame",
+  frame:                       "widget-frame",
+  "bg-scanlines":              "widget-bg",
+  "bg-backdrop":               "widget-bg",
+  "bg-flat-color":             "widget-bg",
+  "bg-ornament-tl":            "widget-bg",
+  "bg-ornament-tr":            "widget-bg",
+  "bg-ornament-br":            "widget-bg",
+  "bg-ornament-bl":            "widget-bg",
+  "station-numpad":            "widget-frame",
   "station-text-reader-single": "widget-textbox",
-  "advanced-imgui":           "widget-frame"
+  "advanced-imgui":            "widget-frame"
 };
+
+// Background overlay widgets should not capture mouse events on the canvas —
+// they cover the full screen and would block selecting any widget behind them.
+// They remain selectable from the hierarchy tree.
+const BG_TYPES = new Set<WidgetType>([
+  "bg-scanlines", "bg-backdrop", "bg-flat-color",
+  "bg-ornament-tl", "bg-ornament-tr", "bg-ornament-br", "bg-ornament-bl"
+]);
 
 interface Props {
   node: WidgetNode;
@@ -46,6 +54,7 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
 
   const selected = selectedId === node.id;
   const isDropTarget = dropTargetId === node.id;
+  const isBg = BG_TYPES.has(node.type);
 
   const beginDrag = (e: React.MouseEvent, resize: boolean) => {
     e.preventDefault();
@@ -70,8 +79,8 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
         isDropTarget ? " drop-target" : ""
       }`}
       style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex }}
-      onMouseDown={(e) => beginDrag(e, false)}
-      onContextMenu={(e) => {
+      onMouseDown={isBg ? undefined : (e) => beginDrag(e, false)}
+      onContextMenu={isBg ? undefined : (e) => {
         e.preventDefault();
         e.stopPropagation();
         onContextMenu(e, node.id);
@@ -79,7 +88,7 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
       title={label}
     >
       <span className="widget-title">{label}</span>
-      <div className="resize-handle" onMouseDown={(e) => beginDrag(e, true)} />
+      {!isBg && <div className="resize-handle" onMouseDown={(e) => beginDrag(e, true)} />}
     </div>
   );
 }
