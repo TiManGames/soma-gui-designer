@@ -612,6 +612,22 @@ label textarea {
 .widget-gauge {
   background: linear-gradient(90deg, rgba(63, 182, 201, 0.6) 45%, rgba(23, 34, 46, 0.8) 45%);
 }
+.widget-checkbox {
+  background: rgba(10, 18, 28, 0.6);
+  border-color: rgba(143, 255, 210, 0.5);
+}
+/* Background/overlay widgets — visually distinct, dashed outline */
+.widget-bg {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(63, 182, 201, 0.04),
+    rgba(63, 182, 201, 0.04) 4px,
+    transparent 4px,
+    transparent 12px
+  );
+  border: 1px dashed rgba(63, 182, 201, 0.3);
+  pointer-events: auto;
+}
 
 .resize-handle {
   position: absolute;

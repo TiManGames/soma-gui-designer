@@ -41,8 +41,8 @@ export function TypeFields({ node }: { node: WidgetNode }) {
       {"caption" in node && textField("Caption", "caption", node.caption)}
 
       {node.type === "text-frame" && textField("Text entry (lang key)", "text", node.text)}
-      {node.type === "station-text-reader-single" &&
-        textField("Body text entry", "text", node.text)}
+      {node.type === "station-text-reader-single" && textField("Body text entry", "text", node.text)}
+
       {node.type === "image" && textField("Gfx file/name", "gfx", node.gfx)}
       {node.type === "image" && (
         <div className="checkbox-row">
@@ -56,10 +56,39 @@ export function TypeFields({ node }: { node: WidgetNode }) {
           </label>
         </div>
       )}
+
       {node.type === "gauge" && textField("Fill expression", "fillExpr", node.fillExpr)}
       {node.type === "label" && numField("Font size mul", "fontSizeMul", node.fontSizeMul, 0.1)}
       {node.type === "station-numpad" && numField("Digits", "digits", node.digits)}
       {node.type === "advanced-imgui" && textField("Raw HPS code", "code", node.code, true)}
+
+      {(node.type === "slider-h" || node.type === "slider-v") && (
+        <>
+          {textField("Default value", "defaultValue", node.defaultValue)}
+          {textField("Min", "min", node.min)}
+          {textField("Max", "max", node.max)}
+          {textField("Step", "step", node.step)}
+        </>
+      )}
+
+      {(node.type === "multi-toggle" || node.type === "multi-select") &&
+        textField("Items (pipe-separated)", "itemsText", node.itemsText)}
+      {node.type === "multi-toggle" && numField("Columns", "columns", node.columns)}
+
+      {node.type === "layout" && (
+        <label>
+          Layout type
+          <select
+            value={node.layoutType}
+            onChange={(e) => updateNode(node.id, { layoutType: e.target.value })}
+          >
+            <option value="eImGuiLayout_X">X (horizontal)</option>
+            <option value="eImGuiLayout_Y">Y (vertical)</option>
+            <option value="eImGuiLayout_XY">XY (wrap)</option>
+            <option value="eImGuiLayout_X_Tabbed">X Tabbed</option>
+          </select>
+        </label>
+      )}
     </div>
   );
 }

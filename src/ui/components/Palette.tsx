@@ -5,6 +5,7 @@ import type { WidgetType } from "@core/model/nodes";
 const CATEGORIES: { title: string; category: WidgetMeta["category"] }[] = [
   { title: "Containers", category: "container" },
   { title: "Elements", category: "element" },
+  { title: "Background", category: "background" },
   { title: "Helpers", category: "helper" },
   { title: "Advanced", category: "advanced" }
 ];

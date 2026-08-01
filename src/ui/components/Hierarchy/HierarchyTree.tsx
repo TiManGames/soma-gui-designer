@@ -7,18 +7,33 @@ import type { SomaDocument } from "@core/model/document";
 
 // Color coding by category for the tree dot / quick scanning.
 const DOT_COLOR: Record<WidgetType, string> = {
-  "station-window": "#3fb6c9",
-  group: "#6b7b8f",
-  "station-button": "#8fffd2",
-  "station-toggle-button": "#8fffd2",
-  label: "#a7d0d9",
-  "text-frame": "#c9b26f",
-  image: "#d98f5a",
-  gauge: "#6fe3f2",
-  fill: "#4a5a6f",
-  "station-numpad": "#d9a441",
+  "station-window":            "#3fb6c9",
+  group:                       "#6b7b8f",
+  layout:                      "#6b7b8f",
+  "station-button":            "#8fffd2",
+  "station-toggle-button":     "#8fffd2",
+  "repeat-button":             "#8fffd2",
+  checkbox:                    "#a7d0d9",
+  "slider-h":                  "#6fe3f2",
+  "slider-v":                  "#6fe3f2",
+  "multi-toggle":              "#8fffd2",
+  "multi-select":              "#c9b26f",
+  label:                       "#a7d0d9",
+  "text-frame":                "#c9b26f",
+  image:                       "#d98f5a",
+  gauge:                       "#6fe3f2",
+  fill:                        "#4a5a6f",
+  frame:                       "#4a5a6f",
+  "bg-scanlines":              "#3a4a5f",
+  "bg-backdrop":               "#3a4a5f",
+  "bg-flat-color":             "#3a4a5f",
+  "bg-ornament-tl":            "#3a4a5f",
+  "bg-ornament-tr":            "#3a4a5f",
+  "bg-ornament-br":            "#3a4a5f",
+  "bg-ornament-bl":            "#3a4a5f",
+  "station-numpad":            "#d9a441",
   "station-text-reader-single": "#c9b26f",
-  "advanced-imgui": "#b07cff"
+  "advanced-imgui":            "#b07cff"
 };
 
 function TreeRow({ node, doc, depth }: { node: WidgetNode; doc: SomaDocument; depth: number }) {

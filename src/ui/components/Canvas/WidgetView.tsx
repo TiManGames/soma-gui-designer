@@ -3,18 +3,33 @@ import type { WidgetNode, WidgetType } from "@core/model/nodes";
 import type { Rect } from "@core/model/geometry";
 
 const CSS_TYPE: Record<WidgetType, string> = {
-  "station-window": "widget-window",
-  group: "widget-frame",
-  "station-button": "widget-button",
-  "station-toggle-button": "widget-button",
-  label: "widget-label",
-  "text-frame": "widget-textbox",
-  image: "widget-image",
-  gauge: "widget-gauge",
-  fill: "widget-frame",
-  "station-numpad": "widget-frame",
+  "station-window":           "widget-window",
+  group:                      "widget-frame",
+  layout:                     "widget-frame",
+  "station-button":           "widget-button",
+  "station-toggle-button":    "widget-button",
+  "repeat-button":            "widget-button",
+  checkbox:                   "widget-checkbox",
+  "slider-h":                 "widget-gauge",
+  "slider-v":                 "widget-gauge",
+  "multi-toggle":             "widget-button",
+  "multi-select":             "widget-textbox",
+  label:                      "widget-label",
+  "text-frame":               "widget-textbox",
+  image:                      "widget-image",
+  gauge:                      "widget-gauge",
+  fill:                       "widget-frame",
+  frame:                      "widget-frame",
+  "bg-scanlines":             "widget-bg",
+  "bg-backdrop":              "widget-bg",
+  "bg-flat-color":            "widget-bg",
+  "bg-ornament-tl":           "widget-bg",
+  "bg-ornament-tr":           "widget-bg",
+  "bg-ornament-br":           "widget-bg",
+  "bg-ornament-bl":           "widget-bg",
+  "station-numpad":           "widget-frame",
   "station-text-reader-single": "widget-textbox",
-  "advanced-imgui": "widget-frame"
+  "advanced-imgui":           "widget-frame"
 };
 
 interface Props {
