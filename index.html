@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SOMA GUI Designer - Phase 1.3</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>SOMA GUI Designer</h1>
+      <p>Primitive-first SOMA/HPL3 ImGui layout composer using StationGUI defaults.</p>
+    </div>
+    <div class="topbar-actions">
+      <button id="newDocBtn" title="Reset to a helper-first starter document">New</button>
+      <button id="copyCodeBtn" class="primary" title="Copy the current code preview to clipboard">Copy Code</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="panel palette-panel">
+      <section>
+        <h2>Document</h2>
+        <label>
+          Target
+          <select id="targetSelect">
+            <option value="terminal-on-gui">Terminal OnGui callback</option>
+            <option value="map-on-gui">Map/main OnGui callback</option>
+          </select>
+        </label>
+        <label>
+          Function name
+          <input id="functionNameInput" type="text" />
+        </label>
+        <label>
+          Translation category
+          <input id="translationCategoryInput" type="text" placeholder="00_03_laboratory" />
+        </label>
+        <label>
+          Resolution preset
+          <select id="resolutionPresetSelect"></select>
+        </label>
+        <div class="two-col">
+          <label>
+            Width
+            <input id="widthInput" type="number" min="1" step="1" />
+          </label>
+          <label>
+            Height
+            <input id="heightInput" type="number" min="1" step="1" />
+          </label>
+        </div>
+        <div class="two-col">
+          <label>
+            Grid
+            <input id="gridInput" type="number" min="1" step="1" />
+          </label>
+          <label>
+            Snap
+            <input id="snapInput" type="checkbox" checked />
+          </label>
+        </div>
+        <button id="useBrowserSizeBtn" type="button">Use browser size</button>
+      </section>
+
+      <section>
+        <h2>Containers</h2>
+        <div class="palette-grid">
+          <button data-add-block="station-window">Station Window</button>
+          <button data-add-block="group">Group</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Elements</h2>
+        <div class="palette-grid">
+          <button data-add-block="station-button">Button</button>
+          <button data-add-block="station-toggle-button">Toggle</button>
+          <button data-add-block="label">Label</button>
+          <button data-add-block="text-frame">Text Frame</button>
+          <button data-add-block="image">Image</button>
+          <button data-add-block="gauge">Gauge</button>
+          <button data-add-block="fill">Fill / Frame</button>
+          <button data-add-block="advanced-imgui">Advanced</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Optional helpers</h2>
+        <div class="palette-grid">
+          <button data-add-block="station-numpad">Numpad</button>
+          <button data-add-block="station-text-reader-single">Text Reader</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Blocks</h2>
+        <div id="hierarchy" class="hierarchy"></div>
+      </section>
+
+      <section>
+        <h2>Validation</h2>
+        <ul id="validationList" class="validation-list"></ul>
+      </section>
+    </aside>
+
+    <section class="canvas-panel">
+      <div class="canvas-toolbar">
+        <span id="canvasInfo"></span>
+        <span class="hint">Preview resolution can change anytime; block layouts are stored normalized.</span>
+      </div>
+      <div id="canvasScroller" class="canvas-scroller">
+        <div id="canvas" class="canvas" aria-label="SOMA GUI canvas"></div>
+      </div>
+    </section>
+
+    <aside class="panel properties-panel">
+      <section>
+        <h2>Selected Block</h2>
+        <div id="emptySelection" class="empty-selection">Select an element on the canvas or hierarchy.</div>
+        <form id="propertiesForm" class="properties-form hidden">
+          <label>
+            ID
+            <input id="propId" type="text" />
+          </label>
+          <label>
+            Type
+            <input id="propType" type="text" disabled />
+          </label>
+          <div class="four-col">
+            <label>X %<input id="propX" type="number" min="0" max="100" step="0.1" /></label>
+            <label>Y %<input id="propY" type="number" min="0" max="100" step="0.1" /></label>
+            <label>W %<input id="propW" type="number" min="0.1" max="100" step="0.1" /></label>
+            <label>H %<input id="propH" type="number" min="0.1" max="100" step="0.1" /></label>
+          </div>
+          <div class="two-col">
+            <label>Z<input id="propZ" type="number" step="0.1" /></label>
+            <label>Parent<input id="propState" type="text" placeholder="screen or parent id" /></label>
+          </div>
+          <label>
+            Caption / label
+            <input id="propCaption" type="text" />
+          </label>
+          <label>
+            Text / body entry
+            <textarea id="propText" rows="3"></textarea>
+          </label>
+          <label>
+            File/image/station/custom argument
+            <input id="propArg" type="text" placeholder="upsilon, background_logo_pathOS, file prefix..." />
+          </label>
+          <label>
+            Items / helper rows
+            <textarea id="propItems" rows="6" placeholder="Optional helper rows, one per line."></textarea>
+          </label>
+          <label>
+            Settings overrides
+            <textarea id="propSettings" rows="7" placeholder="One per line, e.g.&#10;mvTextFontSize=ImGui_NrmSizeKeepRatio(0.0325)&#10;mbDrawAppIcon=true&#10;mWindow.SetPadding(20,20,20,20)"></textarea>
+          </label>
+          <label>
+            Advanced custom HPS
+            <textarea id="propCode" rows="6" placeholder="Only used for Advanced blocks."></textarea>
+          </label>
+          <div class="two-col checkbox-row">
+            <label><input id="propEnabled" type="checkbox" /> Enabled</label>
+            <label><input id="propDrawBack" type="checkbox" /> Back button</label>
+          </div>
+          <div class="button-row">
+            <button id="duplicateWidgetBtn" type="button">Duplicate</button>
+            <button id="deleteWidgetBtn" type="button" class="danger">Delete</button>
+          </div>
+        </form>
+      </section>
+
+      <section>
+        <h2>Code</h2>
+        <div class="tabs">
+          <button id="tabHps" class="tab active" type="button">HPS</button>
+          <button id="tabPreload" class="tab" type="button">Preload</button>
+        </div>
+        <pre id="codePreview" class="code-preview"></pre>
+      </section>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
