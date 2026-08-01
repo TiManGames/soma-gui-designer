@@ -2,7 +2,6 @@ import { useStore } from "../../state/store";
 import type { WidgetNode, WidgetType } from "@core/model/nodes";
 import type { Rect } from "@core/model/geometry";
 
-// Map widget types to the prototype's CSS classes (legacy app.js cssType).
 const CSS_TYPE: Record<WidgetType, string> = {
   "station-window": "widget-window",
   group: "widget-frame",
@@ -18,7 +17,13 @@ const CSS_TYPE: Record<WidgetType, string> = {
   "advanced-imgui": "widget-frame"
 };
 
-export function WidgetView({ node, rect }: { node: WidgetNode; rect: Rect }) {
+interface Props {
+  node: WidgetNode;
+  rect: Rect;
+  onContextMenu: (e: React.MouseEvent, nodeId: string) => void;
+}
+
+export function WidgetView({ node, rect, onContextMenu }: Props) {
   const selectedId = useStore((s) => s.selectedId);
   const dropTargetId = useStore((s) => s.dropTargetId);
   const startDrag = useStore((s) => s.startDrag);
@@ -50,6 +55,11 @@ export function WidgetView({ node, rect }: { node: WidgetNode; rect: Rect }) {
       }`}
       style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex: Math.round(node.z * 10) }}
       onMouseDown={(e) => beginDrag(e, false)}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onContextMenu(e, node.id);
+      }}
       title={label}
     >
       <span className="widget-title">{label}</span>

@@ -24,6 +24,10 @@ export function App() {
         if (e.shiftKey) redo();
         else undo();
       }
+      if ((e.key === "Delete" || e.key === "Backspace") && !typing) {
+        const { selectedId, deleteNode } = useStore.getState();
+        if (selectedId) deleteNode(selectedId);
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -37,11 +41,11 @@ export function App() {
           <Section title="Document">
             <DocumentControls />
           </Section>
-          <Section title="Add Widget">
-            <Palette />
-          </Section>
           <Section title="Hierarchy">
             <HierarchyTree />
+          </Section>
+          <Section title="Add Widget">
+            <Palette />
           </Section>
           <Section title="Validation">
             <ValidationList />

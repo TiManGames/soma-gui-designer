@@ -6,7 +6,7 @@ import { ROOT } from "@core/model/nodes";
 import { makeNode, isContainerType } from "@core/model/defaults";
 import { createDefaultDocument, cloneDoc } from "@core/model/createDefaultDocument";
 import { uniqueId } from "@core/model/ids";
-import { getNode, isContainer, removeNode, canReparent } from "@core/model/tree";
+import { getNode, isContainer, removeNode, canReparent, descendantIds } from "@core/model/tree";
 import {
   absoluteRect,
   parentAbsRect,
@@ -62,6 +62,12 @@ interface DesignerState {
   duplicateNode: (id: string) => void;
   reparent: (id: string, newParentId: string) => void;
 
+  // clipboard (runtime-only, not persisted)
+  clipboard: WidgetNode[] | null;
+  copyNode: (id: string) => void;
+  cutNode: (id: string) => void;
+  pasteNode: () => void;
+
   // drag
   startDrag: (params: Omit<DragState, "docBeforeDrag">) => void;
   dragMove: (clientX: number, clientY: number) => void;
@@ -109,6 +115,7 @@ export const useStore = create<DesignerState>((set, get) => ({
   previewTab: "hps",
   drag: null,
   dropTargetId: null,
+  clipboard: null,
   past: [],
   future: [],
 
@@ -265,6 +272,60 @@ export const useStore = create<DesignerState>((set, get) => ({
     }),
 
   setDropTarget: (id) => set({ dropTargetId: id }),
+
+  copyNode: (id) =>
+    set((s) => {
+      const node = getNode(s.doc, id);
+      if (!node) return {};
+      const descIds = descendantIds(s.doc, id);
+      const nodes = [node, ...s.doc.nodes.filter((n) => descIds.has(n.id))];
+      return { clipboard: JSON.parse(JSON.stringify(nodes)) as WidgetNode[] };
+    }),
+
+  cutNode: (id) =>
+    set((s) => {
+      const node = getNode(s.doc, id);
+      if (!node) return {};
+      const descIds = descendantIds(s.doc, id);
+      const nodes = [node, ...s.doc.nodes.filter((n) => descIds.has(n.id))];
+      const clipboard: WidgetNode[] = JSON.parse(JSON.stringify(nodes));
+      const nextNodes = removeNode(s.doc, id);
+      const nextSelected = nextNodes[0]?.id ?? null;
+      return {
+        clipboard,
+        ...withHistory(s, { ...s.doc, nodes: nextNodes }, { selectedId: nextSelected })
+      };
+    }),
+
+  pasteNode: () =>
+    set((s) => {
+      if (!s.clipboard || s.clipboard.length === 0) return {};
+      const root = s.clipboard[0];
+      const existingIds = new Set(s.doc.nodes.map((n) => n.id));
+
+      // Build a mapping from old id -> new id for all pasted nodes.
+      const idMap = new Map<string, string>();
+      for (const n of s.clipboard) {
+        const newId = uniqueId(n.id, new Set([...existingIds, ...idMap.values()]));
+        idMap.set(n.id, newId);
+        existingIds.add(newId);
+      }
+
+      // Re-parent root to its original parent if it still exists, else "screen".
+      const rootParent =
+        root.parentId === ROOT || getNode(s.doc, root.parentId) ? root.parentId : ROOT;
+
+      const pasted: WidgetNode[] = s.clipboard.map((n) => ({
+        ...n,
+        id: idMap.get(n.id)!,
+        parentId: n.id === root.id ? rootParent : (idMap.get(n.parentId) ?? rootParent),
+        xN: n.id === root.id ? clamp(n.xN + 0.02, 0, 1 - n.wN) : n.xN,
+        yN: n.id === root.id ? clamp(n.yN + 0.02, 0, 1 - n.hN) : n.yN
+      })) as WidgetNode[];
+
+      const nextDoc = { ...s.doc, nodes: [...s.doc.nodes, ...pasted] };
+      return withHistory(s, nextDoc, { selectedId: idMap.get(root.id)! });
+    }),
 
   undo: () =>
     set((s) => {

@@ -1,10 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "../../state/store";
 import { previewSize, absoluteRect } from "@core/model/geometry";
 import { findDropTarget } from "@core/model/hitTest";
 import { WidgetView } from "./WidgetView";
+import { ContextMenu, type ContextMenuEntry } from "./ContextMenu";
 
 const MAX_CANVAS_WIDTH = 980;
+
+interface CtxState {
+  x: number;
+  y: number;
+  nodeId: string | null; // null = blank canvas
+}
 
 export function Canvas() {
   const doc = useStore((s) => s.doc);
@@ -14,20 +21,49 @@ export function Canvas() {
   const reparent = useStore((s) => s.reparent);
   const setDropTarget = useStore((s) => s.setDropTarget);
   const select = useStore((s) => s.select);
+  const clipboard = useStore((s) => s.clipboard);
+  const copyNode = useStore((s) => s.copyNode);
+  const cutNode = useStore((s) => s.cutNode);
+  const pasteNode = useStore((s) => s.pasteNode);
+  const deleteNode = useStore((s) => s.deleteNode);
 
   const size = previewSize(doc);
   const scale = Math.min(1, MAX_CANVAS_WIDTH / size.x);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  // Global pointer handlers while a drag is in progress.
+  // Context menu
+  const [ctxMenu, setCtxMenu] = useState<CtxState | null>(null);
+  const openCtx = useCallback((e: React.MouseEvent, nodeId: string | null) => {
+    e.preventDefault();
+    if (nodeId) select(nodeId);
+    setCtxMenu({ x: e.clientX, y: e.clientY, nodeId });
+  }, [select]);
+
+  // Pan state (middle-mouse or background-drag)
+  const panRef = useRef<{ startX: number; startY: number; scrollLeft: number; scrollTop: number } | null>(null);
+  const [panning, setPanning] = useState(false);
+
+  const startPan = useCallback((e: MouseEvent) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    panRef.current = { startX: e.clientX, startY: e.clientY, scrollLeft: scroller.scrollLeft, scrollTop: scroller.scrollTop };
+    setPanning(true);
+  }, []);
+
+  // Global pointer handlers for widget dragging and panning.
   useEffect(() => {
-    if (!drag) return;
-
     function onMove(e: MouseEvent) {
+      // Pan
+      if (panRef.current && scrollerRef.current) {
+        const dx = e.clientX - panRef.current.startX;
+        const dy = e.clientY - panRef.current.startY;
+        scrollerRef.current.scrollLeft = panRef.current.scrollLeft - dx;
+        scrollerRef.current.scrollTop = panRef.current.scrollTop - dy;
+      }
+      // Widget drag
+      if (!drag) return;
       dragMove(e.clientX, e.clientY);
-
-      // Drag-to-reparent: only when moving (not resizing).
-      if (drag && !drag.resize) {
+      if (!drag.resize) {
         const canvas = scrollerRef.current?.querySelector(".canvas") as HTMLElement | null;
         if (canvas) {
           const rect = canvas.getBoundingClientRect();
@@ -41,12 +77,18 @@ export function Canvas() {
     }
 
     function onUp() {
+      // End pan
+      if (panRef.current) {
+        panRef.current = null;
+        setPanning(false);
+      }
+      // End widget drag
       const state = useStore.getState();
       const target = state.dropTargetId;
-      const draggedId = drag?.id;
-      endDrag();
-      if (draggedId && target) {
-        reparent(draggedId, target);
+      const draggedId = state.drag?.id;
+      if (draggedId) {
+        endDrag();
+        if (target) reparent(draggedId, target);
       }
     }
 
@@ -56,9 +98,25 @@ export function Canvas() {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [drag, dragMove, endDrag, reparent, setDropTarget, scale]);
+  }, [drag, dragMove, endDrag, reparent, setDropTarget, scale, startPan]);
 
   const orderedNodes = [...doc.nodes].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
+
+  // Build context-menu items based on what was right-clicked.
+  function buildMenuItems(nodeId: string | null): ContextMenuEntry[] {
+    if (nodeId) {
+      return [
+        { label: "Cut", onClick: () => cutNode(nodeId) },
+        { label: "Copy", onClick: () => copyNode(nodeId) },
+        { label: "Paste", disabled: !clipboard, onClick: () => pasteNode() },
+        { separator: true },
+        { label: "Delete", danger: true, onClick: () => deleteNode(nodeId) }
+      ];
+    }
+    return [
+      { label: "Paste", disabled: !clipboard, onClick: () => pasteNode() }
+    ];
+  }
 
   return (
     <>
@@ -67,10 +125,31 @@ export function Canvas() {
           {size.x}×{size.y} · {Math.round(scale * 100)}%
         </span>
         <span className="canvas-hint">
-          Drag to move · corner to resize · drop into a window/group to reparent
+          Drag to move · corner to resize · drop into window/group to reparent · middle-drag to pan
         </span>
       </div>
-      <div className="canvas-scroller" ref={scrollerRef}>
+      <div
+        className={`canvas-scroller${panning ? " panning" : ""}`}
+        ref={scrollerRef}
+        onMouseDown={(e) => {
+          // Middle-mouse anywhere in the scroller
+          if (e.button === 1) {
+            e.preventDefault();
+            startPan(e.nativeEvent);
+            return;
+          }
+          // Left-drag on the blank scroller background (not on canvas or widget)
+          if (e.button === 0 && e.target === e.currentTarget) {
+            startPan(e.nativeEvent);
+          }
+        }}
+        onContextMenu={(e) => {
+          // Right-click on blank scroller background
+          if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains("canvas")) {
+            openCtx(e, null);
+          }
+        }}
+      >
         <div
           className="canvas"
           style={{
@@ -82,12 +161,29 @@ export function Canvas() {
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) select(null);
           }}
+          onContextMenu={(e) => {
+            if (e.target === e.currentTarget) openCtx(e, null);
+          }}
         >
           {orderedNodes.map((node) => (
-            <WidgetView key={node.id} node={node} rect={absoluteRect(doc, node)} />
+            <WidgetView
+              key={node.id}
+              node={node}
+              rect={absoluteRect(doc, node)}
+              onContextMenu={openCtx}
+            />
           ))}
         </div>
       </div>
+
+      {ctxMenu && (
+        <ContextMenu
+          x={ctxMenu.x}
+          y={ctxMenu.y}
+          items={buildMenuItems(ctxMenu.nodeId)}
+          onClose={() => setCtxMenu(null)}
+        />
+      )}
     </>
   );
 }
