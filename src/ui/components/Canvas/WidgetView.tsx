@@ -20,10 +20,11 @@ const CSS_TYPE: Record<WidgetType, string> = {
 interface Props {
   node: WidgetNode;
   rect: Rect;
+  zIndex: number;
   onContextMenu: (e: React.MouseEvent, nodeId: string) => void;
 }
 
-export function WidgetView({ node, rect, onContextMenu }: Props) {
+export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
   const selectedId = useStore((s) => s.selectedId);
   const dropTargetId = useStore((s) => s.dropTargetId);
   const startDrag = useStore((s) => s.startDrag);
@@ -53,7 +54,7 @@ export function WidgetView({ node, rect, onContextMenu }: Props) {
       className={`widget ${CSS_TYPE[node.type]}${selected ? " selected" : ""}${
         isDropTarget ? " drop-target" : ""
       }`}
-      style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex: Math.round(node.z * 10) }}
+      style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex }}
       onMouseDown={(e) => beginDrag(e, false)}
       onContextMenu={(e) => {
         e.preventDefault();

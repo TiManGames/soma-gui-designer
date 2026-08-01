@@ -40,9 +40,18 @@ export function removeNode(doc: SomaDocument, id: string): WidgetNode[] {
 }
 
 /**
- * Whether `candidateParentId` may become the parent of `nodeId` without creating
- * a cycle. A node cannot be parented to itself or to any of its own descendants.
+ * Depth of a node in the parent hierarchy (root-level = 0, child of root = 1, …).
+ * Used by the canvas to compute z-index so children always render above parents.
  */
+export function nodeDepth(doc: SomaDocument, node: WidgetNode, maxDepth = 20): number {
+  let depth = 0;
+  let current: WidgetNode | null = node;
+  while (current && current.parentId !== ROOT && depth < maxDepth) {
+    current = getNode(doc, current.parentId);
+    depth++;
+  }
+  return depth;
+}
 export function canReparent(doc: SomaDocument, nodeId: string, candidateParentId: string): boolean {
   if (nodeId === candidateParentId) return false;
   if (candidateParentId === ROOT) return true;

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "../../state/store";
 import { previewSize, absoluteRect } from "@core/model/geometry";
 import { findDropTarget } from "@core/model/hitTest";
+import { nodeDepth } from "@core/model/tree";
 import { WidgetView } from "./WidgetView";
 import { ContextMenu, type ContextMenuEntry } from "./ContextMenu";
 
@@ -159,7 +160,10 @@ export function Canvas() {
             backgroundSize: `${doc.gridSize}px ${doc.gridSize}px, ${doc.gridSize}px ${doc.gridSize}px`
           }}
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) select(null);
+            if (e.target === e.currentTarget) {
+              if (e.button === 1) { e.preventDefault(); startPan(e.nativeEvent); return; }
+              if (e.button === 0) { startPan(e.nativeEvent); select(null); return; }
+            }
           }}
           onContextMenu={(e) => {
             if (e.target === e.currentTarget) openCtx(e, null);
@@ -170,6 +174,7 @@ export function Canvas() {
               key={node.id}
               node={node}
               rect={absoluteRect(doc, node)}
+              zIndex={nodeDepth(doc, node) * 1000 + Math.round(node.z * 10)}
               onContextMenu={openCtx}
             />
           ))}
