@@ -342,6 +342,16 @@ label textarea {
 
 /* ---- Palette ----------------------------------------------------------- */
 
+.palette-group + .palette-group {
+  margin-top: var(--s3);
+}
+.palette-group-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 5px;
+}
 .palette-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
