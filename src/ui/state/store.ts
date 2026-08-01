@@ -15,9 +15,10 @@ import {
   snapPx
 } from "@core/model/geometry";
 import { clamp } from "@core/model/ids";
+import { postToHost } from "../vscodeApi";
 
-const STORAGE_KEY = "soma-gui-designer:doc:v4";
 const HISTORY_LIMIT = 100;
+const EDIT_DEBOUNCE_MS = 200;
 
 export type PreviewTab = "hps" | "preload";
 
@@ -74,6 +75,8 @@ interface DesignerState {
   // document lifecycle
   newDocument: () => void;
   loadDocument: (doc: SomaDocument) => void;
+  /** Replace the document from host-provided JSON text without echoing an edit back. */
+  setDocFromHost: (text: string) => void;
 }
 
 /** Commit a document mutation onto the history stack. */
@@ -87,29 +90,21 @@ function withHistory(
   return { doc: nextDoc, past, future: [], ...extra };
 }
 
-function persist(doc: SomaDocument): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(doc));
-  } catch {
-    // ignore (private mode / quota)
-  }
-}
+// When the document originated from the host (init/docChanged) we suppress the
+// echo so applying it doesn't post an "edit" straight back to the host.
+let suppressPush = false;
+let pushTimer: ReturnType<typeof setTimeout> | undefined;
 
-function loadPersisted(): SomaDocument {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (isSomaDocument(parsed)) return parsed;
-    }
-  } catch {
-    // ignore
-  }
-  return createDefaultDocument();
+/** Push the document to the extension host as a debounced full-text edit. */
+function persist(doc: SomaDocument): void {
+  if (suppressPush) return;
+  const text = JSON.stringify(doc, null, 2) + "\n";
+  if (pushTimer) clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => postToHost({ type: "edit", text }), EDIT_DEBOUNCE_MS);
 }
 
 export const useStore = create<DesignerState>((set, get) => ({
-  doc: loadPersisted(),
+  doc: createDefaultDocument(),
   selectedId: null,
   previewTab: "hps",
   drag: null,
@@ -302,7 +297,31 @@ export const useStore = create<DesignerState>((set, get) => ({
     }),
 
   loadDocument: (doc) =>
-    set((s) => withHistory(s, cloneDoc(doc), { selectedId: doc.nodes[0]?.id ?? null }))
+    set((s) => withHistory(s, cloneDoc(doc), { selectedId: doc.nodes[0]?.id ?? null })),
+
+  setDocFromHost: (text) =>
+    set((s) => {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        return {};
+      }
+      if (!isSomaDocument(parsed)) return {};
+      // Applying host content must not echo an edit back to the host, and must
+      // not pollute undo history (VS Code owns file-level undo).
+      suppressPush = true;
+      try {
+        const doc = parsed;
+        const selectedId =
+          s.selectedId && doc.nodes.some((n) => n.id === s.selectedId)
+            ? s.selectedId
+            : doc.nodes[0]?.id ?? null;
+        return { doc, selectedId };
+      } finally {
+        suppressPush = false;
+      }
+    })
 }));
 
 export { isContainerType };

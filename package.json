@@ -1,16 +1,57 @@
 {
   "name": "soma-gui-designer",
+  "displayName": "SOMA GUI Designer",
+  "publisher": "soma-modding",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Visual builder for SOMA (HPL3) ImGui terminal GUIs — drag-and-drop widgets, generate AngelScript .hps code.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soma-modding/soma-gui-designer.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "somaGui.editor",
+        "displayName": "SOMA GUI Designer",
+        "selector": [
+          {
+            "filenamePattern": "*.somagui.json"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "somaGui.newProject",
+        "title": "SOMA GUI: New Project",
+        "category": "SOMA GUI"
+      }
+    ]
+  },
+  "activationEvents": [],
   "scripts": {
     "extract": "tsx scripts/extract-api-schema.ts",
-    "predev": "npm run extract",
-    "dev": "vite",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build:webview": "vite build",
+    "build:extension": "node esbuild.mjs",
     "prebuild": "npm run extract",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
+    "build": "npm run clean && npm run build:webview && npm run build:extension",
+    "watch:webview": "vite build --watch",
+    "watch:extension": "node esbuild.mjs --watch",
+    "vscode:prepublish": "npm run extract && npm run clean && npm run build:webview && node esbuild.mjs --production",
+    "package": "vsce package",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint ."
@@ -24,9 +65,12 @@
     "@types/node": "^22.20.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.13.0",
     "@typescript-eslint/parser": "^8.13.0",
     "@vitejs/plugin-react": "^4.3.3",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.0",
     "eslint": "^8.57.1",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",

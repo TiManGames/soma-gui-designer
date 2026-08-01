@@ -1,65 +1,30 @@
-import { useRef } from "react";
 import { useStore } from "../state/store";
 import { generate } from "@core/codegen/generateHps";
-import { isSomaDocument, CURRENT_SCHEMA_VERSION } from "@core/model/document";
+import { postToHost } from "../vscodeApi";
 
-async function copyToClipboard(text: string): Promise<void> {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-  const area = document.createElement("textarea");
-  area.value = text;
-  document.body.appendChild(area);
-  area.select();
-  document.execCommand("copy");
-  document.body.removeChild(area);
+/** Derive a suggested .hps filename from the function name. */
+function hpsName(functionName: string): string {
+  const base = (functionName || "soma_screen").replace(/[^A-Za-z0-9_]/g, "") || "soma_screen";
+  return `${base}.hps`;
 }
 
 export function Toolbar() {
   const doc = useStore((s) => s.doc);
   const newDocument = useStore((s) => s.newDocument);
-  const loadDocument = useStore((s) => s.loadDocument);
   const undo = useStore((s) => s.undo);
   const redo = useStore((s) => s.redo);
   const canUndo = useStore((s) => s.past.length > 0);
   const canRedo = useStore((s) => s.future.length > 0);
   const previewTab = useStore((s) => s.previewTab);
-  const fileInput = useRef<HTMLInputElement>(null);
 
-  const onCopy = async () => {
+  const onCopy = () => {
     const { hps, preload } = generate(doc);
-    await copyToClipboard(previewTab === "preload" ? preload : hps);
+    postToHost({ type: "copy", text: previewTab === "preload" ? preload : hps });
   };
 
-  const onExport = () => {
-    const blob = new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${doc.functionName || "soma-screen"}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const onImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result));
-        if (isSomaDocument(parsed)) {
-          loadDocument(parsed);
-        } else {
-          alert(`Unsupported document — expected a SOMA GUI Designer project (schema v${CURRENT_SCHEMA_VERSION}).`);
-        }
-      } catch {
-        alert("Could not parse the selected file.");
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
+  const onWriteHps = () => {
+    const { hps } = generate(doc);
+    postToHost({ type: "writeHps", text: hps, suggestedName: hpsName(doc.functionName) });
   };
 
   return (
@@ -79,23 +44,13 @@ export function Toolbar() {
           ↷ Redo
         </button>
         <span className="toolbar-divider" />
-        <button className="ghost" onClick={() => newDocument()}>
-          New
-        </button>
-        <button className="ghost" onClick={() => fileInput.current?.click()}>
-          Import
-        </button>
-        <input
-          ref={fileInput}
-          type="file"
-          accept="application/json,.json"
-          style={{ display: "none" }}
-          onChange={onImportFile}
-        />
-        <button className="ghost" onClick={onExport}>
-          Export
+        <button className="ghost" onClick={() => newDocument()} title="Reset to a fresh starter layout">
+          Reset
         </button>
         <span className="toolbar-divider" />
+        <button className="ghost" onClick={onWriteHps} title="Write generated HPS to a .hps file">
+          Write .hps
+        </button>
         <button className="primary" onClick={onCopy}>
           Copy Code
         </button>

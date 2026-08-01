@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useStore } from "../../state/store";
 import { generate } from "@core/codegen/generateHps";
+import { postToHost } from "../../vscodeApi";
 
 export function CodePanel() {
   const doc = useStore((s) => s.doc);
@@ -11,14 +12,10 @@ export function CodePanel() {
   const { hps, preload } = generate(doc);
   const code = previewTab === "preload" ? preload : hps;
 
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
-    } catch {
-      /* ignore */
-    }
+  const copy = () => {
+    postToHost({ type: "copy", text: code });
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
   };
 
   return (

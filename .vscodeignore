@@ -1,0 +1,20 @@
+# Ship only the built extension host, the webview bundle, and metadata.
+.claude/**
+.vscode/**
+src/**
+test/**
+scripts/**
+soma_scripts/**
+node_modules/**
+legacy/**
+.git/**
+esbuild.mjs
+vite.config.ts
+tsconfig*.json
+.eslintrc.json
+.gitignore
+*.vsix
+*.tsbuildinfo
+dist/assets/**
+dist/index.html
+dist/**/*.map
