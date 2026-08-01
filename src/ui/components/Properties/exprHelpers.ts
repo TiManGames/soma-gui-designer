@@ -24,7 +24,10 @@ export function parseColorExpr(expr: string, palette: PaletteColor[]): Rgba | nu
 }
 
 export function colorExpr(c: Rgba): string {
-  const f = (n: number) => `${Number(n.toFixed(3))}f`;
+  const f = (n: number) => {
+    const s = Number(n.toFixed(3)).toString();
+    return (s.includes(".") ? s : s + ".0") + "f";
+  };
   return `cColor(${f(c.r)}, ${f(c.g)}, ${f(c.b)}, ${f(c.a)})`;
 }
 
@@ -54,5 +57,6 @@ export function parseFloatExpr(expr: string): number | null {
 }
 
 export function floatExpr(n: number): string {
-  return `${Number(n)}f`;
+  const s = Number(n).toString();
+  return (s.includes(".") ? s : s + ".0") + "f";
 }
