@@ -186,31 +186,22 @@ export interface FrameNode extends NodeBase {
 export interface BgScanlinesNode extends NodeBase {
   type: "bg-scanlines";
   caption: string;
-  zDepth: string;   // e.g. "10.0f"
-  file: string;     // e.g. "station/scanlines/standard_tileable"
 }
 
 export interface BgBackdropNode extends NodeBase {
   type: "bg-backdrop";
   caption: string;
-  file: string;     // e.g. "background_logo_pathOS"
-  relPosX: string;  // e.g. "0.1f"
-  relPosY: string;  // e.g. "0.45f"
-  relSize: string;  // e.g. "0.5f"
-  zDepth: string;   // e.g. "0.0f"
 }
 
 export interface BgFlatColorNode extends NodeBase {
   type: "bg-flat-color";
   caption: string;
-  zDepth: string;   // e.g. "0.0f"
-  color: string;    // cColor expression, e.g. "cColor(0,1)"
 }
 
-export interface BgOrnamentTLNode extends NodeBase { type: "bg-ornament-tl"; caption: string; file: string; zDepth: string; color: string; }
-export interface BgOrnamentTRNode extends NodeBase { type: "bg-ornament-tr"; caption: string; file: string; zDepth: string; color: string; }
-export interface BgOrnamentBRNode extends NodeBase { type: "bg-ornament-br"; caption: string; file: string; zDepth: string; color: string; }
-export interface BgOrnamentBLNode extends NodeBase { type: "bg-ornament-bl"; caption: string; file: string; zDepth: string; color: string; }
+export interface BgOrnamentTLNode extends NodeBase { type: "bg-ornament-tl"; caption: string; }
+export interface BgOrnamentTRNode extends NodeBase { type: "bg-ornament-tr"; caption: string; }
+export interface BgOrnamentBRNode extends NodeBase { type: "bg-ornament-br"; caption: string; }
+export interface BgOrnamentBLNode extends NodeBase { type: "bg-ornament-bl"; caption: string; }
 
 // ---- Helpers -----------------------------------------------------------
 

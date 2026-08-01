@@ -18,6 +18,7 @@ import type {
   MultiSelectNode,
   MultiToggleNode,
   NumpadNode,
+  Override,
   RepeatButtonNode,
   SliderHNode,
   SliderVNode,
@@ -33,6 +34,12 @@ import { escapeString } from "./format";
 import { safeId } from "../model/ids";
 import { posExpr, sizeExpr } from "./coordExpr";
 import { emitDataVar } from "./emitDataVar";
+
+/** Read a named parameter from a bg widget's overrides, falling back to a default. */
+function getParam(overrides: Override[], path: string, def: string): string {
+  const found = overrides.find((o) => o.kind === "expr" && o.path === path);
+  return found && found.kind === "expr" ? found.expr : def;
+}
 
 export interface EmitCtx {
   lines: string[];
@@ -234,43 +241,64 @@ export const EMITTERS: EmitterMap = {
 
   "bg-scanlines": {
     emit(ctx, n: BgScanlinesNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_Scanlines(${n.zDepth || "10.0f"}, "${escapeString(n.file || "station/scanlines/standard_tileable")}");`);
+      const z    = getParam(n.overrides, "zDepth", "10.0f");
+      const file = getParam(n.overrides, "file", '"station/scanlines/standard_tileable"');
+      ctx.lines.push(`${ctx.indent}StationGuiBG_Scanlines(${z}, ${file});`);
     }
   },
 
   "bg-backdrop": {
     emit(ctx, n: BgBackdropNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_Backdrop("${escapeString(n.file || "background_logo_pathOS")}", cVector2f(${n.relPosX || "0.1f"}, ${n.relPosY || "0.45f"}), ${n.relSize || "0.5f"}, ${n.zDepth || "0.0f"});`);
+      const file = getParam(n.overrides, "file", '"background_logo_pathOS"');
+      const px   = getParam(n.overrides, "relPosX", "0.1f");
+      const py   = getParam(n.overrides, "relPosY", "0.45f");
+      const sz   = getParam(n.overrides, "relSize", "0.5f");
+      const z    = getParam(n.overrides, "zDepth", "0.0f");
+      ctx.lines.push(`${ctx.indent}StationGuiBG_Backdrop(${file}, cVector2f(${px}, ${py}), ${sz}, ${z});`);
     }
   },
 
   "bg-flat-color": {
     emit(ctx, n: BgFlatColorNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_FlatColor(${n.zDepth || "0.0f"}, ${n.color || "cColor(0,1.0f)"});`);
+      const z   = getParam(n.overrides, "zDepth", "0.0f");
+      const col = getParam(n.overrides, "color", "cColor(0.0f, 1.0f)");
+      ctx.lines.push(`${ctx.indent}StationGuiBG_FlatColor(${z}, ${col});`);
     }
   },
 
   "bg-ornament-tl": {
     emit(ctx, n: BgOrnamentTLNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopLeft("${escapeString(n.file || "station/ornament/corner_topleft")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor_White"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
+      const file = getParam(n.overrides, "file", '"station/ornament/corner_topleft"');
+      const col  = getParam(n.overrides, "color", "cColor_White");
+      const z    = getParam(n.overrides, "zDepth", "0.2f");
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopLeft(${file}, cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${col}, cVector2f_Zero, ${z});`);
     }
   },
 
   "bg-ornament-tr": {
     emit(ctx, n: BgOrnamentTRNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopRight("${escapeString(n.file || "station/ornament/corner_topright")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor(1.0f,0.75f,0.75f,1.0f)"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
+      const file = getParam(n.overrides, "file", '"station/ornament/corner_topright"');
+      const col  = getParam(n.overrides, "color", "cColor(1.0f, 0.75f, 0.75f, 1.0f)");
+      const z    = getParam(n.overrides, "zDepth", "0.2f");
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentTopRight(${file}, cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${col}, cVector2f_Zero, ${z});`);
     }
   },
 
   "bg-ornament-br": {
     emit(ctx, n: BgOrnamentBRNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomRight("${escapeString(n.file || "station/ornament/corner_bottomright")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor(1.0f,0.75f,0.75f,1.0f)"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
+      const file = getParam(n.overrides, "file", '"station/ornament/corner_bottomright"');
+      const col  = getParam(n.overrides, "color", "cColor(1.0f, 0.75f, 0.75f, 1.0f)");
+      const z    = getParam(n.overrides, "zDepth", "0.2f");
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomRight(${file}, cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${col}, cVector2f_Zero, ${z});`);
     }
   },
 
   "bg-ornament-bl": {
     emit(ctx, n: BgOrnamentBLNode) {
-      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomLeft("${escapeString(n.file || "station/ornament/corner_bottomleft")}", cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${n.color || "cColor(1.0f,0.75f,0.75f,1.0f)"}, cVector2f_Zero, ${n.zDepth || "0.2f"});`);
+      const file = getParam(n.overrides, "file", '"station/ornament/corner_bottomleft"');
+      const col  = getParam(n.overrides, "color", "cColor(1.0f, 0.75f, 0.75f, 1.0f)");
+      const z    = getParam(n.overrides, "zDepth", "0.2f");
+      ctx.lines.push(`${ctx.indent}StationGuiBG_OrnamentBottomLeft(${file}, cVector2f(0.25f), eImGuiSizeType_CorrectAspectWidthNormalized, ${col}, cVector2f_Zero, ${z});`);
     }
   },
 
