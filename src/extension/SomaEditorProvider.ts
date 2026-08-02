@@ -1,6 +1,27 @@
 import * as vscode from "vscode";
-import type { WebviewToHost, HostToWebview } from "@core/protocol";
+import type { WebviewToHost, HostToWebview, GfxConfig } from "@core/protocol";
 import { getHtml } from "./getHtml";
+import { GfxIndex } from "./GfxIndex";
+
+/** Read the current WYSIWYG-related config into the shape sent to the webview. */
+function readGfxConfig(): GfxConfig {
+  const cfg = vscode.workspace.getConfiguration("somaGui");
+  return { wysiwygEnabled: cfg.get<boolean>("wysiwyg.enabled", true) };
+}
+
+/** Absolute graphics-folder uris used to widen the webview's localResourceRoots. */
+function graphicsRoots(): vscode.Uri[] {
+  const cfg = vscode.workspace.getConfiguration("somaGui");
+  const ws = vscode.workspace.workspaceFolders?.[0]?.uri;
+  const roots: vscode.Uri[] = [];
+  for (const key of ["baseGameGraphicsPath", "modGraphicsPath"] as const) {
+    const p = (cfg.get<string>(key) ?? "").trim();
+    if (!p) continue;
+    if (/^([a-zA-Z]:[\\/]|[\\/])/.test(p)) roots.push(vscode.Uri.file(p));
+    else if (ws) roots.push(vscode.Uri.joinPath(ws, p));
+  }
+  return roots;
+}
 
 /**
  * CustomTextEditor backing a *.somagui.json project file. The TextDocument is
@@ -32,11 +53,18 @@ export class SomaEditorProvider implements vscode.CustomTextEditorProvider {
     const webview = webviewPanel.webview;
     webview.options = {
       enableScripts: true,
-      localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, "dist", "webview")]
+      localResourceRoots: [
+        vscode.Uri.joinPath(this.context.extensionUri, "dist", "webview"),
+        ...graphicsRoots()
+      ]
     };
     webview.html = getHtml(webview, this.context.extensionUri);
 
     const post = (msg: HostToWebview) => webview.postMessage(msg);
+
+    // Build the gfx index for this editor from the configured graphics folders.
+    const gfxIndex = new GfxIndex();
+    let indexReady = gfxIndex.reindex();
 
     // Track edits we originate so the onDidChangeTextDocument echo doesn't loop
     // back into the webview and clobber in-progress interaction.
@@ -48,12 +76,31 @@ export class SomaEditorProvider implements vscode.CustomTextEditorProvider {
       post({ type: "docChanged", text: document.getText() });
     });
 
-    webviewPanel.onDidDispose(() => changeSub.dispose());
+    // Re-index and refresh the webview when the graphics paths or WYSIWYG flag
+    // change. Widening localResourceRoots requires reassigning webview.options.
+    const configSub = vscode.workspace.onDidChangeConfiguration((e) => {
+      if (!e.affectsConfiguration("somaGui")) return;
+      webview.options = {
+        enableScripts: true,
+        localResourceRoots: [
+          vscode.Uri.joinPath(this.context.extensionUri, "dist", "webview"),
+          ...graphicsRoots()
+        ]
+      };
+      indexReady = gfxIndex.reindex();
+      void indexReady.then(() => post({ type: "gfxConfigChanged", config: readGfxConfig() }));
+    });
+
+    webviewPanel.onDidDispose(() => {
+      changeSub.dispose();
+      configSub.dispose();
+    });
 
     webview.onDidReceiveMessage(async (msg: WebviewToHost) => {
       switch (msg.type) {
         case "ready":
           post({ type: "init", text: document.getText() });
+          post({ type: "gfxConfig", config: readGfxConfig() });
           break;
 
         case "edit":
@@ -77,8 +124,71 @@ export class SomaEditorProvider implements vscode.CustomTextEditorProvider {
         case "notify":
           this.notify(msg.level, msg.message);
           break;
+
+        case "resolveGfx":
+          await indexReady;
+          await this.resolveGfx(webview, gfxIndex, msg.requestId, msg.gfx, post);
+          break;
+
+        case "browseGfx": {
+          await indexReady;
+          const roots = gfxIndex.rootUris();
+          const uris = await vscode.window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            openLabel: "Select texture",
+            defaultUri: roots[0],
+            filters: { Textures: ["tga", "png", "jpg", "jpeg"] }
+          });
+          const picked = uris?.[0] ?? null;
+          let gfxPath: string | null = null;
+          if (picked) {
+            gfxPath = gfxIndex.normalize(picked);
+            if (!gfxPath) {
+              vscode.window.showWarningMessage(
+                "Selected file is outside your configured graphics folders. Set the graphics paths in Settings first."
+              );
+            }
+          }
+          post({ type: "gfxBrowseResult", requestId: msg.requestId, path: gfxPath });
+          break;
+        }
       }
     });
+  }
+
+  /** Resolve a gfx name and reply with a webview uri, TGA bytes, or a miss. */
+  private async resolveGfx(
+    webview: vscode.Webview,
+    index: GfxIndex,
+    requestId: string,
+    gfx: string,
+    post: (msg: HostToWebview) => void
+  ): Promise<void> {
+    const hit = index.resolve(gfx);
+    if (!hit) {
+      post({ type: "gfxResolved", requestId, result: { kind: "none" } });
+      return;
+    }
+    try {
+      if (hit.kind === "uri") {
+        post({
+          type: "gfxResolved",
+          requestId,
+          result: { kind: "uri", uri: webview.asWebviewUri(hit.fileUri).toString() }
+        });
+      } else {
+        const bytes = await vscode.workspace.fs.readFile(hit.fileUri);
+        post({
+          type: "gfxResolved",
+          requestId,
+          result: { kind: "tga", bytes: Buffer.from(bytes).toString("base64") }
+        });
+      }
+    } catch {
+      post({ type: "gfxResolved", requestId, result: { kind: "none" } });
+    }
   }
 
   /** Replace the whole document with new text via a WorkspaceEdit (undoable). */

@@ -501,6 +501,14 @@ label textarea {
   font-size: 11px;
   color: var(--teal-bright);
 }
+button.scale-chip.active {
+  border-color: var(--teal);
+  background: var(--teal-deep);
+  color: var(--teal-bright);
+}
+button.scale-chip:not(.active) {
+  color: var(--text-faint);
+}
 .canvas-hint {
   color: var(--text-faint);
   font-size: 11px;
@@ -629,8 +637,18 @@ label textarea {
   pointer-events: none;
 }
 .widget-bg.selected {
-  /* Allow selected highlight to show even though pointer-events is off */
   outline: 2px dashed var(--accent-2);
+  pointer-events: none;
+}
+
+/* WYSIWYG: strip all placeholder chrome (background, dashed border) so only the
+   real texture/color shows. Placed after .widget-bg so source order wins at equal
+   specificity. Selection outline is an `outline`, not `border`, so it still shows. */
+.widget-wysiwyg {
+  background: none !important;
+  border: none !important;
+}
+.widget-wysiwyg img {
   pointer-events: none;
 }
 

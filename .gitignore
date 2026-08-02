@@ -7,3 +7,4 @@ dist
 *.tsbuildinfo
 *.vsix
 *.somagui.json
+/graphics

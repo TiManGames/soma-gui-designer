@@ -9,6 +9,7 @@ import {
   rgbaToHex,
   type Rgba
 } from "./exprHelpers";
+import { GfxPicker } from "./GfxPicker";
 
 interface Props {
   field: StructField;
@@ -16,9 +17,14 @@ interface Props {
   value: string | undefined;
   onChange: (expr: string) => void;
   onClear: () => void;
+  /**
+   * For cImGuiGfx fields: called with a SetFile call string rather than an expr.
+   * If not provided, falls back to storing as a quoted expr.
+   */
+  onGfxChange?: (call: string) => void;
 }
 
-export function FieldEditor({ field, value, onChange, onClear }: Props) {
+export function FieldEditor({ field, value, onChange, onClear, onGfxChange }: Props) {
   const active = value !== undefined;
 
   const control = () => {
@@ -60,20 +66,38 @@ export function FieldEditor({ field, value, onChange, onClear }: Props) {
         return <RawInput value={value} placeholder="ImGui_NrmSizeKeepRatio(0.035f)" onChange={onChange} />;
       case "vec3":
         return <RawInput value={value} placeholder="cVector3f(0,0,1)" onChange={onChange} />;
-      case "font":
       case "gfx":
+        if (field.type === "cImGuiFrameGfx") {
+          // Rendered by OverridesSection as FrameGfxEditor — skip here.
+          return null;
+        }
+        // cImGuiGfx: single texture picker
+        return (
+          <GfxPicker
+            value={extractFileFromValue(value ?? "")}
+            onChange={(path) => {
+              if (onGfxChange) onGfxChange(`${field.name}.SetFile("${path}")`);
+              else onChange(`"${path}"`);
+            }}
+            onClear={active ? onClear : undefined}
+          />
+        );
+      case "font":
       default:
         return <RawInput value={value} placeholder={`${field.type} expression`} onChange={onChange} />;
     }
   };
 
+  const ctrl = control();
+  if (ctrl === null) return null;
+
   return (
     <div className="override-row" style={{ opacity: active ? 1 : 0.75 }}>
       <label style={{ margin: 0 }}>
         <span style={{ fontFamily: "monospace" }}>{field.name}</span>
-        {control()}
+        {ctrl}
       </label>
-      {active ? (
+      {active && field.category !== "gfx" ? (
         <button className="danger" title="Remove override" onClick={onClear}>
           ×
         </button>
@@ -82,6 +106,11 @@ export function FieldEditor({ field, value, onChange, onClear }: Props) {
       )}
     </div>
   );
+}
+
+/** Strip surrounding quotes from a stored gfx expr, e.g. '"station/foo"' → 'station/foo' */
+function extractFileFromValue(v: string): string {
+  return v.replace(/^["']|["']$/g, "");
 }
 
 function RawInput({
@@ -105,7 +134,6 @@ function RawInput({
 function FloatEditor({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) {
   const n = value !== undefined ? parseFloatExpr(value) : null;
   if (value !== undefined && n === null) {
-    // Non-numeric expression (e.g. ImGui_NrmSizeKeepRatio): edit raw.
     return <RawInput value={value} onChange={onChange} />;
   }
   return (

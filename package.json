@@ -34,10 +34,50 @@
     "commands": [
       {
         "command": "somaGui.newProject",
-        "title": "SOMA GUI: New Project",
+        "title": "New Project",
+        "category": "SOMA GUI"
+      },
+      {
+        "command": "somaGui.toggleWysiwyg",
+        "title": "Toggle WYSIWYG Rendering",
+        "category": "SOMA GUI"
+      },
+      {
+        "command": "somaGui.configureGraphics",
+        "title": "Configure Graphics Paths",
+        "category": "SOMA GUI"
+      },
+      {
+        "command": "somaGui.setBaseGameGraphicsPath",
+        "title": "Set Base Game Graphics Path",
+        "category": "SOMA GUI"
+      },
+      {
+        "command": "somaGui.setModGraphicsPath",
+        "title": "Set Mod Graphics Path",
         "category": "SOMA GUI"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Canvas & WYSIWYG",
+      "properties": {
+        "somaGui.baseGameGraphicsPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute or workspace-relative path to the **base game** `graphics` folder. Used to render real textures on the WYSIWYG canvas. The mod folder takes precedence over this one."
+        },
+        "somaGui.modGraphicsPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute or workspace-relative path to your **mod's** `graphics` folder. Files here override the base game when rendering the WYSIWYG canvas."
+        },
+        "somaGui.wysiwyg.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Render real game textures and colors on the canvas (WYSIWYG). When off, widgets show simple placeholder styling."
+        }
+      }
+    }
   },
   "activationEvents": [],
   "scripts": {

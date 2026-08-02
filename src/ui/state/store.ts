@@ -44,6 +44,11 @@ interface DesignerState {
   past: SomaDocument[];
   future: SomaDocument[];
 
+  /** WYSIWYG rendering flag (runtime-only, mirrors the somaGui.wysiwyg.enabled setting). */
+  wysiwygEnabled: boolean;
+  setWysiwygEnabled: (enabled: boolean) => void;
+  toggleWysiwyg: () => void;
+
   // selection & tabs
   select: (id: string | null) => void;
   setPreviewTab: (tab: PreviewTab) => void;
@@ -118,6 +123,10 @@ export const useStore = create<DesignerState>((set, get) => ({
   clipboard: null,
   past: [],
   future: [],
+
+  wysiwygEnabled: true,
+  setWysiwygEnabled: (enabled) => set({ wysiwygEnabled: enabled }),
+  toggleWysiwyg: () => set((s) => ({ wysiwygEnabled: !s.wysiwygEnabled })),
 
   select: (id) => set({ selectedId: id }),
   setPreviewTab: (tab) => set({ previewTab: tab }),

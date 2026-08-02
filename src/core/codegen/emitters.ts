@@ -18,7 +18,6 @@ import type {
   MultiSelectNode,
   MultiToggleNode,
   NumpadNode,
-  Override,
   RepeatButtonNode,
   SliderHNode,
   SliderVNode,
@@ -34,12 +33,7 @@ import { escapeString } from "./format";
 import { safeId } from "../model/ids";
 import { posExpr, sizeExpr } from "./coordExpr";
 import { emitDataVar } from "./emitDataVar";
-
-/** Read a named parameter from a bg widget's overrides, falling back to a default. */
-function getParam(overrides: Override[], path: string, def: string): string {
-  const found = overrides.find((o) => o.kind === "expr" && o.path === path);
-  return found && found.kind === "expr" ? found.expr : def;
-}
+import { getParam } from "../model/overrides";
 
 export interface EmitCtx {
   lines: string[];

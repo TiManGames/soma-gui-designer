@@ -27,6 +27,8 @@ export function Canvas() {
   const cutNode = useStore((s) => s.cutNode);
   const pasteNode = useStore((s) => s.pasteNode);
   const deleteNode = useStore((s) => s.deleteNode);
+  const wysiwygEnabled = useStore((s) => s.wysiwygEnabled);
+  const toggleWysiwyg = useStore((s) => s.toggleWysiwyg);
 
   const size = previewSize(doc);
   const scale = Math.min(1, MAX_CANVAS_WIDTH / size.x);
@@ -125,9 +127,19 @@ export function Canvas() {
         <span className="scale-chip">
           {size.x}×{size.y} · {Math.round(scale * 100)}%
         </span>
-        <span className="canvas-hint">
-          Drag to move · corner to resize · drop into window/group to reparent · middle-drag to pan
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--s3)" }}>
+          <button
+            className={`scale-chip${wysiwygEnabled ? " active" : ""}`}
+            title="Toggle rendering real game textures & colors on the canvas"
+            onClick={toggleWysiwyg}
+            style={{ cursor: "pointer" }}
+          >
+            WYSIWYG {wysiwygEnabled ? "on" : "off"}
+          </button>
+          <span className="canvas-hint">
+            Drag to move · corner to resize · drop into window/group to reparent · middle-drag to pan
+          </span>
+        </div>
       </div>
       <div
         className={`canvas-scroller${panning ? " panning" : ""}`}
