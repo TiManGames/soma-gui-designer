@@ -1,0 +1,27 @@
+{
+  "root": true,
+  "env": { "browser": true, "es2020": true, "node": true },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": { "ecmaVersion": "latest", "sourceType": "module" },
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+  },
+  "overrides": [
+    {
+      "files": ["src/core/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              { "group": ["react", "react-dom", "react/*", "zustand", "@ui/*"], "message": "src/core must stay framework-agnostic (no React/UI imports) so it can be reused by a VS Code webview." }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "ignorePatterns": ["dist", "legacy", "soma_scripts", "node_modules", "src/data/api-schema.json"]
+}

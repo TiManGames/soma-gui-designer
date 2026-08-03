@@ -1,0 +1,3477 @@
+{
+  "generatedFrom": [
+    "soma_scripts/hps_api.hps",
+    "soma_scripts/script/helpers/helper_imgui.hps",
+    "soma_scripts/script/custom_depth/helper_custom_depth_imgui/helper_imgui_station_basics.hps"
+  ],
+  "structs": {
+    "cImGuiButtonData": {
+      "name": "cImGuiButtonData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbUseFrame",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxFrame",
+          "type": "cImGuiFrameGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseInFocusColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mColorInFocus",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mbUseInFocusGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseTriggeredColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mColorTriggered",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mbUseTriggeredGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxTriggered",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseTriggeredAndInFocusColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mColorTriggeredAndInFocus",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mbClipText",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mfClipAreaPaddingLeft",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfClipAreaPaddingRight",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfScrollSpeed",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfScrollStartDelay",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfScrollResetDelay",
+          "type": "float",
+          "category": "float"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiWindowData": {
+      "name": "cImGuiWindowData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mHeaderType",
+          "type": "eImGuiWindowHeader",
+          "category": "enum",
+          "enumType": "eImGuiWindowHeader"
+        },
+        {
+          "name": "mGfxWindowData",
+          "type": "cImGuiFrameGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseHeader",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mvLabelOffset",
+          "type": "cVector3f",
+          "category": "vec3"
+        },
+        {
+          "name": "mfCaptionSizeMul",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mGfxLabelData",
+          "type": "cImGuiFrameGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mfLabelPaddingTop",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfLabelPaddingRight",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfLabelPaddingBottom",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfLabelPaddingLeft",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfLabelMinWidth",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfPaddingTop",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfPaddingRight",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfPaddingBottom",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfPaddingLeft",
+          "type": "float",
+          "category": "float"
+        }
+      ],
+      "methods": [
+        "SetLabelPadding",
+        "SetPadding"
+      ]
+    },
+    "cImGuiTextFrameData": {
+      "name": "cImGuiTextFrameData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiGaugeData": {
+      "name": "cImGuiGaugeData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxFrame",
+          "type": "cImGuiFrameGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseFrame",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxFill",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseFillUV",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mOrientation",
+          "type": "eImGuiGaugeOrientation",
+          "category": "enum",
+          "enumType": "eImGuiGaugeOrientation"
+        },
+        {
+          "name": "mvPadding",
+          "type": "cVector2f",
+          "category": "vec2"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiSliderData": {
+      "name": "cImGuiSliderData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbUseButtonGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxButton",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mvButtonSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBaseInFocusGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBaseInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseButtonInFocusGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxButtonInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseButtonTriggeredGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxButtonTriggered",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mfRepeatDelay",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfDefaultStepSize",
+          "type": "float",
+          "category": "float"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiLabelData": {
+      "name": "cImGuiLabelData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbScrolling",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfScrollSpeed",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfScrollStartDelay",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mfScrollResetDelay",
+          "type": "float",
+          "category": "float"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiCheckBoxData": {
+      "name": "cImGuiCheckBoxData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbUseBackgroundInFocusGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackgroundInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mvBoxSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mGfxBox",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mvCheckOverlaySize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mGfxCheckOverlay",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mbUseBoxInFocusGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBoxInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiMultiSelectData": {
+      "name": "cImGuiMultiSelectData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbUseBackgroundInFocusGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackgroundInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mvArrowSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseArrowInFocusGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxArrowRight",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxArrowRightInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxArrowLeft",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxArrowLeftInFocus",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiFrameData": {
+      "name": "cImGuiFrameData",
+      "fields": [
+        {
+          "name": "mColorBase",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorText",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorDisabled",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvDefaultSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUseBackgroundGfx",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mFont",
+          "type": "cImGuiFont",
+          "category": "font"
+        },
+        {
+          "name": "mFontAlign",
+          "type": "eFontAlign",
+          "category": "enum",
+          "enumType": "eFontAlign"
+        },
+        {
+          "name": "mbUseDisabledColor",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mFrameGfx",
+          "type": "cImGuiFrameGfx",
+          "category": "gfx"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiFont": {
+      "name": "cImGuiFont",
+      "fields": [
+        {
+          "name": "mMaterial",
+          "type": "eGuiMaterial",
+          "category": "enum",
+          "enumType": "eGuiMaterial"
+        },
+        {
+          "name": "mColor",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mvSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        }
+      ],
+      "methods": []
+    },
+    "cImGuiGfx": {
+      "name": "cImGuiGfx",
+      "fields": [
+        {
+          "name": "mMaterial",
+          "type": "eGuiMaterial",
+          "category": "enum",
+          "enumType": "eGuiMaterial"
+        },
+        {
+          "name": "mColor",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mType",
+          "type": "eImGuiGfx",
+          "category": "enum",
+          "enumType": "eImGuiGfx"
+        },
+        {
+          "name": "mWrapMode",
+          "type": "eImGuiWrapMode",
+          "category": "enum",
+          "enumType": "eImGuiWrapMode"
+        },
+        {
+          "name": "mvOffset",
+          "type": "cVector3f",
+          "category": "vec3"
+        },
+        {
+          "name": "mfAnimationTime",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mbCrossfadeAnimation",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mvUVMin",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mvUVMax",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mbUVFlipH",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbUVFlipV",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mColorCornerTopLeft",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorCornerTopRight",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorCornerBotRight",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorCornerBotLeft",
+          "type": "cColor",
+          "category": "color"
+        }
+      ],
+      "methods": []
+    }
+  },
+  "enums": {
+    "eFontAlign": {
+      "name": "eFontAlign",
+      "members": [
+        "eFontAlign_Left",
+        "eFontAlign_Right",
+        "eFontAlign_Center"
+      ]
+    },
+    "eImGuiAlign": {
+      "name": "eImGuiAlign",
+      "members": [
+        "eImGuiAlign_TopLeft",
+        "eImGuiAlign_BottomLeft",
+        "eImGuiAlign_CenterLeft",
+        "eImGuiAlign_TopRight",
+        "eImGuiAlign_BottomRight",
+        "eImGuiAlign_CenterRight",
+        "eImGuiAlign_CenterCenter",
+        "eImGuiAlign_TopCenter",
+        "eImGuiAlign_BottomCenter"
+      ]
+    },
+    "eImGuiGfx": {
+      "name": "eImGuiGfx",
+      "members": [
+        "eImGuiGfx_Image",
+        "eImGuiGfx_ImageAnimated",
+        "eImGuiGfx_Texture",
+        "eImGuiGfx_TextureAnimated",
+        "eImGuiGfx_Special"
+      ]
+    },
+    "eImGuiLayout": {
+      "name": "eImGuiLayout",
+      "members": [
+        "eImGuiLayout_XY",
+        "eImGuiLayout_X",
+        "eImGuiLayout_X_Tabbed",
+        "eImGuiLayout_Y"
+      ]
+    },
+    "eImGuiWindowHeader": {
+      "name": "eImGuiWindowHeader",
+      "members": [
+        "eImGuiWindowHeader_Full",
+        "eImGuiWindowHeader_FitCaption"
+      ]
+    },
+    "eImGuiGaugeOrientation": {
+      "name": "eImGuiGaugeOrientation",
+      "members": [
+        "eImGuiGaugeOrientation_Hori",
+        "eImGuiGaugeOrientation_Vert"
+      ]
+    },
+    "eGuiMaterial": {
+      "name": "eGuiMaterial",
+      "members": [
+        "eGuiMaterial_Diffuse",
+        "eGuiMaterial_Alpha",
+        "eGuiMaterial_FontNormal",
+        "eGuiMaterial_Additive",
+        "eGuiMaterial_Modulative",
+        "eGuiMaterial_PremulAlpha"
+      ]
+    },
+    "eImGuiAction": {
+      "name": "eImGuiAction",
+      "members": [
+        "eImGuiAction_MouseRight",
+        "eImGuiAction_MouseLeft",
+        "eImGuiAction_Confirm",
+        "eImGuiAction_Cancel",
+        "eImGuiAction_Up",
+        "eImGuiAction_Down",
+        "eImGuiAction_Right",
+        "eImGuiAction_Left",
+        "eImGuiAction_ScrollUp",
+        "eImGuiAction_ScrollDown"
+      ]
+    },
+    "eEasing": {
+      "name": "eEasing",
+      "members": [
+        "eEasing_Linear",
+        "eEasing_SineIn",
+        "eEasing_SineOut",
+        "eEasing_SineInOut",
+        "eEasing_QuadIn",
+        "eEasing_QuadOut",
+        "eEasing_QuadInOut",
+        "eEasing_CubicIn",
+        "eEasing_CubicOut",
+        "eEasing_CubicInOut",
+        "eEasing_QuartIn",
+        "eEasing_QuartOut",
+        "eEasing_QuartInOut",
+        "eEasing_QuintIn",
+        "eEasing_QuintOut",
+        "eEasing_QuintInOut",
+        "eEasing_ExpoIn",
+        "eEasing_ExpoOut",
+        "eEasing_ExpoInOut",
+        "eEasing_CircIn",
+        "eEasing_CircOut",
+        "eEasing_CircInOut",
+        "eEasing_BackIn",
+        "eEasing_BackOut",
+        "eEasing_BackInOut",
+        "eEasing_ElasticIn",
+        "eEasing_ElasticOut",
+        "eEasing_ElasticInOut",
+        "eEasing_BounceIn",
+        "eEasing_BounceOut",
+        "eEasing_BounceInOut"
+      ]
+    }
+  },
+  "factories": {
+    "StationGui_CreateDefaultWindowData": {
+      "name": "StationGui_CreateDefaultWindowData",
+      "returns": "cImGuiWindowData"
+    },
+    "StationGui_CreateDefaultSliderData": {
+      "name": "StationGui_CreateDefaultSliderData",
+      "returns": "cImGuiSliderData"
+    },
+    "StationGui_CreateDefaultTextFrameData": {
+      "name": "StationGui_CreateDefaultTextFrameData",
+      "returns": "cImGuiTextFrameData"
+    },
+    "StationGui_CreateDefaultButtonData": {
+      "name": "StationGui_CreateDefaultButtonData",
+      "returns": "cImGuiButtonData"
+    },
+    "StationGui_CreateToggleButtonData": {
+      "name": "StationGui_CreateToggleButtonData",
+      "returns": "cImGuiButtonData"
+    },
+    "StationGui_CreateDefaultGaugeData": {
+      "name": "StationGui_CreateDefaultGaugeData",
+      "returns": "cImGuiGaugeData"
+    }
+  },
+  "wrappers": {
+    "ImGui_ClearStates": {
+      "name": "ImGui_ClearStates",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_InFocus": {
+      "name": "ImGui_InFocus",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_BecameInFocus": {
+      "name": "ImGui_BecameInFocus",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_WasInFocus": {
+      "name": "ImGui_WasInFocus",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_Exit": {
+      "name": "ImGui_Exit",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_ClickedMouseOutside": {
+      "name": "ImGui_ClickedMouseOutside",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_GetTransCategory": {
+      "name": "ImGui_GetTransCategory",
+      "returnType": "tString",
+      "params": []
+    },
+    "ImGui_Translate": {
+      "name": "ImGui_Translate",
+      "returnType": "tWString",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asEntry"
+        }
+      ]
+    },
+    "ImGui_GetSize": {
+      "name": "ImGui_GetSize",
+      "returnType": "cVector2f",
+      "params": []
+    },
+    "ImGui_NrmPos": {
+      "name": "ImGui_NrmPos",
+      "returnType": "cVector3f",
+      "params": [
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        }
+      ]
+    },
+    "ImGui_NrmPos2": {
+      "name": "ImGui_NrmPos2",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "float",
+          "name": "afX"
+        },
+        {
+          "type": "float",
+          "name": "afY"
+        }
+      ]
+    },
+    "ImGui_NrmSize": {
+      "name": "ImGui_NrmSize",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_NrmPosGroup": {
+      "name": "ImGui_NrmPosGroup",
+      "returnType": "cVector3f",
+      "params": [
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "bool",
+          "name": "abOffsetInsideGroup",
+          "default": "false"
+        }
+      ]
+    },
+    "ImGui_NrmPos2Group": {
+      "name": "ImGui_NrmPos2Group",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "float",
+          "name": "afX"
+        },
+        {
+          "type": "float",
+          "name": "afY"
+        },
+        {
+          "type": "bool",
+          "name": "abOffsetInsideGroup",
+          "default": "false"
+        }
+      ]
+    },
+    "ImGui_NrmSizeGroup": {
+      "name": "ImGui_NrmSizeGroup",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_NrmSizeKeepRatio": {
+      "name": "ImGui_NrmSizeKeepRatio",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_NrmSizeGroupKeepRatio": {
+      "name": "ImGui_NrmSizeGroupKeepRatio",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_GetRatioCorrectSizeByWidth": {
+      "name": "ImGui_GetRatioCorrectSizeByWidth",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "float",
+          "name": "afWidth"
+        }
+      ]
+    },
+    "ImGui_GetRatioCorrectSizeByNrmWidth": {
+      "name": "ImGui_GetRatioCorrectSizeByNrmWidth",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "float",
+          "name": "afWidth"
+        }
+      ]
+    },
+    "ImGui_GetRatioCorrectSizeByHeight": {
+      "name": "ImGui_GetRatioCorrectSizeByHeight",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "float",
+          "name": "afHeight"
+        }
+      ]
+    },
+    "ImGui_GetRatioCorrectSizeByNrmHeight": {
+      "name": "ImGui_GetRatioCorrectSizeByNrmHeight",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "float",
+          "name": "afHeight"
+        }
+      ]
+    },
+    "ImGui_GetRatioCorrectSizeByRect": {
+      "name": "ImGui_GetRatioCorrectSizeByRect",
+      "returnType": "cVector2f",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "cVector2f",
+          "name": "aRect"
+        },
+        {
+          "type": "bool",
+          "name": "abCompensateForUV",
+          "default": "false"
+        }
+      ]
+    },
+    "ImGui_SetupWidgetRect": {
+      "name": "ImGui_SetupWidgetRect",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector3f",
+          "name": "avInPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avInSize"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avOutPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avOutSize"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avDefaultSize"
+        },
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        }
+      ]
+    },
+    "ImGui_ActionTriggered": {
+      "name": "ImGui_ActionTriggered",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "eImGuiAction",
+          "name": "aAction"
+        },
+        {
+          "type": "bool",
+          "name": "abCheckIfUsed",
+          "default": "false"
+        }
+      ]
+    },
+    "ImGui_ActionIsDown": {
+      "name": "ImGui_ActionIsDown",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "eImGuiAction",
+          "name": "aAction"
+        },
+        {
+          "type": "bool",
+          "name": "abCheckIfUsed",
+          "default": "false"
+        }
+      ]
+    },
+    "ImGui_GetMouseRel": {
+      "name": "ImGui_GetMouseRel",
+      "returnType": "cVector2f",
+      "params": []
+    },
+    "ImGui_GetMouseRel3D": {
+      "name": "ImGui_GetMouseRel3D",
+      "returnType": "cVector3f",
+      "params": []
+    },
+    "ImGui_GetMousePosition": {
+      "name": "ImGui_GetMousePosition",
+      "returnType": "cVector2f",
+      "params": []
+    },
+    "ImGui_GetMousePosition3D": {
+      "name": "ImGui_GetMousePosition3D",
+      "returnType": "cVector3f",
+      "params": []
+    },
+    "ImGui_CheckMouseHasMoved": {
+      "name": "ImGui_CheckMouseHasMoved",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_SetFocus": {
+      "name": "ImGui_SetFocus",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asWidgetName"
+        }
+      ]
+    },
+    "ImGui_SetAlignment": {
+      "name": "ImGui_SetAlignment",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "eImGuiAlign",
+          "name": "aAlign"
+        }
+      ]
+    },
+    "ImGui_SetUIMoveGroupFlags": {
+      "name": "ImGui_SetUIMoveGroupFlags",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "int",
+          "name": "alGroupFlags"
+        }
+      ]
+    },
+    "ImGui_SetUIMoveWrapMode": {
+      "name": "ImGui_SetUIMoveWrapMode",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "eImGuiWrap",
+          "name": "aWrap"
+        }
+      ]
+    },
+    "ImGui_GetStateInt": {
+      "name": "ImGui_GetStateInt",
+      "returnType": "int",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "int",
+          "name": "alDefault",
+          "default": "0"
+        }
+      ]
+    },
+    "ImGui_GetStateFloat": {
+      "name": "ImGui_GetStateFloat",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "float",
+          "name": "afDefault",
+          "default": "0.0f"
+        }
+      ]
+    },
+    "ImGui_GetStateVector3f": {
+      "name": "ImGui_GetStateVector3f",
+      "returnType": "cVector3f",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avDefault"
+        }
+      ]
+    },
+    "ImGui_GetStateColor": {
+      "name": "ImGui_GetStateColor",
+      "returnType": "cColor",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cColor",
+          "name": "aDefault"
+        }
+      ]
+    },
+    "ImGui_GetStateBool": {
+      "name": "ImGui_GetStateBool",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "bool",
+          "name": "abDefault"
+        }
+      ]
+    },
+    "ImGui_SetStateInt": {
+      "name": "ImGui_SetStateInt",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "int",
+          "name": "alVal"
+        }
+      ]
+    },
+    "ImGui_SetStateFloat": {
+      "name": "ImGui_SetStateFloat",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "float",
+          "name": "afVal"
+        }
+      ]
+    },
+    "ImGui_SetStateVector3f": {
+      "name": "ImGui_SetStateVector3f",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avVal"
+        }
+      ]
+    },
+    "ImGui_SetStateColor": {
+      "name": "ImGui_SetStateColor",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cColor",
+          "name": "aVal"
+        }
+      ]
+    },
+    "ImGui_SetStateBool": {
+      "name": "ImGui_SetStateBool",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "bool",
+          "name": "abVal"
+        }
+      ]
+    },
+    "ImGui_IncStateInt": {
+      "name": "ImGui_IncStateInt",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "int",
+          "name": "alVal"
+        }
+      ]
+    },
+    "ImGui_IncStateFloat": {
+      "name": "ImGui_IncStateFloat",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "float",
+          "name": "afVal"
+        }
+      ]
+    },
+    "ImGui_IncStateVector3f": {
+      "name": "ImGui_IncStateVector3f",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avVal"
+        }
+      ]
+    },
+    "ImGui_IncStateColor": {
+      "name": "ImGui_IncStateColor",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cColor",
+          "name": "aVal"
+        }
+      ]
+    },
+    "ImGui_FadeStateFloat": {
+      "name": "ImGui_FadeStateFloat",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "float",
+          "name": "afGoalVal"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        },
+        {
+          "type": "eEasing",
+          "name": "aType",
+          "default": "eEasing_QuadInOut"
+        },
+        {
+          "type": "bool",
+          "name": "abReplaceIfExist",
+          "default": "true"
+        }
+      ]
+    },
+    "ImGui_FadeStateVector3f": {
+      "name": "ImGui_FadeStateVector3f",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avGoalVal"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        },
+        {
+          "type": "eEasing",
+          "name": "aType",
+          "default": "eEasing_QuadInOut"
+        },
+        {
+          "type": "bool",
+          "name": "abReplaceIfExist",
+          "default": "true"
+        }
+      ]
+    },
+    "ImGui_FadeStateColor": {
+      "name": "ImGui_FadeStateColor",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cColor",
+          "name": "aGoalVal"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        },
+        {
+          "type": "eEasing",
+          "name": "aType",
+          "default": "eEasing_QuadInOut"
+        },
+        {
+          "type": "bool",
+          "name": "abReplaceIfExist",
+          "default": "true"
+        }
+      ]
+    },
+    "ImGui_StopFade": {
+      "name": "ImGui_StopFade",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        }
+      ]
+    },
+    "ImGui_IsFading": {
+      "name": "ImGui_IsFading",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        }
+      ]
+    },
+    "ImGui_FadeOver": {
+      "name": "ImGui_FadeOver",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        }
+      ]
+    },
+    "ImGui_FadeOscillateFloat": {
+      "name": "ImGui_FadeOscillateFloat",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "float",
+          "name": "afStart"
+        },
+        {
+          "type": "float",
+          "name": "afGoal"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        },
+        {
+          "type": "eEasing",
+          "name": "aType",
+          "default": "eEasing_QuadInOut"
+        }
+      ]
+    },
+    "ImGui_FadeOscillateVector3f": {
+      "name": "ImGui_FadeOscillateVector3f",
+      "returnType": "cVector3f",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avStart"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avGoal"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        },
+        {
+          "type": "eEasing",
+          "name": "aType",
+          "default": "eEasing_QuadInOut"
+        }
+      ]
+    },
+    "ImGui_FadeOscillateColor": {
+      "name": "ImGui_FadeOscillateColor",
+      "returnType": "cColor",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asVarName"
+        },
+        {
+          "type": "cColor",
+          "name": "aStart"
+        },
+        {
+          "type": "cColor",
+          "name": "aGoal"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        },
+        {
+          "type": "eEasing",
+          "name": "aType",
+          "default": "eEasing_QuadInOut"
+        }
+      ]
+    },
+    "ImGui_AddTimer": {
+      "name": "ImGui_AddTimer",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        }
+      ]
+    },
+    "ImGui_RepeatTimer": {
+      "name": "ImGui_RepeatTimer",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "float",
+          "name": "afTime"
+        }
+      ]
+    },
+    "ImGui_StopTimer": {
+      "name": "ImGui_StopTimer",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        }
+      ]
+    },
+    "ImGui_TimerOver": {
+      "name": "ImGui_TimerOver",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        }
+      ]
+    },
+    "ImGui_TimerExists": {
+      "name": "ImGui_TimerExists",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        }
+      ]
+    },
+    "ImGui_SetModColorMul": {
+      "name": "ImGui_SetModColorMul",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cColor",
+          "name": "aCol"
+        }
+      ]
+    },
+    "ImGui_SetModTextColorMul": {
+      "name": "ImGui_SetModTextColorMul",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cColor",
+          "name": "aCol"
+        }
+      ]
+    },
+    "ImGui_SetModUseUIPos": {
+      "name": "ImGui_SetModUseUIPos",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "bool",
+          "name": "abX"
+        }
+      ]
+    },
+    "ImGui_SetModUISizeHoriExpansion": {
+      "name": "ImGui_SetModUISizeHoriExpansion",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "float",
+          "name": "afNeg"
+        },
+        {
+          "type": "float",
+          "name": "afPos"
+        }
+      ]
+    },
+    "ImGui_SetModUISizeVertExpansion": {
+      "name": "ImGui_SetModUISizeVertExpansion",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "float",
+          "name": "afNeg"
+        },
+        {
+          "type": "float",
+          "name": "afPos"
+        }
+      ]
+    },
+    "ImGui_SetModUseInput": {
+      "name": "ImGui_SetModUseInput",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "bool",
+          "name": "abX"
+        }
+      ]
+    },
+    "ImGui_SetModRotateAngle": {
+      "name": "ImGui_SetModRotateAngle",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "float",
+          "name": "afX"
+        }
+      ]
+    },
+    "ImGui_SetModRotateCustomPivot": {
+      "name": "ImGui_SetModRotateCustomPivot",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "bool",
+          "name": "abX"
+        }
+      ]
+    },
+    "ImGui_SetModRotatePivot": {
+      "name": "ImGui_SetModRotatePivot",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avPivot"
+        }
+      ]
+    },
+    "ImGui_SetModGfx": {
+      "name": "ImGui_SetModGfx",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        }
+      ]
+    },
+    "ImGui_ResetModifiers": {
+      "name": "ImGui_ResetModifiers",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_PushModifiers": {
+      "name": "ImGui_PushModifiers",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_PopModifiers": {
+      "name": "ImGui_PopModifiers",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_PrevPressed": {
+      "name": "ImGui_PrevPressed",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_PrevBecamePressed": {
+      "name": "ImGui_PrevBecamePressed",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_PrevInFocus": {
+      "name": "ImGui_PrevInFocus",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_PrevPosition": {
+      "name": "ImGui_PrevPosition",
+      "returnType": "cVector3f",
+      "params": []
+    },
+    "ImGui_PrevSize": {
+      "name": "ImGui_PrevSize",
+      "returnType": "cVector2f",
+      "params": []
+    },
+    "ImGui_PrevBecameInFocus": {
+      "name": "ImGui_PrevBecameInFocus",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_PrevWasInFocus": {
+      "name": "ImGui_PrevWasInFocus",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_PrevMouseOver": {
+      "name": "ImGui_PrevMouseOver",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_PrevUpdated": {
+      "name": "ImGui_PrevUpdated",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_ClearPrevData": {
+      "name": "ImGui_ClearPrevData",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_GroupBegin": {
+      "name": "ImGui_GroupBegin",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        },
+        {
+          "type": "bool",
+          "name": "abClip",
+          "default": "false"
+        }
+      ]
+    },
+    "ImGui_GroupEnd": {
+      "name": "ImGui_GroupEnd",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_GetCurrentGroupPos": {
+      "name": "ImGui_GetCurrentGroupPos",
+      "returnType": "cVector3f",
+      "params": []
+    },
+    "ImGui_GetCurrentGroupSize": {
+      "name": "ImGui_GetCurrentGroupSize",
+      "returnType": "cVector2f",
+      "params": []
+    },
+    "ImGui_LayoutBegin": {
+      "name": "ImGui_LayoutBegin",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "eImGuiLayout",
+          "name": "aType"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSpacing",
+          "default": "cVector2f_Zero"
+        }
+      ]
+    },
+    "ImGui_LayoutEnd": {
+      "name": "ImGui_LayoutEnd",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_AddLayoutHorizontalSpace": {
+      "name": "ImGui_AddLayoutHorizontalSpace",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "float",
+          "name": "afWidth"
+        },
+        {
+          "type": "float",
+          "name": "afHeight",
+          "default": "0"
+        }
+      ]
+    },
+    "ImGui_AddLayoutVerticalSpace": {
+      "name": "ImGui_AddLayoutVerticalSpace",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "float",
+          "name": "afHeight"
+        }
+      ]
+    },
+    "ImGui_AddItemStringW": {
+      "name": "ImGui_AddItemStringW",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tWString",
+          "name": "asStr"
+        }
+      ]
+    },
+    "ImGui_AddItemString": {
+      "name": "ImGui_AddItemString",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asStr"
+        }
+      ]
+    },
+    "ImGui_AddItemStringList": {
+      "name": "ImGui_AddItemStringList",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tWString",
+          "name": "asStrList"
+        }
+      ]
+    },
+    "ImGui_AddItemGfx": {
+      "name": "ImGui_AddItemGfx",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        }
+      ]
+    },
+    "ImGui_ClearItems": {
+      "name": "ImGui_ClearItems",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_DoMouse": {
+      "name": "ImGui_DoMouse",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avOffset",
+          "default": "0"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoButtonExt": {
+      "name": "ImGui_DoButtonExt",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cImGuiButtonData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoButton": {
+      "name": "ImGui_DoButton",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoRepeatButtonExt": {
+      "name": "ImGui_DoRepeatButtonExt",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cImGuiButtonData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoRepeatButton": {
+      "name": "ImGui_DoRepeatButton",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoToggleButtonExt": {
+      "name": "ImGui_DoToggleButtonExt",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "bool",
+          "name": "abDefaultChecked"
+        },
+        {
+          "type": "cImGuiButtonData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoToggleButton": {
+      "name": "ImGui_DoToggleButton",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "bool",
+          "name": "abDefaultChecked"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoSliderHorizontalExt": {
+      "name": "ImGui_DoSliderHorizontalExt",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "float",
+          "name": "afDefaultValue"
+        },
+        {
+          "type": "float",
+          "name": "afMin"
+        },
+        {
+          "type": "float",
+          "name": "afMax"
+        },
+        {
+          "type": "float",
+          "name": "afStepSize"
+        },
+        {
+          "type": "cImGuiSliderData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoSliderHorizontal": {
+      "name": "ImGui_DoSliderHorizontal",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "float",
+          "name": "afDefaultValue"
+        },
+        {
+          "type": "float",
+          "name": "afMin"
+        },
+        {
+          "type": "float",
+          "name": "afMax"
+        },
+        {
+          "type": "float",
+          "name": "afStepSize",
+          "default": "-1"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoSliderVerticalExt": {
+      "name": "ImGui_DoSliderVerticalExt",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "float",
+          "name": "afDefaultValue"
+        },
+        {
+          "type": "float",
+          "name": "afMin"
+        },
+        {
+          "type": "float",
+          "name": "afMax"
+        },
+        {
+          "type": "float",
+          "name": "afStepSize"
+        },
+        {
+          "type": "cImGuiSliderData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoSliderVertical": {
+      "name": "ImGui_DoSliderVertical",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "float",
+          "name": "afDefaultValue"
+        },
+        {
+          "type": "float",
+          "name": "afMin"
+        },
+        {
+          "type": "float",
+          "name": "afMax"
+        },
+        {
+          "type": "float",
+          "name": "afStepSize",
+          "default": "-1"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoLabelExt": {
+      "name": "ImGui_DoLabelExt",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cImGuiLabelData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        },
+        {
+          "type": "float",
+          "name": "afFontSizeMul",
+          "default": "1"
+        }
+      ]
+    },
+    "ImGui_DoImage": {
+      "name": "ImGui_DoImage",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfxImage"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoImageCorrectAspect": {
+      "name": "ImGui_DoImageCorrectAspect",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfxImage"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoMultiToggleExt": {
+      "name": "ImGui_DoMultiToggleExt",
+      "returnType": "int",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "int",
+          "name": "alDefaultSelectedItem"
+        },
+        {
+          "type": "uint",
+          "name": "alColumnNum"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSpacing"
+        },
+        {
+          "type": "cImGuiButtonData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_DoMultiToggle": {
+      "name": "ImGui_DoMultiToggle",
+      "returnType": "int",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "int",
+          "name": "alDefaultSelectedItem"
+        },
+        {
+          "type": "uint",
+          "name": "alColumnNum"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSpacing"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_DoCheckBoxExt": {
+      "name": "ImGui_DoCheckBoxExt",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "bool",
+          "name": "abDefaultChecked"
+        },
+        {
+          "type": "cImGuiCheckBoxData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoCheckBox": {
+      "name": "ImGui_DoCheckBox",
+      "returnType": "bool",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "bool",
+          "name": "abDefaultChecked"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoTextFrameExt": {
+      "name": "ImGui_DoTextFrameExt",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avEdgeSpacing"
+        },
+        {
+          "type": "float",
+          "name": "afRowSpace"
+        },
+        {
+          "type": "float",
+          "name": "afStartRowOffset"
+        },
+        {
+          "type": "cImGuiTextFrameData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_DoTextFrame": {
+      "name": "ImGui_DoTextFrame",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avEdgeSpacing"
+        },
+        {
+          "type": "float",
+          "name": "afRowSpace"
+        },
+        {
+          "type": "float",
+          "name": "afStartRowOffset"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize"
+        }
+      ]
+    },
+    "ImGui_DoMultiSelectExt": {
+      "name": "ImGui_DoMultiSelectExt",
+      "returnType": "int",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "int",
+          "name": "alDefaultSelectedItem"
+        },
+        {
+          "type": "cImGuiMultiSelectData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoMultiSelect": {
+      "name": "ImGui_DoMultiSelect",
+      "returnType": "int",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asName"
+        },
+        {
+          "type": "int",
+          "name": "alDefaultSelectedItem"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_DoWindowStart": {
+      "name": "ImGui_DoWindowStart",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asCaption"
+        },
+        {
+          "type": "cImGuiWindowData",
+          "name": "aData"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        },
+        {
+          "type": "bool",
+          "name": "abClip",
+          "default": "true"
+        },
+        {
+          "type": "bool",
+          "name": "abForceCaptionFit",
+          "default": "true"
+        }
+      ]
+    },
+    "ImGui_DoWindowEnd": {
+      "name": "ImGui_DoWindowEnd",
+      "returnType": "void",
+      "params": []
+    },
+    "ImGui_DoGauge": {
+      "name": "ImGui_DoGauge",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGaugeData",
+          "name": "aData"
+        },
+        {
+          "type": "float",
+          "name": "afFillAmount"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos",
+          "default": "cVector3f_Zero"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        }
+      ]
+    },
+    "ImGui_SetDefaultButton": {
+      "name": "ImGui_SetDefaultButton",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiButtonData",
+          "name": "aData"
+        }
+      ]
+    },
+    "ImGui_GetDefaultButton": {
+      "name": "ImGui_GetDefaultButton",
+      "returnType": "cImGuiButtonData",
+      "params": []
+    },
+    "ImGui_SetDefaultSliderHorizontal": {
+      "name": "ImGui_SetDefaultSliderHorizontal",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiSliderData",
+          "name": "aData"
+        }
+      ]
+    },
+    "ImGui_GetDefaultSliderHorizontal": {
+      "name": "ImGui_GetDefaultSliderHorizontal",
+      "returnType": "cImGuiSliderData",
+      "params": []
+    },
+    "ImGui_SetDefaultSliderVertical": {
+      "name": "ImGui_SetDefaultSliderVertical",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiSliderData",
+          "name": "aData"
+        }
+      ]
+    },
+    "ImGui_GetDefaultSliderVertical": {
+      "name": "ImGui_GetDefaultSliderVertical",
+      "returnType": "cImGuiSliderData",
+      "params": []
+    },
+    "ImGui_SetDefaultLabel": {
+      "name": "ImGui_SetDefaultLabel",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiLabelData",
+          "name": "aData"
+        }
+      ]
+    },
+    "ImGui_GetDefaultLabel": {
+      "name": "ImGui_GetDefaultLabel",
+      "returnType": "cImGuiLabelData",
+      "params": []
+    },
+    "ImGui_SetDefaultCheckBox": {
+      "name": "ImGui_SetDefaultCheckBox",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiCheckBoxData",
+          "name": "aData"
+        }
+      ]
+    },
+    "ImGui_GetDefaultCheckBox": {
+      "name": "ImGui_GetDefaultCheckBox",
+      "returnType": "cImGuiCheckBoxData",
+      "params": []
+    },
+    "ImGui_SetDefaultTextFrame": {
+      "name": "ImGui_SetDefaultTextFrame",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiTextFrameData",
+          "name": "aData"
+        }
+      ]
+    },
+    "ImGui_GetDefaultTextFrame": {
+      "name": "ImGui_GetDefaultTextFrame",
+      "returnType": "cImGuiTextFrameData",
+      "params": []
+    },
+    "ImGui_SetDefaultMultiSelect": {
+      "name": "ImGui_SetDefaultMultiSelect",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiMultiSelectData",
+          "name": "aData"
+        }
+      ]
+    },
+    "ImGui_GetDefaultMultiSelect": {
+      "name": "ImGui_GetDefaultMultiSelect",
+      "returnType": "cImGuiMultiSelectData",
+      "params": []
+    },
+    "ImGui_SetDefaultMouse": {
+      "name": "ImGui_SetDefaultMouse",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        }
+      ]
+    },
+    "ImGui_SetDefaultFont": {
+      "name": "ImGui_SetDefaultFont",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiFont",
+          "name": "aFont"
+        }
+      ]
+    },
+    "ImGui_GetName": {
+      "name": "ImGui_GetName",
+      "returnType": "tString",
+      "params": []
+    },
+    "ImGui_SetShowMouseAutomatically": {
+      "name": "ImGui_SetShowMouseAutomatically",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "bool",
+          "name": "abX"
+        }
+      ]
+    },
+    "ImGui_GetShowMouseAutomatically": {
+      "name": "ImGui_GetShowMouseAutomatically",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_IsFirstRun": {
+      "name": "ImGui_IsFirstRun",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_GetTimeStep": {
+      "name": "ImGui_GetTimeStep",
+      "returnType": "float",
+      "params": []
+    },
+    "ImGui_GetTimeCount": {
+      "name": "ImGui_GetTimeCount",
+      "returnType": "float",
+      "params": []
+    },
+    "ImGui_GetMouseVisible": {
+      "name": "ImGui_GetMouseVisible",
+      "returnType": "bool",
+      "params": []
+    },
+    "ImGui_DrawLine": {
+      "name": "ImGui_DrawLine",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avStart"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avEnd"
+        },
+        {
+          "type": "float",
+          "name": "afZ"
+        },
+        {
+          "type": "float",
+          "name": "afThickness",
+          "default": "1.0f"
+        },
+        {
+          "type": "cColor",
+          "name": "aCol",
+          "default": "cColor_White"
+        }
+      ]
+    },
+    "ImGui_DrawLineExt": {
+      "name": "ImGui_DrawLineExt",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avStart"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avEnd"
+        },
+        {
+          "type": "float",
+          "name": "afZ"
+        },
+        {
+          "type": "float",
+          "name": "afThickness"
+        },
+        {
+          "type": "cColor",
+          "name": "aCol"
+        },
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        }
+      ]
+    },
+    "ImGui_AddLineStripVertex": {
+      "name": "ImGui_AddLineStripVertex",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avVertex"
+        }
+      ]
+    },
+    "ImGui_AddLineStripNrmVertex": {
+      "name": "ImGui_AddLineStripNrmVertex",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector2f",
+          "name": "avVertex"
+        }
+      ]
+    },
+    "ImGui_DrawAndClearLineStrip": {
+      "name": "ImGui_DrawAndClearLineStrip",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "float",
+          "name": "afZ"
+        },
+        {
+          "type": "float",
+          "name": "afThickness"
+        },
+        {
+          "type": "cColor",
+          "name": "aCol",
+          "default": "cColor_White"
+        },
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx",
+          "default": "cImGuiGfx()"
+        }
+      ]
+    },
+    "ImGui_DrawGfx": {
+      "name": "ImGui_DrawGfx",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        },
+        {
+          "type": "cColor",
+          "name": "aCol",
+          "default": "cColor_White"
+        }
+      ]
+    },
+    "ImGui_DrawAlignedGfx": {
+      "name": "ImGui_DrawAlignedGfx",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "eImGuiAlign",
+          "name": "aAlignment"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        },
+        {
+          "type": "cColor",
+          "name": "aCol",
+          "default": "cColor_White"
+        }
+      ]
+    },
+    "ImGui_DrawFontW": {
+      "name": "ImGui_DrawFontW",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tWString",
+          "name": "asText"
+        },
+        {
+          "type": "cImGuiFont",
+          "name": "aFont"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "eFontAlign",
+          "name": "aAlign"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSizeMul",
+          "default": "1"
+        },
+        {
+          "type": "cColor",
+          "name": "aColMul",
+          "default": "1.0f"
+        }
+      ]
+    },
+    "ImGui_DrawFrame": {
+      "name": "ImGui_DrawFrame",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cImGuiFrameGfx",
+          "name": "aGfx"
+        },
+        {
+          "type": "cVector3f",
+          "name": "avPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "avSize",
+          "default": "cVector2f_MinusOne"
+        },
+        {
+          "type": "cColor",
+          "name": "aCol",
+          "default": "cColor_White"
+        }
+      ]
+    },
+    "ImGui_ResizeFontToFit": {
+      "name": "ImGui_ResizeFontToFit",
+      "returnType": "float",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asText"
+        },
+        {
+          "type": "cImGuiFont",
+          "name": "aFont"
+        },
+        {
+          "type": "float",
+          "name": "afMaxWidth",
+          "default": "-1"
+        },
+        {
+          "type": "float",
+          "name": "afSizeMultiplier",
+          "default": "1.0f"
+        }
+      ]
+    },
+    "ImGui_DrawReadableBackground": {
+      "name": "ImGui_DrawReadableBackground",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "cVector3f",
+          "name": "vPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "vSize"
+        },
+        {
+          "type": "float",
+          "name": "fAlpha"
+        }
+      ]
+    },
+    "ImGui_DrawReadableLabel": {
+      "name": "ImGui_DrawReadableLabel",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString in",
+          "name": "asText"
+        },
+        {
+          "type": "cVector3f",
+          "name": "vPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "vSize"
+        },
+        {
+          "type": "float",
+          "name": "fAlpha"
+        },
+        {
+          "type": "cColor",
+          "name": "aColor",
+          "default": "cColor(1"
+        },
+        {
+          "type": "",
+          "name": "1"
+        },
+        {
+          "type": "",
+          "name": "1)"
+        },
+        {
+          "type": "float",
+          "name": "afFontSize",
+          "default": "20.0f"
+        }
+      ]
+    },
+    "ImGui_DrawReadableTextFrame": {
+      "name": "ImGui_DrawReadableTextFrame",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString in",
+          "name": "asText"
+        },
+        {
+          "type": "cVector3f",
+          "name": "vPos"
+        },
+        {
+          "type": "cVector2f",
+          "name": "vSize"
+        },
+        {
+          "type": "float",
+          "name": "fAlpha"
+        },
+        {
+          "type": "cColor",
+          "name": "aColor",
+          "default": "cColor(1"
+        },
+        {
+          "type": "",
+          "name": "1"
+        },
+        {
+          "type": "",
+          "name": "1)"
+        },
+        {
+          "type": "float",
+          "name": "afFontSize",
+          "default": "20.0f"
+        }
+      ]
+    },
+    "ImGui_PreloadImage": {
+      "name": "ImGui_PreloadImage",
+      "returnType": "void",
+      "params": [
+        {
+          "type": "tString",
+          "name": "asFile"
+        },
+        {
+          "type": "eImGuiGfx",
+          "name": "aType",
+          "default": "eImGuiGfx_Image"
+        }
+      ]
+    }
+  },
+  "paletteColors": [
+    {
+      "name": "gStationGuiColor_Normal",
+      "r": 0.227,
+      "g": 0.51,
+      "b": 0.557,
+      "a": 1
+    },
+    {
+      "name": "gStationGuiColor_Highlight",
+      "r": 0.576,
+      "g": 0.612,
+      "b": 0.184,
+      "a": 1
+    },
+    {
+      "name": "gStationGuiColor_Warning",
+      "r": 0.706,
+      "g": 0.208,
+      "b": 0.082,
+      "a": 1
+    },
+    {
+      "name": "gStationGuiColor_FocusedAndSelected",
+      "r": 0.9,
+      "g": 0.6,
+      "b": 0.1,
+      "a": 1
+    },
+    {
+      "name": "gStationGuiColor_Normal2",
+      "r": 0.396,
+      "g": 0.698,
+      "b": 0.745,
+      "a": 1
+    },
+    {
+      "name": "gStationGuiColor_Highlight2",
+      "r": 0.655,
+      "g": 0.592,
+      "b": 0.176,
+      "a": 1
+    },
+    {
+      "name": "gStationGuiColor_Warning2",
+      "r": 0.698,
+      "g": 0.035,
+      "b": 0.035,
+      "a": 1
+    },
+    {
+      "name": "gStationGuiColor_Disabled",
+      "r": 0.192,
+      "g": 0.192,
+      "b": 0.192,
+      "a": 1
+    }
+  ]
+}

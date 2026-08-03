@@ -1,0 +1,10 @@
+.claude
+/soma_scripts
+node_modules
+dist
+*.local
+.DS_Store
+*.tsbuildinfo
+*.vsix
+*.somagui.json
+/graphics

@@ -1,0 +1,862 @@
+/* ============================================================================
+   SOMA GUI Designer — design system
+   Dark, terminal-inspired UI. Teal identity drawn from the in-game Station look
+   (gStationGuiColor_Normal #3a828e). Systematic tokens: color, space, radius,
+   type, elevation.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces (dark -> light) */
+  --bg-0: #0a0e14;
+  --bg-1: #0e131b;
+  --bg-2: #141b25;
+  --bg-3: #1b2431;
+  --bg-4: #24303f;
+  --surface-input: #0b1017;
+
+  /* Lines */
+  --border: #2a3646;
+  --border-strong: #3a4a5f;
+  --grid: rgba(120, 200, 220, 0.05);
+
+  /* Text */
+  --text: #e8eff7;
+  --text-dim: #9fb0c3;
+  --text-faint: #6b7b8f;
+
+  /* Brand — SOMA station teal + supporting states */
+  --teal: #3fb6c9;
+  --teal-bright: #6fe3f2;
+  --teal-deep: #12333c;
+  --mint: #8fffd2;
+  --amber: #d9a441;
+  --warn: #e2603a;
+  --danger: #ff6b6b;
+
+  /* Semantic */
+  --accent: var(--teal);
+  --accent-2: var(--mint);
+
+  /* Spacing scale */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+
+  /* Radius */
+  --r1: 5px;
+  --r2: 8px;
+  --r3: 12px;
+
+  /* Elevation */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 24px 64px rgba(0, 0, 0, 0.5);
+
+  --font-ui: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-0);
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-4);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+  background-clip: padding-box;
+}
+
+/* ---- Controls ---------------------------------------------------------- */
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: var(--r1);
+  background: var(--bg-3);
+  color: var(--text);
+  padding: 6px 11px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.05s;
+}
+button:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-4);
+}
+button:active {
+  transform: translateY(1px);
+}
+button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+button.primary {
+  background: linear-gradient(180deg, #1d5a68, #12414c);
+  border-color: var(--teal);
+  color: var(--teal-bright);
+  font-weight: 600;
+}
+button.primary:hover {
+  background: linear-gradient(180deg, #226a7a, #164e5b);
+}
+button.ghost {
+  background: transparent;
+}
+button.danger {
+  border-color: #6e2f2f;
+  color: #ffb9b9;
+}
+button.danger:hover {
+  background: #3a1e1e;
+  border-color: var(--danger);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+}
+button.icon-btn {
+  padding: 6px 8px;
+  line-height: 1;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--r1);
+  background: var(--surface-input);
+  color: var(--text);
+  padding: 6px 8px;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(63, 182, 201, 0.14);
+}
+input[type="color"] {
+  padding: 2px;
+  height: 30px;
+  cursor: pointer;
+}
+textarea {
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+label {
+  display: grid;
+  gap: var(--s1);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  margin-bottom: var(--s3);
+}
+label input,
+label select,
+label textarea {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+.four-col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s2);
+}
+
+/* ---- App shell --------------------------------------------------------- */
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--s4);
+  height: 60px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  z-index: 5;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r2);
+  background: radial-gradient(circle at 35% 30%, var(--teal-bright), var(--teal-deep));
+  box-shadow: 0 0 14px rgba(63, 182, 201, 0.4), inset 0 0 6px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: 3px;
+}
+.brand h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.brand p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 var(--s1);
+}
+
+.workspace {
+  display: grid;
+  /* 4 columns: left-rail, canvas, resize-handle, right-rail.
+     The third column (handle) is 0-width; the right rail width is driven by
+     JS via the inline style on the workspace element. */
+  grid-template-columns: 264px minmax(360px, 1fr) 6px 380px;
+  min-width: 1024px;
+  overflow: hidden;
+}
+
+.rail-resize-handle {
+  width: 6px;
+  margin-left: -3px; /* overlap the border so it's easy to grab */
+  cursor: ew-resize;
+  background: transparent;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.rail-resize-handle:hover,
+.rail-resize-handle:active {
+  background: var(--teal);
+}
+
+.rail {
+  overflow-y: auto;
+  background: var(--bg-1);
+  display: flex;
+  flex-direction: column;
+}
+.rail.left {
+  border-right: 1px solid var(--border);
+}
+.rail.right {
+  border-left: 1px solid var(--border);
+}
+
+/* ---- Collapsible sections --------------------------------------------- */
+
+.rail-section {
+  border-bottom: 1px solid var(--border);
+}
+.rail-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--s3);
+}
+.rail-section-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  background: none;
+  border: none;
+  padding: var(--s3) 0;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.rail-section-toggle:hover {
+  color: var(--teal-bright);
+  background: none;
+}
+.chevron {
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s;
+}
+.chevron.open {
+  transform: rotate(90deg);
+}
+.rail-section-body {
+  padding: 0 var(--s3) var(--s4);
+}
+
+/* ---- Palette ----------------------------------------------------------- */
+
+.palette-group + .palette-group {
+  margin-top: var(--s3);
+}
+.palette-group-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 5px;
+}
+.palette-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+.palette-btn {
+  padding: 5px var(--s2);
+  text-align: left;
+  border-radius: var(--r1);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.palette-btn:hover {
+  border-color: var(--teal);
+  background: var(--bg-3);
+  color: var(--text);
+}
+
+/* ---- Hierarchy tree ---------------------------------------------------- */
+
+.hierarchy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 5px var(--s2);
+  border-radius: var(--r1);
+  cursor: pointer;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+}
+.tree-row:hover {
+  background: var(--bg-2);
+  color: var(--text);
+}
+.tree-row.selected {
+  background: var(--teal-deep);
+  border-color: var(--teal);
+  color: var(--teal-bright);
+}
+.tree-row.drop-target {
+  border-color: var(--mint);
+  border-style: dashed;
+  background: rgba(143, 255, 210, 0.06);
+}
+.tree-row.root {
+  color: var(--text-faint);
+  font-style: italic;
+}
+.tree-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.tree-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tree-kind {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+/* ---- Validation -------------------------------------------------------- */
+
+.validation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.validation .v-ok {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  color: var(--mint);
+  font-size: 12px;
+}
+.validation .v-item {
+  display: flex;
+  gap: var(--s2);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #ffd9a8;
+  background: rgba(217, 164, 65, 0.08);
+  border-left: 2px solid var(--amber);
+  border-radius: 0 var(--r1) var(--r1) 0;
+  padding: var(--s2);
+}
+
+/* ---- Canvas ------------------------------------------------------------ */
+
+.canvas-panel {
+  display: grid;
+  grid-template-rows: 44px 1fr;
+  background: radial-gradient(ellipse at 50% 0%, #10161f, var(--bg-0));
+  overflow: hidden;
+}
+.canvas-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--s4);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.scale-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 3px var(--s2);
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--teal-bright);
+}
+button.scale-chip.active {
+  border-color: var(--teal);
+  background: var(--teal-deep);
+  color: var(--teal-bright);
+}
+button.scale-chip:not(.active) {
+  color: var(--text-faint);
+}
+.canvas-hint {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+.canvas-scroller {
+  overflow: auto;
+  padding: var(--s6);
+  display: grid;
+  place-items: start center;
+  cursor: grab;
+}
+.canvas-scroller.panning,
+.canvas-scroller.panning * {
+  cursor: grabbing !important;
+}
+.canvas-scroller .widget {
+  cursor: move;
+}
+.canvas {
+  position: relative;
+  transform-origin: top center;
+  background-color: #05080c;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r1);
+  box-shadow: var(--shadow-3);
+  user-select: none;
+}
+
+.widget {
+  position: absolute;
+  border: 1px solid rgba(63, 182, 201, 0.5);
+  background: rgba(30, 46, 60, 0.72);
+  color: #dff6ff;
+  overflow: hidden;
+  cursor: move;
+  min-width: 8px;
+  min-height: 8px;
+  transition: box-shadow 0.1s;
+}
+.widget:hover {
+  border-color: rgba(111, 227, 242, 0.7);
+}
+.widget.selected {
+  outline: 2px solid var(--mint);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(143, 255, 210, 0.12);
+}
+.widget.drop-target {
+  outline: 2px dashed var(--mint);
+  outline-offset: 2px;
+  background: rgba(143, 255, 210, 0.08);
+}
+.widget-title {
+  pointer-events: none;
+  display: block;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.widget-window {
+  background: rgba(23, 34, 46, 0.9);
+}
+.widget-window::before {
+  content: "";
+  display: block;
+  height: 20px;
+  background: linear-gradient(180deg, rgba(63, 182, 201, 0.28), rgba(63, 182, 201, 0.1));
+  border-bottom: 1px solid rgba(63, 182, 201, 0.5);
+}
+.widget-frame {
+  background: rgba(20, 34, 48, 0.5);
+  border-style: dashed;
+}
+.widget-label {
+  background: transparent;
+  border-color: rgba(143, 255, 210, 0.42);
+}
+.widget-button {
+  background: linear-gradient(180deg, #2c4a55, #1a2c36);
+  border-radius: var(--r1);
+  display: grid;
+  place-items: center;
+}
+.widget-button .widget-title {
+  text-align: center;
+}
+.widget-image {
+  background-color: #0c141c;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.06) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+.widget-textbox {
+  background: rgba(9, 15, 22, 0.85);
+  border-color: rgba(159, 176, 195, 0.4);
+}
+.widget-gauge {
+  background: linear-gradient(90deg, rgba(63, 182, 201, 0.6) 45%, rgba(23, 34, 46, 0.8) 45%);
+}
+.widget-checkbox {
+  background: rgba(10, 18, 28, 0.6);
+  border-color: rgba(143, 255, 210, 0.5);
+}
+/* Background/overlay widgets — visually distinct, dashed outline, non-interactive */
+.widget-bg {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(63, 182, 201, 0.04),
+    rgba(63, 182, 201, 0.04) 4px,
+    transparent 4px,
+    transparent 12px
+  );
+  border: 1px dashed rgba(63, 182, 201, 0.3);
+  pointer-events: none;
+}
+.widget-bg.selected {
+  outline: 2px dashed var(--accent-2);
+  pointer-events: none;
+}
+
+/* WYSIWYG: strip all placeholder chrome (background, dashed border) so only the
+   real texture/color shows. Placed after .widget-bg so source order wins at equal
+   specificity. Selection outline is an `outline`, not `border`, so it still shows. */
+.widget-wysiwyg {
+  background: none !important;
+  border: none !important;
+}
+.widget-wysiwyg img {
+  pointer-events: none;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  right: -1px;
+  bottom: -1px;
+  background: var(--mint);
+  border: 1px solid #00201c;
+  border-radius: 2px 0 var(--r1) 0;
+  cursor: nwse-resize;
+}
+
+/* ---- Property panel ---------------------------------------------------- */
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  gap: var(--s3);
+  padding: var(--s6) var(--s4);
+  text-align: center;
+  color: var(--text-faint);
+}
+.empty-state .es-icon {
+  font-size: 28px;
+  opacity: 0.5;
+}
+
+.prop-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+.prop-title .pt-kind {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bg-0);
+  background: var(--teal);
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.field-group {
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: var(--s3);
+  margin-bottom: var(--s3);
+  background: var(--bg-2);
+}
+.field-group > h3 {
+  margin: 0 0 var(--s3);
+  font-size: 10px;
+  color: var(--teal-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.checkbox-row label {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+  color: var(--text);
+  font-size: 12px;
+}
+.checkbox-row input {
+  width: auto;
+}
+
+.override-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--s2);
+  align-items: end;
+  margin-bottom: var(--s2);
+}
+.override-row label {
+  margin: 0;
+}
+
+.color-field {
+  display: flex;
+  gap: var(--s2);
+  align-items: center;
+}
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r1);
+  border: 1px solid var(--border-strong);
+  flex: 0 0 auto;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.4);
+}
+.color-alpha {
+  width: 64px;
+}
+.palette-swatches {
+  display: flex;
+  gap: var(--s1);
+  flex-wrap: wrap;
+  margin-top: var(--s2);
+}
+.swatch-btn {
+  padding: 3px 7px;
+  font-size: 10px;
+  border-radius: 999px;
+  color: #06121a;
+  font-weight: 600;
+  border: none;
+}
+.swatch-btn:hover {
+  filter: brightness(1.12);
+}
+
+.button-row {
+  display: flex;
+  gap: var(--s2);
+}
+.button-row button {
+  flex: 1;
+}
+
+/* ---- Code output ------------------------------------------------------- */
+
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  margin-bottom: var(--s3);
+}
+.tab {
+  background: none;
+  border: none;
+  padding: 5px 14px;
+  border-radius: var(--r1);
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.tab:hover {
+  background: var(--bg-3);
+}
+.tab.active {
+  background: var(--teal-deep);
+  color: var(--teal-bright);
+  font-weight: 600;
+}
+.code-preview {
+  margin: 0;
+  padding: var(--s3);
+  max-height: 42vh;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  background: #060a0f;
+  color: #cfe6f5;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre;
+  tab-size: 4;
+}
+
+/* ---- Context menu ------------------------------------------------------ */
+
+.ctx-menu {
+  position: fixed;
+  z-index: 9999;
+  min-width: 140px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r2);
+  box-shadow: var(--shadow-3);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.ctx-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: var(--r1);
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+.ctx-item:hover:not(:disabled) {
+  background: var(--bg-4);
+}
+.ctx-item:disabled {
+  color: var(--text-faint);
+  cursor: default;
+}
+.ctx-item.danger {
+  color: var(--danger);
+}
+.ctx-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
