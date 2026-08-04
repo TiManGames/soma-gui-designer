@@ -48,6 +48,9 @@ interface DesignerState {
   wysiwygEnabled: boolean;
   setWysiwygEnabled: (enabled: boolean) => void;
   toggleWysiwyg: () => void;
+  /** Canvas-only grid visibility; snapping remains controlled by doc.snapToGrid. */
+  gridVisible: boolean;
+  toggleGridVisible: () => void;
 
   // selection & tabs
   select: (id: string | null) => void;
@@ -127,6 +130,8 @@ export const useStore = create<DesignerState>((set, get) => ({
   wysiwygEnabled: true,
   setWysiwygEnabled: (enabled) => set({ wysiwygEnabled: enabled }),
   toggleWysiwyg: () => set((s) => ({ wysiwygEnabled: !s.wysiwygEnabled })),
+  gridVisible: true,
+  toggleGridVisible: () => set((s) => ({ gridVisible: !s.gridVisible })),
 
   select: (id) => set({ selectedId: id }),
   setPreviewTab: (tab) => set({ previewTab: tab }),

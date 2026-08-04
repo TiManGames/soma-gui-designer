@@ -29,6 +29,7 @@ import type {
   WidgetNode,
   WidgetType
 } from "../model/nodes";
+import { gaugeFillExpr } from "../model/gaugeFill";
 import { escapeString } from "./format";
 import { safeId } from "../model/ids";
 import { posExpr, sizeExpr } from "./coordExpr";
@@ -209,7 +210,7 @@ export const EMITTERS: EmitterMap = {
     emit(ctx, n: GaugeNode) {
       const v = emitDataVar(ctx.lines, n, ctx.indent);
       ctx.lines.push(
-        `${ctx.indent}ImGui_DoGauge(${v}, ${n.fillExpr || "0.5f"}, ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)});`
+        `${ctx.indent}ImGui_DoGauge(${v}, ${gaugeFillExpr(n.fillExpr)}, ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)});`
       );
     }
   },

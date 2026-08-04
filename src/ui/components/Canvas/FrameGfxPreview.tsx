@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { WidgetNode } from "../../state/../../../core/model/nodes";
+import type { WidgetNode } from "@core/model/nodes";
 import { getFileParam } from "../../../core/model/overrides";
 import { GfxImage } from "./GfxImage";
 import type { GfxEntry } from "../../state/gfxStore";
@@ -12,36 +12,21 @@ interface Props {
   defaults: Record<string, string>;
   /** CSS color applied as multiply blend over all frame textures (mColorBase). */
   tintColor?: string;
-  /** CSS color for the center fill. Transparent if omitted. */
-  bgColor?: string;
-  /** Optional caption rendered in the header (showHeader=true) or center cell. */
+  /** CSS color drawn behind the complete frame, matching mGfxBackground. */
+  backgroundColor?: string;
+  /** CSS color limited to the frame's center cell. */
+  centerColor?: string;
+  /** Size of the transparent diagonal cut in a slanted bottom-right corner. */
+  backgroundClipBottomRight?: number;
+  /** Optional caption rendered in the center cell. */
   caption?: string;
-  /** When true, renders a header bar at the top of the interior (station-window). */
-  showHeader?: boolean;
+  captionColor?: string;
+  captionFontSize?: number;
 }
 
 function sub(frameField: string, piece: string) {
   return `${frameField}.${piece}`;
 }
-
-const HEADER_STYLE: React.CSSProperties = {
-  height: 20,
-  background: "linear-gradient(180deg, rgba(63,182,201,0.28), rgba(63,182,201,0.10))",
-  borderBottom: "1px solid rgba(63,182,201,0.5)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: 11,
-  fontWeight: 500,
-  color: "#dff6ff",
-  textShadow: "0 1px 2px rgba(0,0,0,0.7)",
-  pointerEvents: "none",
-  overflow: "hidden",
-  whiteSpace: "nowrap" as const,
-  textOverflow: "ellipsis",
-  padding: "0 4px",
-  flexShrink: 0,
-};
 
 const CAPTION_STYLE: React.CSSProperties = {
   position: "absolute",
@@ -49,9 +34,7 @@ const CAPTION_STYLE: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontSize: 11,
   fontWeight: 500,
-  color: "#dff6ff",
   textShadow: "0 1px 2px rgba(0,0,0,0.7)",
   pointerEvents: "none",
   overflow: "hidden",
@@ -70,7 +53,18 @@ const CAPTION_STYLE: React.CSSProperties = {
  *   [left edge 1fr] [center fill] [right edge 1fr]
  *   [BL] [ bot edge 1fr ] [BR]
  */
-export function FrameGfxPreview({ node, frameField, defaults, tintColor, bgColor, caption, showHeader }: Props) {
+export function FrameGfxPreview({
+  node,
+  frameField,
+  defaults,
+  tintColor,
+  backgroundColor,
+  centerColor,
+  backgroundClipBottomRight,
+  caption,
+  captionColor,
+  captionFontSize
+}: Props) {
   const f = (piece: string) =>
     getFileParam(node.overrides, sub(frameField, piece), defaults[sub(frameField, piece)] ?? "");
 
@@ -113,6 +107,19 @@ export function FrameGfxPreview({ node, frameField, defaults, tintColor, bgColor
 
   return (
     <div style={{ position: "absolute", inset: 0 }}>
+      {backgroundColor && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: backgroundColor,
+            clipPath: backgroundClipBottomRight
+              ? `polygon(0 0, 100% 0, 100% calc(100% - ${backgroundClipBottomRight}px), calc(100% - ${backgroundClipBottomRight}px) 100%, 0 100%)`
+              : undefined
+          }}
+        />
+      )}
+
       {/* Optional full-rect background texture */}
       {bgGfx && (
         <GfxImage
@@ -139,10 +146,7 @@ export function FrameGfxPreview({ node, frameField, defaults, tintColor, bgColor
         <div style={edgeV}>
           {leftGfx && <GfxImage gfx={leftGfx} objectFit="fill" multiply={tintColor} style={{ width: "100%", height: "100%" }} />}
         </div>
-        <div style={{ background: bgColor ?? "transparent", position: "relative", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {showHeader && <div style={HEADER_STYLE}>{caption}</div>}
-          {!showHeader && caption && <span style={CAPTION_STYLE}>{caption}</span>}
-        </div>
+        <div style={{ position: "relative", overflow: "hidden", background: centerColor }} />
         <div style={edgeV}>
           {rightGfx && <GfxImage gfx={rightGfx} objectFit="fill" multiply={tintColor} style={{ width: "100%", height: "100%" }} />}
         </div>
@@ -158,6 +162,18 @@ export function FrameGfxPreview({ node, frameField, defaults, tintColor, bgColor
           {brGfx && <GfxImage gfx={brGfx} objectFit="fill" multiply={tintColor} onEntry={onBr} style={{ width: cw, height: ch }} />}
         </div>
       </div>
+
+      {caption && (
+        <span
+          style={{
+            ...CAPTION_STYLE,
+            color: captionColor ?? "#ffffff",
+            fontSize: captionFontSize ?? 11
+          }}
+        >
+          {caption}
+        </span>
+      )}
     </div>
   );
 }

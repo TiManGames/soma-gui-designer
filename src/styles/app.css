@@ -539,6 +539,9 @@ button.scale-chip:not(.active) {
   box-shadow: var(--shadow-3);
   user-select: none;
 }
+.canvas.grid-hidden {
+  background-image: none;
+}
 
 .widget {
   position: absolute;
@@ -648,8 +651,18 @@ button.scale-chip:not(.active) {
   background: none !important;
   border: none !important;
 }
+.widget-window.widget-wysiwyg::before {
+  display: none;
+}
 .widget-wysiwyg img {
   pointer-events: none;
+}
+.widget-wysiwyg .resize-handle {
+  opacity: 0;
+}
+.widget-wysiwyg:hover .resize-handle,
+.widget-wysiwyg.selected .resize-handle {
+  opacity: 1;
 }
 
 .resize-handle {

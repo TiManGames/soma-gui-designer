@@ -1,7 +1,7 @@
 import type { SomaDocument, Target } from "../model/document";
 import { ROOT, type WidgetNode } from "../model/nodes";
 import { getChildren } from "../model/tree";
-import { escapeString } from "./format";
+import { escapeString, normalizeHpsFloatLiterals } from "./format";
 import { EMITTERS, type EmitCtx } from "./emitters";
 
 export interface CodegenResult {
@@ -64,7 +64,7 @@ export function generateHps(doc: SomaDocument): string {
   }
 
   lines.push("}");
-  return lines.join("\n");
+  return normalizeHpsFloatLiterals(lines.join("\n"));
 }
 
 // Ported from legacy/app.js:766-774.

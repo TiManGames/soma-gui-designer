@@ -1,5 +1,6 @@
 import { useStore } from "../../state/store";
 import type { WidgetNode } from "@core/model/nodes";
+import { gaugeFillAmount } from "@core/model/gaugeFill";
 
 /** First-class, type-specific fields (caption, text, gfx, etc.). */
 export function TypeFields({ node }: { node: WidgetNode }) {
@@ -35,6 +36,20 @@ export function TypeFields({ node }: { node: WidgetNode }) {
     </label>
   );
 
+  const gaugeFillField = () => (
+    <label>
+      Fill amount
+      <input
+        type="number"
+        min={0}
+        max={1}
+        step={0.01}
+        value={gaugeFillAmount(node.type === "gauge" ? node.fillExpr : undefined)}
+        onChange={(e) => updateNode(node.id, { fillExpr: e.target.value } as Partial<WidgetNode>)}
+      />
+    </label>
+  );
+
   return (
     <div className="field-group">
       <h3>Content</h3>
@@ -57,7 +72,7 @@ export function TypeFields({ node }: { node: WidgetNode }) {
         </div>
       )}
 
-      {node.type === "gauge" && textField("Fill expression", "fillExpr", node.fillExpr)}
+      {node.type === "gauge" && gaugeFillField()}
       {node.type === "label" && numField("Font size mul", "fontSizeMul", node.fontSizeMul, 0.1)}
       {node.type === "station-numpad" && numField("Digits", "digits", node.digits)}
       {node.type === "advanced-imgui" && textField("Raw HPS code", "code", node.code, true)}

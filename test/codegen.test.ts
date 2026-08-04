@@ -4,6 +4,7 @@ import { fileURLToPath, URL } from "node:url";
 import { createDefaultDocument } from "../src/core/model/createDefaultDocument";
 import { makeNode } from "../src/core/model/defaults";
 import { generateHps } from "../src/core/codegen/generateHps";
+import { normalizeHpsFloatLiterals } from "../src/core/codegen/format";
 import type { SomaDocument } from "../src/core/model/document";
 
 function fixture(name: string): string {
@@ -27,6 +28,20 @@ describe("generateHps parity", () => {
     expect(hps).toContain("StationGui_DoWindowStart(");
     expect(hps).toContain("StationGui_DoWindowEnd();");
     expect(hps).toContain("// TODO: ConfirmButton pressed");
+  });
+});
+
+describe("HPS float literal formatting", () => {
+  it("adds a decimal place to whole-number float literals", () => {
+    expect(normalizeHpsFloatLiterals("cColor(1f, 0f, -2f, 0.969f)")).toBe(
+      "cColor(1.0f, 0.0f, -2.0f, 0.969f)"
+    );
+  });
+
+  it("does not rewrite quoted text or identifiers", () => {
+    expect(normalizeHpsFloatLiterals('Print("1f"); float value1f = 0x1f;')).toBe(
+      'Print("1f"); float value1f = 0x1f;'
+    );
   });
 });
 
@@ -65,6 +80,15 @@ describe("generateHps widget coverage", () => {
     expect(hps).toContain('ImGui_SetStateBool("Tog_Checked", bTog);');
   });
 
+  it("formats the gauge's numeric fill value as an HPS float", () => {
+    const gauge = makeNode("gauge", "Load", { parentId: "screen" });
+    expect(gauge.type).toBe("gauge");
+    if (gauge.type !== "gauge") throw new Error("Expected a gauge node");
+    gauge.fillExpr = "0.65";
+    const hps = generateHps(docWith([gauge]));
+    expect(hps).toContain("ImGui_DoGauge(loadData, 0.65f,");
+  });
+
   it("emits a numpad helper block", () => {
     const hps = generateHps(docWith([makeNode("station-numpad", "Pad", { parentId: "screen" })]));
     expect(hps).toContain('if (StationGui_Numpad("EnterCode", 4, 0.2f,');
@@ -80,6 +104,17 @@ describe("generateHps widget coverage", () => {
     const hps = generateHps(docWith([node]));
     expect(hps).toContain("btnData.mColorBase = gStationGuiColor_Warning;");
     expect(hps).toContain("btnData.SetPadding(20,20,20,20);");
+  });
+
+  it("normalizes whole-number channels in generated color overrides", () => {
+    const node = makeNode("station-toggle-button", "Toggle", { parentId: "screen" });
+    node.overrides = [
+      { kind: "expr", path: "mColorTriggeredAndInFocus", expr: "cColor(1f, 0f, 0.969f, 1f)" }
+    ];
+    const hps = generateHps(docWith([node]));
+    expect(hps).toContain(
+      "toggleData.mColorTriggeredAndInFocus = cColor(1.0f, 0.0f, 0.969f, 1.0f);"
+    );
   });
 
   it("uses the map-on-gui header for that target", () => {
