@@ -69,6 +69,8 @@ export interface NodeBase {
 export interface StationWindowNode extends NodeBase {
   type: "station-window";
   caption: string;
+  /** StationGui_DoWindowStart abDrawOrnaments argument. Missing legacy values resolve to false. */
+  drawOrnaments?: boolean;
 }
 
 export interface GroupNode extends NodeBase {

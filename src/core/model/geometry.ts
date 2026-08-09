@@ -2,6 +2,7 @@ import type { SomaDocument } from "./document";
 import { ROOT, type WidgetNode } from "./nodes";
 import { getNode } from "./tree";
 import { clamp } from "./ids";
+import { resolveStationWindowMetrics, stationWindowChildFrame } from "./stationMetrics";
 
 export interface Rect {
   x: number;
@@ -25,7 +26,7 @@ export function parentAbsRect(doc: SomaDocument, node: WidgetNode | null): Rect 
   }
   const parent = getNode(doc, node.parentId);
   if (!parent) return { x: 0, y: 0, w: size.x, h: size.y };
-  return absoluteRect(doc, parent);
+  return absRectOfParent(doc, parent.id);
 }
 
 export function absoluteRect(doc: SomaDocument, node: WidgetNode): Rect {
@@ -44,7 +45,9 @@ export function absRectOfParent(doc: SomaDocument, parentId: string): Rect {
   if (parentId === ROOT) return { x: 0, y: 0, w: size.x, h: size.y };
   const parent = getNode(doc, parentId);
   if (!parent) return { x: 0, y: 0, w: size.x, h: size.y };
-  return absoluteRect(doc, parent);
+  const outer = absoluteRect(doc, parent);
+  if (parent.type !== "station-window") return outer;
+  return stationWindowChildFrame(outer, resolveStationWindowMetrics(parent, size.y));
 }
 
 export function snapPx(value: number, doc: SomaDocument): number {

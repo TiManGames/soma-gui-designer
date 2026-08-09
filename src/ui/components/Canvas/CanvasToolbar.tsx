@@ -2,8 +2,7 @@ import { useStore } from "../../state/store";
 import { previewSize } from "@core/model/geometry";
 import { RESOLUTION_PRESETS } from "@core/model/document";
 import { NumberInput } from "../NumberInput";
-
-const MAX_CANVAS_WIDTH = 980;
+import { canvasScale } from "@core/model/canvasScale";
 
 /**
  * Canvas toolbar: resolution preset + custom W/H, fit-only zoom readout,
@@ -20,7 +19,7 @@ export function CanvasToolbar() {
   const toggleWysiwyg = useStore((s) => s.toggleWysiwyg);
 
   const size = previewSize(doc);
-  const scale = Math.min(1, MAX_CANVAS_WIDTH / size.x);
+  const scale = canvasScale(size);
 
   return (
     <div className="canvas-toolbar">

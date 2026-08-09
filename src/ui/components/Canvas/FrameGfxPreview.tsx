@@ -17,7 +17,7 @@ interface Props {
   /** CSS color limited to the frame's center cell. */
   centerColor?: string;
   /** Size of the transparent diagonal cut in a slanted bottom-right corner. */
-  backgroundClipBottomRight?: number;
+  backgroundClipBottomRight?: number | true;
   /** Optional caption rendered in the center cell. */
   caption?: string;
   captionColor?: string;
@@ -92,6 +92,9 @@ export function FrameGfxPreview({
   // Use max corner width/height so all 4 corners match — they're typically identical.
   const cw = Math.max(tlSize?.w ?? 12, trSize?.w ?? 12, blSize?.w ?? 12, brSize?.w ?? 12);
   const ch = Math.max(tlSize?.h ?? 12, trSize?.h ?? 12, blSize?.h ?? 12, brSize?.h ?? 12);
+  const clipBottomRight = backgroundClipBottomRight === true
+    ? (brSize?.w ?? 16)
+    : backgroundClipBottomRight;
 
   const gridStyle: React.CSSProperties = {
     position: "absolute",
@@ -113,8 +116,8 @@ export function FrameGfxPreview({
             position: "absolute",
             inset: 0,
             background: backgroundColor,
-            clipPath: backgroundClipBottomRight
-              ? `polygon(0 0, 100% 0, 100% calc(100% - ${backgroundClipBottomRight}px), calc(100% - ${backgroundClipBottomRight}px) 100%, 0 100%)`
+            clipPath: clipBottomRight
+              ? `polygon(0 0, 100% 0, 100% calc(100% - ${clipBottomRight}px), calc(100% - ${clipBottomRight}px) 100%, 0 100%)`
               : undefined
           }}
         />

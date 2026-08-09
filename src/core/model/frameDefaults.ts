@@ -1,4 +1,5 @@
 import type { WidgetType } from "./nodes";
+import { stationFrameSize } from "./stationMetrics";
 
 /**
  * Per-widget-type factory defaults for cImGuiFrameGfx sub-fields.
@@ -7,56 +8,6 @@ import type { WidgetType } from "./nodes";
  * Mirrors what helper_imgui_station_basics.hps sets for each widget type.
  */
 export const FRAME_GFX_DEFAULTS: Partial<Record<WidgetType, Record<string, string>>> = {
-  "station-window": {
-    "mGfxWindowData.mGfxCornerTopLeft":     "stationV2/window/small_corner_topleft",
-    "mGfxWindowData.mGfxCornerTopRight":    "stationV2/window/small_corner_topright",
-    "mGfxWindowData.mGfxCornerBottomLeft":  "stationV2/window/small_corner_bottomleft",
-    "mGfxWindowData.mGfxCornerBottomRight": "stationV2/window/small_corner_bottomright",
-    "mGfxWindowData.mGfxBorderTop":         "stationV2/window/small_border_top",
-    "mGfxWindowData.mGfxBorderRight":       "stationV2/window/small_border_right",
-    "mGfxWindowData.mGfxBorderBottom":      "stationV2/window/small_border_bottom",
-    "mGfxWindowData.mGfxBorderLeft":        "stationV2/window/small_border_left",
-  },
-  "station-button": {
-    "mGfxFrame.mGfxCornerTopLeft":     "stationV2/button/small_corner_topleft",
-    "mGfxFrame.mGfxCornerTopRight":    "stationV2/button/small_corner_topright",
-    "mGfxFrame.mGfxCornerBottomLeft":  "stationV2/button/small_corner_bottomleft",
-    "mGfxFrame.mGfxCornerBottomRight": "stationV2/button/small_corner_slanted_bottomright",
-    "mGfxFrame.mGfxBorderTop":         "stationV2/button/small_border_top",
-    "mGfxFrame.mGfxBorderRight":       "stationV2/button/small_border_right",
-    "mGfxFrame.mGfxBorderBottom":      "stationV2/button/small_border_bottom",
-    "mGfxFrame.mGfxBorderLeft":        "stationV2/button/small_border_left",
-  },
-  "station-toggle-button": {
-    "mGfxFrame.mGfxCornerTopLeft":     "stationV2/button/small_corner_topleft",
-    "mGfxFrame.mGfxCornerTopRight":    "stationV2/button/small_corner_topright",
-    "mGfxFrame.mGfxCornerBottomLeft":  "stationV2/button/small_corner_bottomleft",
-    "mGfxFrame.mGfxCornerBottomRight": "stationV2/button/small_corner_slanted_bottomright",
-    "mGfxFrame.mGfxBorderTop":         "stationV2/button/small_border_top",
-    "mGfxFrame.mGfxBorderRight":       "stationV2/button/small_border_right",
-    "mGfxFrame.mGfxBorderBottom":      "stationV2/button/small_border_bottom",
-    "mGfxFrame.mGfxBorderLeft":        "stationV2/button/small_border_left",
-  },
-  "repeat-button": {
-    "mGfxFrame.mGfxCornerTopLeft":     "stationV2/button/small_corner_topleft",
-    "mGfxFrame.mGfxCornerTopRight":    "stationV2/button/small_corner_topright",
-    "mGfxFrame.mGfxCornerBottomLeft":  "stationV2/button/small_corner_bottomleft",
-    "mGfxFrame.mGfxCornerBottomRight": "stationV2/button/small_corner_slanted_bottomright",
-    "mGfxFrame.mGfxBorderTop":         "stationV2/button/small_border_top",
-    "mGfxFrame.mGfxBorderRight":       "stationV2/button/small_border_right",
-    "mGfxFrame.mGfxBorderBottom":      "stationV2/button/small_border_bottom",
-    "mGfxFrame.mGfxBorderLeft":        "stationV2/button/small_border_left",
-  },
-  "multi-toggle": {
-    "mGfxFrame.mGfxCornerTopLeft":     "stationV2/button/small_corner_topleft",
-    "mGfxFrame.mGfxCornerTopRight":    "stationV2/button/small_corner_topright",
-    "mGfxFrame.mGfxCornerBottomLeft":  "stationV2/button/small_corner_bottomleft",
-    "mGfxFrame.mGfxCornerBottomRight": "stationV2/button/small_corner_slanted_bottomright",
-    "mGfxFrame.mGfxBorderTop":         "stationV2/button/small_border_top",
-    "mGfxFrame.mGfxBorderRight":       "stationV2/button/small_border_right",
-    "mGfxFrame.mGfxBorderBottom":      "stationV2/button/small_border_bottom",
-    "mGfxFrame.mGfxBorderLeft":        "stationV2/button/small_border_left",
-  },
   "frame": {
     "mFrameGfx.mGfxCornerTopLeft":     "stationV2/button/small_corner_topleft",
     "mFrameGfx.mGfxCornerTopRight":    "stationV2/button/small_corner_topright",
@@ -75,6 +26,47 @@ export const FRAME_GFX_DEFAULTS: Partial<Record<WidgetType, Record<string, strin
     "mGfxFrame.mGfxCornerBottomRight": "station/bar/small_framing_lower_right",
   },
 };
+
+const STATION_BUTTON_TYPES = new Set<WidgetType>([
+  "station-button", "station-toggle-button", "repeat-button", "multi-toggle"
+]);
+
+function stationWindowDefaults(previewHeight: number): Record<string, string> {
+  const size = stationFrameSize(previewHeight);
+  const root = `stationV2/window/${size}`;
+  return {
+    "mGfxWindowData.mGfxCornerTopLeft":     `${root}_corner_topleft`,
+    "mGfxWindowData.mGfxCornerTopRight":    `${root}_corner_topright`,
+    "mGfxWindowData.mGfxCornerBottomLeft":  `${root}_corner_bottomleft`,
+    "mGfxWindowData.mGfxCornerBottomRight": `${root}_corner_bottomright`,
+    "mGfxWindowData.mGfxBorderTop":         `${root}_border_top`,
+    "mGfxWindowData.mGfxBorderRight":       `${root}_border_right`,
+    "mGfxWindowData.mGfxBorderBottom":      `${root}_border_bottom`,
+    "mGfxWindowData.mGfxBorderLeft":        `${root}_border_left`,
+  };
+}
+
+function stationButtonDefaults(previewHeight: number): Record<string, string> {
+  const size = stationFrameSize(previewHeight);
+  const root = `stationV2/button/${size}`;
+  return {
+    "mGfxFrame.mGfxCornerTopLeft":     `${root}_corner_topleft`,
+    "mGfxFrame.mGfxCornerTopRight":    `${root}_corner_topright`,
+    "mGfxFrame.mGfxCornerBottomLeft":  `${root}_corner_bottomleft`,
+    "mGfxFrame.mGfxCornerBottomRight": `${root}_corner_slanted_bottomright`,
+    "mGfxFrame.mGfxBorderTop":         `${root}_border_top`,
+    "mGfxFrame.mGfxBorderRight":       `${root}_border_right`,
+    "mGfxFrame.mGfxBorderBottom":      `${root}_border_bottom`,
+    "mGfxFrame.mGfxBorderLeft":        `${root}_border_left`,
+  };
+}
+
+/** Factory defaults resolved against the current ImGui virtual height. */
+export function getFrameGfxDefaults(type: WidgetType, previewHeight: number): Record<string, string> {
+  if (type === "station-window") return stationWindowDefaults(previewHeight);
+  if (STATION_BUTTON_TYPES.has(type)) return stationButtonDefaults(previewHeight);
+  return FRAME_GFX_DEFAULTS[type] ?? {};
+}
 
 /** Default track + thumb textures for sliders (factory: StationGui_CreateDefaultSliderData). */
 export const SLIDER_GFX_DEFAULTS: Record<"slider-h" | "slider-v", { track: string; thumb: string }> = {

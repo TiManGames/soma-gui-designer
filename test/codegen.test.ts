@@ -80,6 +80,19 @@ describe("generateHps widget coverage", () => {
     expect(hps).toContain('ImGui_SetStateBool("Tog_Checked", bTog);');
   });
 
+  it("defaults station window ornaments off and emits an explicit opt-in", () => {
+    const window = makeNode("station-window", "Window", { parentId: "screen" });
+    expect(generateHps(docWith([window]))).toContain(
+      'StationGui_DoWindowStart("MainWindow", windowData, ImGui_NrmPos(cVector3f(0.1, 0.1, 1)), ImGui_NrmSize(cVector2f(0.8, 0.72)), false);'
+    );
+
+    if (window.type !== "station-window") throw new Error("Expected a station window");
+    window.drawOrnaments = true;
+    expect(generateHps(docWith([window]))).toContain(
+      'StationGui_DoWindowStart("MainWindow", windowData, ImGui_NrmPos(cVector3f(0.1, 0.1, 1)), ImGui_NrmSize(cVector2f(0.8, 0.72)), true);'
+    );
+  });
+
   it("formats the gauge's numeric fill value as an HPS float", () => {
     const gauge = makeNode("gauge", "Load", { parentId: "screen" });
     expect(gauge.type).toBe("gauge");

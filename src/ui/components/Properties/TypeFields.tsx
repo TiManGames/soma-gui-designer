@@ -54,6 +54,19 @@ export function TypeFields({ node }: { node: WidgetNode }) {
       <h3>Content</h3>
       {"caption" in node && textField("Caption", "caption", node.caption)}
 
+      {node.type === "station-window" && (
+        <div className="checkbox-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={node.drawOrnaments === true}
+              onChange={(e) => updateNode(node.id, { drawOrnaments: e.target.checked })}
+            />
+            Draw window ornaments
+          </label>
+        </div>
+      )}
+
       {node.type === "text-frame" && textField("Text entry (lang key)", "text", node.text)}
       {node.type === "station-text-reader-single" && textField("Body text entry", "text", node.text)}
 

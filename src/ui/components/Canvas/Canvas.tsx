@@ -6,8 +6,7 @@ import { nodeDepth } from "@core/model/tree";
 import { WidgetView } from "./WidgetView";
 import { CanvasToolbar } from "./CanvasToolbar";
 import { ContextMenu, type ContextMenuEntry } from "./ContextMenu";
-
-const MAX_CANVAS_WIDTH = 980;
+import { canvasScale, scaledCanvasSize } from "@core/model/canvasScale";
 
 interface CtxState {
   x: number;
@@ -31,7 +30,8 @@ export function Canvas() {
   const deleteNode = useStore((s) => s.deleteNode);
 
   const size = previewSize(doc);
-  const scale = Math.min(1, MAX_CANVAS_WIDTH / size.x);
+  const scale = canvasScale(size);
+  const displaySize = scaledCanvasSize(size);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   // Context menu
@@ -146,33 +146,35 @@ export function Canvas() {
           }
         }}
       >
-        <div
-          className={`canvas${gridVisible ? "" : " grid-hidden"}`}
-          style={{
-            width: size.x,
-            height: size.y,
-            transform: `scale(${scale})`,
-            backgroundSize: `${doc.gridSize}px ${doc.gridSize}px, ${doc.gridSize}px ${doc.gridSize}px`
-          }}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
-              if (e.button === 1) { e.preventDefault(); startPan(e.nativeEvent); return; }
-              if (e.button === 0) { startPan(e.nativeEvent); select(null); return; }
-            }
-          }}
-          onContextMenu={(e) => {
-            if (e.target === e.currentTarget) openCtx(e, null);
-          }}
-        >
-          {orderedNodes.map((node) => (
-            <WidgetView
-              key={node.id}
-              node={node}
-              rect={absoluteRect(doc, node)}
-              zIndex={nodeDepth(doc, node) * 1000 + Math.round(node.z * 10)}
-              onContextMenu={openCtx}
-            />
-          ))}
+        <div className="canvas-stage" style={{ width: displaySize.x, height: displaySize.y }}>
+          <div
+            className={`canvas${gridVisible ? "" : " grid-hidden"}`}
+            style={{
+              width: size.x,
+              height: size.y,
+              transform: `scale(${scale})`,
+              backgroundSize: `${doc.gridSize}px ${doc.gridSize}px, ${doc.gridSize}px ${doc.gridSize}px`
+            }}
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) {
+                if (e.button === 1) { e.preventDefault(); startPan(e.nativeEvent); return; }
+                if (e.button === 0) { startPan(e.nativeEvent); select(null); return; }
+              }
+            }}
+            onContextMenu={(e) => {
+              if (e.target === e.currentTarget) openCtx(e, null);
+            }}
+          >
+            {orderedNodes.map((node) => (
+              <WidgetView
+                key={node.id}
+                node={node}
+                rect={absoluteRect(doc, node)}
+                zIndex={nodeDepth(doc, node) * 1000 + Math.round(node.z * 10)}
+                onContextMenu={openCtx}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

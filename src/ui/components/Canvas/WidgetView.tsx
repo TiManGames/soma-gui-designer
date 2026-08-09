@@ -1,13 +1,16 @@
+import { useCallback, useState } from "react";
 import { useStore } from "../../state/store";
 import type { WidgetNode, WidgetType } from "@core/model/nodes";
 import type { Rect } from "@core/model/geometry";
 import { getParam, getFileParam } from "@core/model/overrides";
 import { gaugeFillAmount } from "@core/model/gaugeFill";
-import { FRAME_GFX_DEFAULTS, SLIDER_GFX_DEFAULTS, CHECKBOX_GFX_DEFAULT } from "@core/model/frameDefaults";
+import { getFrameGfxDefaults, SLIDER_GFX_DEFAULTS, CHECKBOX_GFX_DEFAULT } from "@core/model/frameDefaults";
+import { resolveStationButtonMetrics, resolveStationWindowMetrics } from "@core/model/stationMetrics";
 import { parseColorExpr, parseFloatExpr, type Rgba } from "../Properties/exprHelpers";
 import { paletteColors } from "@core/schema/loadSchema";
 import { GfxImage } from "./GfxImage";
 import { FrameGfxPreview } from "./FrameGfxPreview";
+import type { GfxEntry } from "../../state/gfxStore";
 
 const CSS_TYPE: Record<WidgetType, string> = {
   "station-window":            "widget-window",
@@ -47,11 +50,27 @@ const BG_TYPES = new Set<WidgetType>([
   "bg-ornament-tl", "bg-ornament-tr", "bg-ornament-br", "bg-ornament-bl"
 ]);
 
-const ORNAMENT_CORNER: Partial<Record<WidgetType, React.CSSProperties>> = {
+type OrnamentType = "bg-ornament-tl" | "bg-ornament-tr" | "bg-ornament-br" | "bg-ornament-bl";
+
+const ORNAMENT_CORNER: Record<OrnamentType, React.CSSProperties> = {
   "bg-ornament-tl": { top: 0, left: 0 },
   "bg-ornament-tr": { top: 0, right: 0 },
   "bg-ornament-br": { bottom: 0, right: 0 },
   "bg-ornament-bl": { bottom: 0, left: 0 }
+};
+
+const ORNAMENT_DEFAULT_GFX: Record<OrnamentType, string> = {
+  "bg-ornament-tl": "station/ornament/corner_topleft",
+  "bg-ornament-tr": "station/ornament/corner_topright",
+  "bg-ornament-br": "station/ornament/corner_bottomright",
+  "bg-ornament-bl": "station/ornament/corner_bottomleft"
+};
+
+const ORNAMENT_DEFAULT_COLOR: Record<OrnamentType, string> = {
+  "bg-ornament-tl": "cColor_White",
+  "bg-ornament-tr": "cColor(1.0f, 0.75f, 0.75f, 1.0f)",
+  "bg-ornament-br": "cColor(1.0f, 0.75f, 0.75f, 1.0f)",
+  "bg-ornament-bl": "cColor(1.0f, 0.75f, 0.75f, 1.0f)"
 };
 
 interface Props {
@@ -85,6 +104,69 @@ function withAlpha(color: Rgba, alphaMul: number): Rgba {
 
 function multiplyColor(a: Rgba, b: Rgba): Rgba {
   return { r: a.r * b.r, g: a.g * b.g, b: a.b * b.b, a: a.a * b.a };
+}
+
+function justifyForAlign(align: "left" | "center" | "right"): React.CSSProperties["justifyContent"] {
+  if (align === "left") return "flex-start";
+  if (align === "right") return "flex-end";
+  return "center";
+}
+
+function NaturalGfx({
+  gfx,
+  width,
+  tint,
+  style
+}: {
+  gfx: string;
+  width?: number | string;
+  tint?: string;
+  style: React.CSSProperties;
+}) {
+  const [natural, setNatural] = useState({ w: 12, h: 12 });
+  const onEntry = useCallback((entry: GfxEntry) => {
+    if (entry.w && entry.h) setNatural({ w: entry.w, h: entry.h });
+  }, []);
+  const drawWidth = width ?? natural.w;
+  const sizeStyle: React.CSSProperties = typeof drawWidth === "number"
+    ? { width: drawWidth, height: drawWidth * natural.h / Math.max(1, natural.w) }
+    : { width: drawWidth, height: "auto", aspectRatio: `${natural.w} / ${natural.h}` };
+  return (
+    <GfxImage
+      gfx={gfx}
+      tint={tint}
+      objectFit="contain"
+      onEntry={onEntry}
+      style={{ ...style, ...sizeStyle }}
+    />
+  );
+}
+
+function StationWindowOrnaments() {
+  return (
+    <>
+      <NaturalGfx
+        gfx="station/ornament/corner_topright"
+        width={50}
+        style={{ position: "absolute", top: 2, right: 2 }}
+      />
+      <NaturalGfx
+        gfx="station/ornament/corner_bottomleft"
+        width={50}
+        style={{ position: "absolute", bottom: 2, left: 2 }}
+      />
+      <NaturalGfx
+        gfx="station/chinsymbol/small_default_exit"
+        tint="rgba(101, 178, 190, 0.6)"
+        style={{ position: "absolute", top: 5, right: 5 }}
+      />
+      <NaturalGfx
+        gfx="station/chinsymbol/small_default_help"
+        tint="rgba(101, 178, 190, 0.6)"
+        style={{ position: "absolute", bottom: 2, left: 5 }}
+      />
+    </>
+  );
 }
 
 /** Approximate the station font's additive material over its widget background. */
@@ -156,23 +238,25 @@ function WysiwygContent({ node }: { node: WidgetNode }) {
     case "bg-ornament-tr":
     case "bg-ornament-br":
     case "bg-ornament-bl": {
-      const file = getParam(node.overrides, "file", '"station/ornament/corner_topleft"');
-      const tint = colorToCss(getParam(node.overrides, "color", "cColor_White")) ?? "#ffffff";
+      const file = getParam(node.overrides, "file", `"${ORNAMENT_DEFAULT_GFX[node.type]}"`);
+      const tint = colorToCss(
+        getParam(node.overrides, "color", ORNAMENT_DEFAULT_COLOR[node.type])
+      ) ?? "#ffffff";
       return (
-        <GfxImage
+        <NaturalGfx
           gfx={file}
           tint={tint}
+          width="25%"
           style={{
             position: "absolute",
-            width: "22%",
-            aspectRatio: "1 / 1",
             ...ORNAMENT_CORNER[node.type]
           }}
         />
       );
     }
     case "station-window": {
-      const defs = FRAME_GFX_DEFAULTS["station-window"] ?? {};
+      const defs = getFrameGfxDefaults("station-window", previewHeight);
+      const metrics = resolveStationWindowMetrics(node, previewHeight);
       // Factory default: gStationGuiColor_Normal = cColor(0.227, 0.51, 0.557) = #3a828e
       const base = colorValue(
         getParam(node.overrides, "mColorBase", "gStationGuiColor_Normal"),
@@ -181,8 +265,11 @@ function WysiwygContent({ node }: { node: WidgetNode }) {
       const tint = rgbaToCss(base);
       const textBase = colorValue(getParam(node.overrides, "mColorText", "cColor_White"), WHITE);
       const textColor = rgbaToCss(additiveColor(textBase, withAlpha(base, 0.7)));
-      const useHeader = getParam(node.overrides, "mbUseHeader", "true") !== "false";
       const cap = "caption" in node ? node.caption : undefined;
+      const headerFontSize = metrics.fontSize.y * metrics.captionSizeMul;
+      const headerPosition: React.CSSProperties = metrics.headerType === "full"
+        ? { left: metrics.labelOffset.x, right: 0 }
+        : { left: metrics.labelOffset.x, width: "max-content", maxWidth: `calc(100% - ${Math.max(0, metrics.labelOffset.x)}px)` };
       return (
         <div style={{ position: "absolute", inset: 0 }}>
           <FrameGfxPreview
@@ -192,24 +279,25 @@ function WysiwygContent({ node }: { node: WidgetNode }) {
             tintColor={tint}
             centerColor="rgba(0, 0, 0, 0.75)"
           />
-          {useHeader && cap && (
+          {node.drawOrnaments === true && <StationWindowOrnaments />}
+          {metrics.useHeader && cap && (
             <div
               style={{
                 position: "absolute",
-                left: 0,
-                top: 0,
-                maxWidth: "calc(100% - 32px)",
-                minWidth: 32,
-                minHeight: previewHeight * 0.05,
-                padding: "0 15px 0 10px",
+                top: metrics.labelOffset.y,
+                ...headerPosition,
+                minWidth: metrics.labelMinWidth,
+                height: metrics.headerHeight,
+                padding: `${metrics.labelPadding.top}px ${metrics.labelPadding.right}px ${metrics.labelPadding.bottom}px ${metrics.labelPadding.left}px`,
                 display: "flex",
                 alignItems: "center",
+                justifyContent: justifyForAlign(metrics.fontAlign),
                 overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 background: tint,
                 color: textColor,
-                fontSize: previewHeight * 0.047,
+                fontSize: headerFontSize,
                 lineHeight: 1,
                 textShadow: "0 1px 2px rgba(0,0,0,0.7)",
                 pointerEvents: "none"
@@ -225,7 +313,8 @@ function WysiwygContent({ node }: { node: WidgetNode }) {
     case "station-toggle-button":
     case "repeat-button":
     case "multi-toggle": {
-      const defs = FRAME_GFX_DEFAULTS[node.type] ?? FRAME_GFX_DEFAULTS["station-button"] ?? {};
+      const defs = getFrameGfxDefaults(node.type, previewHeight);
+      const metrics = resolveStationButtonMetrics(node, previewHeight);
       // Factory default: gStationGuiColor_Normal = cColor(0.227, 0.51, 0.557) = #3a828e
       const base = colorValue(
         getParam(node.overrides, "mColorBase", "gStationGuiColor_Normal"),
@@ -235,22 +324,56 @@ function WysiwygContent({ node }: { node: WidgetNode }) {
       const textBase = colorValue(getParam(node.overrides, "mColorText", "cColor_White"), WHITE);
       const textColor = rgbaToCss(additiveColor(textBase, withAlpha(base, 0.7)));
       const cap = "caption" in node ? node.caption : undefined;
+      const backgroundGfx = getFileParam(node.overrides, "mGfxBackground", "");
       return (
-        <FrameGfxPreview
-          node={node}
-          frameField="mGfxFrame"
-          defaults={defs}
-          tintColor={tint}
-          backgroundColor={rgbaToCss(base)}
-          backgroundClipBottomRight={16}
-          caption={cap}
-          captionColor={textColor}
-          captionFontSize={previewHeight * 0.0625}
-        />
+        <div style={{ position: "absolute", inset: 0 }}>
+          {metrics.useBackgroundGfx && backgroundGfx && (
+            <GfxImage
+              gfx={backgroundGfx}
+              objectFit="fill"
+              multiply={tint}
+              style={{ position: "absolute", inset: 0 }}
+            />
+          )}
+          {metrics.useFrame && (
+            <FrameGfxPreview
+              node={node}
+              frameField="mGfxFrame"
+              defaults={defs}
+              tintColor={tint}
+              backgroundColor={rgbaToCss(base)}
+              backgroundClipBottomRight
+            />
+          )}
+          {cap && (
+            <span
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: justifyForAlign(metrics.fontAlign),
+                paddingLeft: metrics.clipText ? metrics.clipPaddingLeft : 0,
+                paddingRight: metrics.clipText ? metrics.clipPaddingRight : 0,
+                overflow: metrics.clipText ? "hidden" : "visible",
+                whiteSpace: "nowrap",
+                textOverflow: metrics.clipText ? "ellipsis" : "clip",
+                color: textColor,
+                fontSize: metrics.fontSize.y,
+                lineHeight: 1,
+                fontWeight: 500,
+                textShadow: "0 1px 2px rgba(0,0,0,0.7)",
+                pointerEvents: "none"
+              }}
+            >
+              {cap}
+            </span>
+          )}
+        </div>
       );
     }
     case "frame": {
-      const defs = FRAME_GFX_DEFAULTS["frame"] ?? {};
+      const defs = getFrameGfxDefaults("frame", previewHeight);
       return (
         <FrameGfxPreview
           node={node}
@@ -260,7 +383,7 @@ function WysiwygContent({ node }: { node: WidgetNode }) {
       );
     }
     case "gauge": {
-      const defs = FRAME_GFX_DEFAULTS["gauge"] ?? {};
+      const defs = getFrameGfxDefaults("gauge", previewHeight);
       // Gauge base defaults to white. The station factory separately colors the
       // frame corners teal, so base overrides multiply both colors in-game.
       const base = colorValue(getParam(node.overrides, "mColorBase", "cColor_White"), WHITE);

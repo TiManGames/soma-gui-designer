@@ -16,6 +16,9 @@ describe("document serialize round-trip", () => {
 
   it("preserves overrides and typed fields through the round-trip", () => {
     const doc = createDefaultDocument();
+    const window = doc.nodes.find((n) => n.id === "MainWindow")!;
+    if (window.type !== "station-window") throw new Error("Expected a station window");
+    window.drawOrnaments = true;
     const btn = doc.nodes.find((n) => n.id === "ConfirmButton")!;
     btn.overrides = [{ kind: "expr", path: "mColorBase", expr: "gStationGuiColor_Warning" }];
     doc.nodes.push(makeNode("image", "Pic", { parentId: "screen" }));
@@ -25,6 +28,7 @@ describe("document serialize round-trip", () => {
     expect(back.nodes.find((n: { id: string }) => n.id === "ConfirmButton").overrides).toEqual(
       btn.overrides
     );
+    expect(back.nodes.find((n: { id: string }) => n.id === "MainWindow").drawOrnaments).toBe(true);
   });
 
   it("rejects malformed or wrong-version text via the guard", () => {

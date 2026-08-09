@@ -14,6 +14,7 @@ import {
   renormalizeToParent,
   snapPx
 } from "@core/model/geometry";
+import { canvasScale } from "@core/model/canvasScale";
 import { clamp } from "@core/model/ids";
 import { postToHost } from "../vscodeApi";
 
@@ -373,7 +374,7 @@ export const useStore = create<DesignerState>((set, get) => ({
     if (!node) return;
 
     const parent = parentAbsRect(s.doc, node);
-    const scale = Math.min(1, 980 / previewSize(s.doc).x);
+    const scale = canvasScale(previewSize(s.doc));
     const dxPx = (clientX - s.drag.startClientX) / scale;
     const dyPx = (clientY - s.drag.startClientY) / scale;
 

@@ -7,7 +7,7 @@ void DrawGeneratedCustomScreen(const tString&in asEntityName, float afTimeStep)
 	ImGui_SetTransCategory("GeneratedTerminal");
 
 	cImGuiWindowData mainWindowData = StationGui_CreateDefaultWindowData();
-	StationGui_DoWindowStart("MyWindowCaption", mainWindowData, ImGui_NrmPos(cVector3f(0.1, 0.1, 1)), ImGui_NrmSize(cVector2f(0.8, 0.72)), true);
+	StationGui_DoWindowStart("MyWindowCaption", mainWindowData, ImGui_NrmPos(cVector3f(0.1, 0.1, 1)), ImGui_NrmSize(cVector2f(0.8, 0.72)), false);
 		ImGui_DoImage(cImGuiGfx("my_image"), ImGui_NrmPosGroup(cVector3f(0.05, 0.1, 1)), ImGui_NrmSizeGroup(cVector2f(0.35, 0.45)));
 		cImGuiTextFrameData bodyTextData = StationGui_CreateDefaultTextFrameData();
 		ImGui_DoTextFrameExt("MyTextEntry", 0, 0, 0, bodyTextData, ImGui_NrmPosGroup(cVector3f(0.45, 0.1, 1)), ImGui_NrmSizeGroup(cVector2f(0.5, 0.55)));

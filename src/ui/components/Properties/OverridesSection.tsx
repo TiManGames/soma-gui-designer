@@ -4,7 +4,7 @@ import { WIDGETS } from "@core/model/defaults";
 import { getStruct } from "@core/schema/loadSchema";
 import type { FieldCategory, StructField } from "@core/schema/api-schema.types";
 import type { Override, WidgetNode, WidgetType } from "@core/model/nodes";
-import { FRAME_GFX_DEFAULTS } from "@core/model/frameDefaults";
+import { getFrameGfxDefaults } from "@core/model/frameDefaults";
 import { FieldEditor } from "./FieldEditor";
 import { FrameGfxEditor } from "./FrameGfxEditor";
 import { GfxPicker } from "./GfxPicker";
@@ -177,6 +177,7 @@ function removeCall(overrides: Override[], matchPrefix: string): Override[] {
 
 export function OverridesSection({ node }: { node: WidgetNode }) {
   const setOverrides = useStore((s) => s.setOverrides);
+  const previewHeight = useStore((s) => Math.max(1, s.doc.previewResolution.y));
   const meta = WIDGETS[node.type];
   const [showAll, setShowAll] = useState(false);
 
@@ -278,7 +279,7 @@ export function OverridesSection({ node }: { node: WidgetNode }) {
         {groups.map((group) => {
           // FrameGfx group
           if (group.frameGfx) {
-            const defs = FRAME_GFX_DEFAULTS[node.type as WidgetType] ?? {};
+            const defs = getFrameGfxDefaults(node.type as WidgetType, previewHeight);
             return (
               <div className="field-group" key={group.frameGfx}>
                 <h3>{group.title}</h3>

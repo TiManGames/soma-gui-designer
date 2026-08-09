@@ -55,8 +55,9 @@ export const EMITTERS: EmitterMap = {
   "station-window": {
     emit(ctx, n: StationWindowNode) {
       const v = emitDataVar(ctx.lines, n, ctx.indent);
+      const drawOrnaments = n.drawOrnaments === true ? "true" : "false";
       ctx.lines.push(
-        `${ctx.indent}StationGui_DoWindowStart("${escapeString(n.caption)}", ${v}, ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)}, true);`
+        `${ctx.indent}StationGui_DoWindowStart("${escapeString(n.caption)}", ${v}, ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)}, ${drawOrnaments});`
       );
       ctx.emitChildren(n, `${ctx.indent}\t`);
       ctx.lines.push(`${ctx.indent}StationGui_DoWindowEnd();`);

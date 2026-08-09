@@ -543,9 +543,14 @@ button.scale-chip:not(.active) {
 .canvas-scroller .widget {
   cursor: move;
 }
-.canvas {
+.canvas-stage {
   position: relative;
-  transform-origin: top center;
+  flex: 0 0 auto;
+}
+.canvas {
+  position: absolute;
+  inset: 0 auto auto 0;
+  transform-origin: top left;
   background-color: #05080c;
   background-image:
     linear-gradient(var(--grid) 1px, transparent 1px),

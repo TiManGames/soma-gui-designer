@@ -160,7 +160,7 @@ export function makeNode(type: WidgetType, id: string, patch: Partial<WidgetNode
 
   let node: WidgetNode;
   switch (type) {
-    case "station-window":          node = { ...base, type, caption }; break;
+    case "station-window":          node = { ...base, type, caption, drawOrnaments: false }; break;
     case "group":                   node = { ...base, type, caption }; break;
     case "layout":                  node = { ...base, type, caption, layoutType: "eImGuiLayout_Y" }; break;
     case "station-button":          node = { ...base, type, caption }; break;
