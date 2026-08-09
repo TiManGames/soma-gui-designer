@@ -39,6 +39,16 @@
   --accent: var(--teal);
   --accent-2: var(--mint);
 
+  /* Neutral control tokens — used for hover/active on non-selection UI so teal
+     stays reserved for selection, focus, and primary actions. */
+  --control-bg: var(--bg-3);
+  --control-bg-hover: var(--bg-4);
+  --control-border-hover: var(--border-strong);
+  --focus-ring: var(--teal-bright);
+  --selection: var(--teal);
+  --primary: var(--teal);
+  --label-fg: var(--text-dim);
+
   /* Spacing scale */
   --s1: 4px;
   --s2: 8px;
@@ -338,7 +348,7 @@ label textarea {
   cursor: pointer;
 }
 .rail-section-toggle:hover {
-  color: var(--teal-bright);
+  color: var(--text);
   background: none;
 }
 .chevron {
@@ -388,7 +398,7 @@ label textarea {
   text-overflow: ellipsis;
 }
 .palette-btn:hover {
-  border-color: var(--teal);
+  border-color: var(--control-border-hover);
   background: var(--bg-3);
   color: var(--text);
 }
@@ -444,6 +454,12 @@ label textarea {
 .tree-kind {
   font-size: 10px;
   color: var(--text-faint);
+}
+.tree-rename {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  padding: 1px var(--s1);
 }
 
 /* ---- Validation -------------------------------------------------------- */
@@ -718,8 +734,8 @@ button.scale-chip:not(.active) {
 }
 .field-group > h3 {
   margin: 0 0 var(--s3);
-  font-size: 10px;
-  color: var(--teal-bright);
+  font-size: 11px;
+  color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 700;
@@ -739,13 +755,37 @@ button.scale-chip:not(.active) {
 
 .override-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--s2);
   align-items: end;
   margin-bottom: var(--s2);
 }
 .override-row label {
   margin: 0;
+  min-width: 0;
+}
+
+.vec-field {
+  display: flex;
+  gap: var(--s1);
+  align-items: center;
+}
+.vec-comp {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.vec-axis {
+  font-size: 10px;
+  color: var(--label-fg, var(--text-dim));
+  font-family: var(--font-mono);
+  flex: 0 0 auto;
+}
+.vec-comp input {
+  width: 100%;
+  min-width: 0;
 }
 
 .color-field {
@@ -872,4 +912,409 @@ button.scale-chip:not(.active) {
   height: 1px;
   background: var(--border);
   margin: 4px 0;
+}
+
+/* ---- Sidebar tabs (Layers / Widgets / Assets) -------------------------- */
+
+.sidebar-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.sidebar-tabstrip {
+  display: flex;
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.sidebar-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: var(--s3) var(--s2);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.sidebar-tab:hover {
+  color: var(--text);
+  background: var(--bg-3);
+}
+.sidebar-tab.active {
+  color: var(--teal-bright);
+  border-bottom-color: var(--selection);
+}
+.sidebar-tabpanel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s3);
+}
+
+/* ---- Sidebar search field --------------------------------------------- */
+
+.sidebar-search {
+  margin-bottom: var(--s3);
+}
+.sidebar-search input,
+input.sidebar-search {
+  font-size: 12px;
+  padding: 5px var(--s2);
+  width: 100%;
+}
+
+/* ---- Canvas toolbar controls ------------------------------------------ */
+
+.canvas-toolbar {
+  gap: var(--s3);
+}
+.ct-group {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.ct-group + .ct-group {
+  padding-left: var(--s3);
+  border-left: 1px solid var(--border);
+}
+.ct-spacer {
+  flex: 1;
+}
+.ct-label {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+.ct-select,
+.ct-num {
+  width: auto;
+  padding: 3px var(--s2);
+  font-size: 11px;
+  background: var(--control-bg);
+  border-radius: var(--r1);
+}
+.ct-num {
+  width: 52px;
+}
+.ct-toggle {
+  padding: 3px 9px;
+  font-size: 11px;
+  background: var(--control-bg);
+  color: var(--text-dim);
+}
+.ct-toggle:hover {
+  background: var(--control-bg-hover);
+  color: var(--text);
+}
+.ct-toggle.active {
+  border-color: var(--selection);
+  background: var(--teal-deep);
+  color: var(--teal-bright);
+}
+.ct-readout {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 44px;
+  text-align: right;
+}
+
+/* ---- Bottom dock (Problems / HPS / Preload / Output) ------------------- */
+
+.bottom-dock {
+  grid-area: dock;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg-1);
+  border-top: 1px solid var(--border);
+}
+.dock-tabstrip {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 var(--s2);
+}
+.dock-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: var(--s2) var(--s3);
+  color: var(--text-dim);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dock-tab:hover {
+  color: var(--text);
+  background: var(--bg-3);
+}
+.dock-tab.active {
+  color: var(--teal-bright);
+  border-bottom-color: var(--selection);
+}
+.dock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--amber);
+  color: var(--bg-0);
+  font-size: 10px;
+  font-weight: 700;
+}
+.dock-badge.zero {
+  background: var(--bg-4);
+  color: var(--text-faint);
+}
+.dock-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+.dock-collapse {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: var(--s1) var(--s2);
+  font-size: 13px;
+  border-radius: var(--r1);
+}
+.dock-collapse:hover {
+  color: var(--text);
+  background: var(--bg-3);
+}
+.dock-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--s3);
+}
+.dock-body .code-preview {
+  max-height: none;
+  height: 100%;
+}
+.dock-resize-handle {
+  grid-area: dockhandle;
+  height: 6px;
+  margin-bottom: -3px;
+  cursor: ns-resize;
+  background: transparent;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.dock-resize-handle:hover,
+.dock-resize-handle:active {
+  background: var(--teal);
+}
+
+/* ---- Hierarchy row controls (icons, visibility, lock, badges) ---------- */
+
+.tree-caret-slot {
+  flex: 0 0 auto;
+  width: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.tree-caret {
+  background: none;
+  border: none;
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  font-size: 10px;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.tree-caret:hover {
+  color: var(--text);
+}
+.tree-caret.collapsed {
+  transform: rotate(-90deg);
+}
+
+.tree-icon {
+  flex: 0 0 auto;
+  font-size: 11px;
+  width: 14px;
+  text-align: center;
+  opacity: 0.9;
+}
+.tree-id {
+  font-size: 10px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+.tree-warn {
+  flex: 0 0 auto;
+  color: var(--amber);
+  font-size: 11px;
+  cursor: help;
+}
+.tree-toggles {
+  display: inline-flex;
+  gap: 2px;
+  flex: 0 0 auto;
+  opacity: 0;
+}
+.tree-row:hover .tree-toggles,
+.tree-row.selected .tree-toggles,
+.tree-toggles.pinned {
+  opacity: 1;
+}
+.tree-toggle {
+  background: none;
+  border: none;
+  padding: 1px 3px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-faint);
+  border-radius: var(--r1);
+  cursor: pointer;
+}
+.tree-toggle:hover {
+  color: var(--text);
+  background: var(--bg-4);
+}
+.tree-toggle.on {
+  color: var(--teal-bright);
+}
+.tree-row.hidden .tree-name {
+  opacity: 0.45;
+  font-style: italic;
+}
+
+/* Canvas: editor-only hidden / locked widget affordances. */
+.widget.editor-hidden {
+  display: none;
+}
+.widget.editor-locked {
+  cursor: default;
+}
+
+/* ---- Palette favorites / recent --------------------------------------- */
+
+.palette-btn-wrap {
+  position: relative;
+  display: flex;
+}
+.palette-btn-wrap .palette-btn {
+  flex: 1;
+}
+.palette-fav {
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  background: none;
+  border: none;
+  padding: 2px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-faint);
+  cursor: pointer;
+  opacity: 0;
+}
+.palette-btn-wrap:hover .palette-fav,
+.palette-fav.on {
+  opacity: 1;
+}
+.palette-fav.on {
+  color: var(--amber);
+}
+.palette-empty {
+  color: var(--text-faint);
+  font-size: 11px;
+  padding: var(--s2) 0;
+}
+
+/* ---- Assets panel ------------------------------------------------------ */
+
+.assets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: var(--s2);
+  margin-top: var(--s2);
+}
+.asset-cell {
+  border: 1px solid var(--border);
+  border-radius: var(--r1);
+  background: #0c141c;
+  padding: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.asset-cell:hover {
+  border-color: var(--control-border-hover);
+}
+.asset-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.asset-name {
+  font-size: 9px;
+  color: var(--text-faint);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Inspector project mode ------------------------------------------- */
+
+.inspector-mode-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  margin-bottom: var(--s3);
+}
+
+/* ---- px/% unit toggle -------------------------------------------------- */
+
+.unit-toggle {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r1);
+  overflow: hidden;
+}
+.unit-toggle button {
+  border: none;
+  border-radius: 0;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--control-bg);
+  color: var(--text-dim);
+}
+.unit-toggle button.active {
+  background: var(--teal-deep);
+  color: var(--teal-bright);
 }

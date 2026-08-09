@@ -6,9 +6,15 @@ import {
   hexToRgb,
   parseColorExpr,
   parseFloatExpr,
+  parseSizeKeepRatio,
+  parseVec,
   rgbaToHex,
+  sizeKeepRatioExpr,
+  vec2Expr,
+  vec3Expr,
   type Rgba
 } from "./exprHelpers";
+import { NumberInput } from "../NumberInput";
 import { GfxPicker } from "./GfxPicker";
 
 interface Props {
@@ -41,14 +47,7 @@ export function FieldEditor({ field, value, onChange, onClear, onGfxChange }: Pr
       case "float":
         return <FloatEditor value={value} onChange={onChange} />;
       case "int":
-        return (
-          <input
-            type="number"
-            value={value ?? ""}
-            placeholder="0"
-            onChange={(e) => onChange(e.target.value)}
-          />
-        );
+        return <IntEditor value={value} onChange={onChange} />;
       case "enum": {
         const e = getEnum(field.enumType);
         if (!e) return <RawInput value={value} onChange={onChange} />;
@@ -63,9 +62,15 @@ export function FieldEditor({ field, value, onChange, onClear, onGfxChange }: Pr
         );
       }
       case "vec2":
-        return <RawInput value={value} placeholder="ImGui_NrmSizeKeepRatio(0.035f)" onChange={onChange} />;
+        // "size"-named vec2 fields take a single keep-ratio number; other vec2
+        // fields (padding, UV) get a dedicated X/Y pair.
+        return /size/i.test(field.name) ? (
+          <SizeEditor value={value} onChange={onChange} />
+        ) : (
+          <VecEditor value={value} dims={2} onChange={onChange} />
+        );
       case "vec3":
-        return <RawInput value={value} placeholder="cVector3f(0,0,1)" onChange={onChange} />;
+        return <VecEditor value={value} dims={3} onChange={onChange} />;
       case "gfx":
         if (field.type === "cImGuiFrameGfx") {
           // Rendered by OverridesSection as FrameGfxEditor — skip here.
@@ -137,13 +142,91 @@ function FloatEditor({ value, onChange }: { value: string | undefined; onChange:
     return <RawInput value={value} onChange={onChange} />;
   }
   return (
-    <input
-      type="number"
+    <NumberInput
+      value={n ?? 0}
       step="0.01"
-      value={n ?? ""}
       placeholder="0.0"
-      onChange={(e) => onChange(floatExpr(Number(e.target.value)))}
+      onCommit={(v) => onChange(floatExpr(v))}
     />
+  );
+}
+
+/**
+ * An integer editor. Stores a plain integer expression (no float suffix).
+ * Falls back to a raw input if the stored value isn't a plain number.
+ */
+function IntEditor({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) {
+  const n = value !== undefined ? parseFloatExpr(value) : null;
+  if (value !== undefined && n === null) {
+    return <RawInput value={value} onChange={onChange} />;
+  }
+  return (
+    <NumberInput
+      value={n ?? 0}
+      step={1}
+      placeholder="0"
+      onCommit={(v) => onChange(String(Math.round(v)))}
+    />
+  );
+}
+
+/**
+ * A single-number editor for "size"-category vec2 fields, emitting
+ * `ImGui_NrmSizeKeepRatio(n)`. Falls back to a raw expression input if the
+ * stored value is something else the user hand-wrote.
+ */
+function SizeEditor({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) {
+  const n = value !== undefined ? parseSizeKeepRatio(value) : null;
+  if (value !== undefined && n === null) {
+    return <RawInput value={value} onChange={onChange} />;
+  }
+  return (
+    <NumberInput
+      value={n ?? 0}
+      step="0.005"
+      min={0}
+      title="Normalized size, aspect ratio preserved"
+      onCommit={(v) => onChange(sizeKeepRatioExpr(v))}
+    />
+  );
+}
+
+/**
+ * A per-component editor for cVector2f / cVector3f fields. Emits a plain
+ * `cVector2f(x,y)` / `cVector3f(x,y,z)` literal. Falls back to a raw input if the
+ * stored value is a hand-written expression (e.g. a helper-function call).
+ */
+function VecEditor({
+  value,
+  dims,
+  onChange
+}: {
+  value: string | undefined;
+  dims: 2 | 3;
+  onChange: (v: string) => void;
+}) {
+  const parsed = value !== undefined ? parseVec(value) : null;
+  if (value !== undefined && parsed === null) {
+    return <RawInput value={value} onChange={onChange} />;
+  }
+  const comps = parsed ?? new Array(dims).fill(0);
+  const labels = dims === 3 ? ["X", "Y", "Z"] : ["X", "Y"];
+
+  const setComp = (i: number, v: number) => {
+    const next = [...comps];
+    next[i] = v;
+    onChange(dims === 3 ? vec3Expr(next[0], next[1], next[2]) : vec2Expr(next[0], next[1]));
+  };
+
+  return (
+    <div className="vec-field">
+      {labels.map((lbl, i) => (
+        <span key={lbl} className="vec-comp">
+          <span className="vec-axis">{lbl}</span>
+          <NumberInput value={comps[i] ?? 0} step="0.01" onCommit={(v) => setComp(i, v)} />
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -172,15 +255,13 @@ function ColorEditor({ value, onChange }: { value: string | undefined; onChange:
             onChange(colorExpr({ ...rgb, a: rgba.a }));
           }}
         />
-        <input
-          type="number"
+        <NumberInput
           className="color-alpha"
           min={0}
-          max={1}
           step="0.05"
           title="alpha"
           value={rgba.a}
-          onChange={(e) => onChange(colorExpr({ ...rgba, a: Number(e.target.value) }))}
+          onCommit={(v) => onChange(colorExpr({ ...rgba, a: v }))}
         />
       </div>
       <div className="palette-swatches">

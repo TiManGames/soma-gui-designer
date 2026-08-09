@@ -8,3 +8,4 @@ dist
 *.vsix
 *.somagui.json
 /graphics
+.idea

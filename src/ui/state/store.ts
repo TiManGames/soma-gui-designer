@@ -21,6 +21,45 @@ const HISTORY_LIMIT = 100;
 const EDIT_DEBOUNCE_MS = 200;
 
 export type PreviewTab = "hps" | "preload";
+export type SidebarTab = "layers" | "widgets" | "assets";
+export type DockTab = "problems" | "hps" | "preload" | "output";
+export type LayoutUnit = "pct" | "px";
+
+const UI_PREFS_KEY = "soma-gui:ui-prefs";
+
+interface UiPrefs {
+  sidebarTab: SidebarTab;
+  dockTab: DockTab;
+  dockOpen: boolean;
+  layoutUnit: LayoutUnit;
+  paletteFavorites: WidgetType[];
+}
+
+function loadUiPrefs(): UiPrefs {
+  const fallback: UiPrefs = {
+    sidebarTab: "layers",
+    dockTab: "problems",
+    dockOpen: true,
+    layoutUnit: "pct",
+    paletteFavorites: []
+  };
+  try {
+    const raw = localStorage.getItem(UI_PREFS_KEY);
+    if (!raw) return fallback;
+    return { ...fallback, ...(JSON.parse(raw) as Partial<UiPrefs>) };
+  } catch {
+    return fallback;
+  }
+}
+
+function saveUiPrefs(prefs: Partial<UiPrefs>): void {
+  try {
+    const current = loadUiPrefs();
+    localStorage.setItem(UI_PREFS_KEY, JSON.stringify({ ...current, ...prefs }));
+  } catch {
+    /* ignore */
+  }
+}
 
 interface DragState {
   id: string;
@@ -43,6 +82,28 @@ interface DesignerState {
   dropTargetId: string | null;
   past: SomaDocument[];
   future: SomaDocument[];
+
+  /** UI-only shell state (never persisted into the document / history). */
+  sidebarTab: SidebarTab;
+  setSidebarTab: (tab: SidebarTab) => void;
+  dockTab: DockTab;
+  setDockTab: (tab: DockTab) => void;
+  dockOpen: boolean;
+  toggleDock: () => void;
+  setDockOpen: (open: boolean) => void;
+  layoutUnit: LayoutUnit;
+  setLayoutUnit: (unit: LayoutUnit) => void;
+
+  /** Palette favorites (persisted) and recently-added types (session-only). */
+  paletteFavorites: WidgetType[];
+  toggleFavorite: (type: WidgetType) => void;
+  paletteRecent: WidgetType[];
+
+  /** Editor-only visibility / lock overlays (ephemeral, reset on reload). */
+  hidden: Set<string>;
+  toggleHidden: (id: string) => void;
+  locked: Set<string>;
+  toggleLocked: (id: string) => void;
 
   /** WYSIWYG rendering flag (runtime-only, mirrors the somaGui.wysiwyg.enabled setting). */
   wysiwygEnabled: boolean;
@@ -127,6 +188,70 @@ export const useStore = create<DesignerState>((set, get) => ({
   past: [],
   future: [],
 
+  ...(() => {
+    const p = loadUiPrefs();
+    return {
+      sidebarTab: p.sidebarTab,
+      dockTab: p.dockTab,
+      dockOpen: p.dockOpen,
+      layoutUnit: p.layoutUnit,
+      paletteFavorites: p.paletteFavorites
+    };
+  })(),
+  paletteRecent: [],
+  toggleFavorite: (type) =>
+    set((s) => {
+      const has = s.paletteFavorites.includes(type);
+      const paletteFavorites = has
+        ? s.paletteFavorites.filter((t) => t !== type)
+        : [...s.paletteFavorites, type];
+      saveUiPrefs({ paletteFavorites });
+      return { paletteFavorites };
+    }),
+  setSidebarTab: (tab) => {
+    saveUiPrefs({ sidebarTab: tab });
+    set({ sidebarTab: tab });
+  },
+  setDockTab: (tab) => {
+    saveUiPrefs({ dockTab: tab, dockOpen: true });
+    set({ dockTab: tab, dockOpen: true });
+  },
+  toggleDock: () =>
+    set((s) => {
+      const dockOpen = !s.dockOpen;
+      saveUiPrefs({ dockOpen });
+      return { dockOpen };
+    }),
+  setDockOpen: (open) => {
+    saveUiPrefs({ dockOpen: open });
+    set({ dockOpen: open });
+  },
+  setLayoutUnit: (unit) => {
+    saveUiPrefs({ layoutUnit: unit });
+    set({ layoutUnit: unit });
+  },
+
+  hidden: new Set<string>(),
+  toggleHidden: (id) =>
+    set((s) => {
+      const hidden = new Set(s.hidden);
+      // Cascade to the whole subtree: hiding a parent hides its descendants;
+      // re-showing it shows them again. In between, children toggle individually.
+      const subtree = [id, ...descendantIds(s.doc, id)];
+      if (hidden.has(id)) subtree.forEach((n) => hidden.delete(n));
+      else subtree.forEach((n) => hidden.add(n));
+      return { hidden };
+    }),
+  locked: new Set<string>(),
+  toggleLocked: (id) =>
+    set((s) => {
+      const locked = new Set(s.locked);
+      const subtree = [id, ...descendantIds(s.doc, id)];
+      if (locked.has(id)) subtree.forEach((n) => locked.delete(n));
+      else subtree.forEach((n) => locked.add(n));
+      return { locked };
+    }),
+
   wysiwygEnabled: true,
   setWysiwygEnabled: (enabled) => set({ wysiwygEnabled: enabled }),
   toggleWysiwyg: () => set((s) => ({ wysiwygEnabled: !s.wysiwygEnabled })),
@@ -170,7 +295,9 @@ export const useStore = create<DesignerState>((set, get) => ({
       );
       const node = makeNode(type, id, { parentId });
       const nextDoc = { ...s.doc, nodes: [...s.doc.nodes, node] };
-      return withHistory(s, nextDoc, { selectedId: id });
+      // Track recently-added types (session-only, most-recent-first, max 6).
+      const paletteRecent = [type, ...s.paletteRecent.filter((t) => t !== type)].slice(0, 6);
+      return withHistory(s, nextDoc, { selectedId: id, paletteRecent });
     }),
 
   updateNode: (id, patch) =>

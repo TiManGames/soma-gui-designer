@@ -1,6 +1,7 @@
 import { useStore } from "../../state/store";
 import type { WidgetNode } from "@core/model/nodes";
 import { gaugeFillAmount } from "@core/model/gaugeFill";
+import { NumberInput } from "../NumberInput";
 
 /** First-class, type-specific fields (caption, text, gfx, etc.). */
 export function TypeFields({ node }: { node: WidgetNode }) {
@@ -27,11 +28,10 @@ export function TypeFields({ node }: { node: WidgetNode }) {
   const numField = (label: string, key: string, value: number, step = 1) => (
     <label>
       {label}
-      <input
-        type="number"
+      <NumberInput
         step={step}
         value={value}
-        onChange={(e) => updateNode(node.id, { [key]: Number(e.target.value) } as Partial<WidgetNode>)}
+        onCommit={(v) => updateNode(node.id, { [key]: v } as Partial<WidgetNode>)}
       />
     </label>
   );
@@ -39,13 +39,12 @@ export function TypeFields({ node }: { node: WidgetNode }) {
   const gaugeFillField = () => (
     <label>
       Fill amount
-      <input
-        type="number"
+      <NumberInput
         min={0}
         max={1}
         step={0.01}
         value={gaugeFillAmount(node.type === "gauge" ? node.fillExpr : undefined)}
-        onChange={(e) => updateNode(node.id, { fillExpr: e.target.value } as Partial<WidgetNode>)}
+        onCommit={(v) => updateNode(node.id, { fillExpr: String(v) } as Partial<WidgetNode>)}
       />
     </label>
   );

@@ -56,7 +56,7 @@ export function FrameGfxEditor({ fieldName, overrides, defaults, onChange }: Pro
         );
 
         return (
-          <div key={key} style={{ display: "grid", gridTemplateColumns: "72px 1fr", gap: 4, alignItems: "center" }}>
+          <div key={key} style={{ display: "grid", gridTemplateColumns: "72px minmax(0, 1fr)", gap: 4, alignItems: "center" }}>
             <span style={{
               fontSize: 10.5, color: isOverridden ? "var(--teal-bright)" : "var(--text-dim)",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",

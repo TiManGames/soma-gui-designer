@@ -4,6 +4,7 @@ import { WIDGETS } from "@core/model/defaults";
 import { CommonProps } from "./CommonProps";
 import { TypeFields } from "./TypeFields";
 import { OverridesSection } from "./OverridesSection";
+import { ProjectPanel } from "./ProjectPanel";
 
 export function PropertyPanel() {
   const selectedId = useStore((s) => s.selectedId);
@@ -13,15 +14,9 @@ export function PropertyPanel() {
 
   const node = selectedId ? getNode(doc, selectedId) : null;
 
+  // Nothing selected → Project mode (screen-level metadata).
   if (!node) {
-    return (
-      <div className="empty-state">
-        <div className="es-icon" aria-hidden>
-          ⌖
-        </div>
-        <div>Select a widget on the canvas or in the hierarchy to edit its properties.</div>
-      </div>
-    );
+    return <ProjectPanel />;
   }
 
   return (

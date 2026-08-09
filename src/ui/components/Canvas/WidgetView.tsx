@@ -431,13 +431,20 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
   const dropTargetId = useStore((s) => s.dropTargetId);
   const startDrag = useStore((s) => s.startDrag);
   const wysiwygEnabled = useStore((s) => s.wysiwygEnabled);
+  const isHidden = useStore((s) => s.hidden.has(node.id));
+  const isLocked = useStore((s) => s.locked.has(node.id));
 
   const selected = selectedId === node.id;
   const isDropTarget = dropTargetId === node.id;
   const isBg = BG_TYPES.has(node.type);
   const showWysiwyg = wysiwygEnabled && WYSIWYG_TYPES.has(node.type);
 
+  // Locked widgets can't be dragged or selected on the canvas; hidden widgets
+  // are removed from the canvas entirely (both are editor-only, not in the doc).
+  if (isHidden) return null;
+
   const beginDrag = (e: React.MouseEvent, resize: boolean) => {
+    if (isLocked) return;
     e.preventDefault();
     e.stopPropagation();
     startDrag({
@@ -458,9 +465,9 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
     <div
       className={`widget ${CSS_TYPE[node.type]}${showWysiwyg ? " widget-wysiwyg" : ""}${
         selected ? " selected" : ""
-      }${isDropTarget ? " drop-target" : ""}`}
+      }${isDropTarget ? " drop-target" : ""}${isLocked ? " editor-locked" : ""}`}
       style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex }}
-      onMouseDown={isBg ? undefined : (e) => beginDrag(e, false)}
+      onMouseDown={isBg || isLocked ? undefined : (e) => beginDrag(e, false)}
       onContextMenu={isBg ? undefined : (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -470,7 +477,7 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
     >
       {showWysiwyg && <WysiwygContent node={node} />}
       {!showWysiwyg && <span className="widget-title">{label}</span>}
-      {!isBg && <div className="resize-handle" onMouseDown={(e) => beginDrag(e, true)} />}
+      {!isBg && !isLocked && <div className="resize-handle" onMouseDown={(e) => beginDrag(e, true)} />}
     </div>
   );
 }

@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useStore } from "../state/store";
 import { generate } from "@core/codegen/generateHps";
 import { postToHost } from "../vscodeApi";
+import { ContextMenu, type ContextMenuEntry } from "./Canvas/ContextMenu";
 
 /** Derive a suggested .hps filename from the function name. */
 function hpsName(functionName: string): string {
@@ -15,16 +17,39 @@ export function Toolbar() {
   const redo = useStore((s) => s.redo);
   const canUndo = useStore((s) => s.past.length > 0);
   const canRedo = useStore((s) => s.future.length > 0);
-  const previewTab = useStore((s) => s.previewTab);
+  const wysiwygEnabled = useStore((s) => s.wysiwygEnabled);
+  const toggleWysiwyg = useStore((s) => s.toggleWysiwyg);
+  const setDockTab = useStore((s) => s.setDockTab);
 
-  const onCopy = () => {
-    const { hps, preload } = generate(doc);
-    postToHost({ type: "copy", text: previewTab === "preload" ? preload : hps });
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+
+  const openExport = (e: React.MouseEvent) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setMenu({ x: rect.right - 200, y: rect.bottom + 4 });
   };
 
-  const onWriteHps = () => {
-    const { hps } = generate(doc);
-    postToHost({ type: "writeHps", text: hps, suggestedName: hpsName(doc.functionName) });
+  const exportItems = (): ContextMenuEntry[] => {
+    const { hps, preload } = generate(doc);
+    return [
+      { label: "Copy HPS", onClick: () => postToHost({ type: "copy", text: hps }) },
+      { label: "Copy preload", onClick: () => postToHost({ type: "copy", text: preload }) },
+      { separator: true },
+      {
+        label: "Write .hps file…",
+        onClick: () =>
+          postToHost({ type: "writeHps", text: hps, suggestedName: hpsName(doc.functionName) })
+      },
+      { separator: true },
+      {
+        label: "Reset to starter layout",
+        danger: true,
+        onClick: () => {
+          if (confirm("Reset the design to a fresh starter layout? This cannot be undone via file history.")) {
+            newDocument();
+          }
+        }
+      }
+    ];
   };
 
   return (
@@ -44,17 +69,28 @@ export function Toolbar() {
           ↷ Redo
         </button>
         <span className="toolbar-divider" />
-        <button className="ghost" onClick={() => newDocument()} title="Reset to a fresh starter layout">
-          Reset
+        <button
+          className={`ghost${wysiwygEnabled ? " " : ""}`}
+          onClick={toggleWysiwyg}
+          title="Toggle rendering real game textures & colors on the canvas"
+        >
+          Preview
         </button>
-        <span className="toolbar-divider" />
-        <button className="ghost" onClick={onWriteHps} title="Write generated HPS to a .hps file">
-          Write .hps
+        <button
+          className="ghost"
+          onClick={() => setDockTab("problems")}
+          title="Show validation problems"
+        >
+          Validate
         </button>
-        <button className="primary" onClick={onCopy}>
-          Copy Code
+        <button className="primary" onClick={openExport}>
+          Export ▾
         </button>
       </div>
+
+      {menu && (
+        <ContextMenu x={menu.x} y={menu.y} items={exportItems()} onClose={() => setMenu(null)} />
+      )}
     </header>
   );
 }
