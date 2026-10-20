@@ -10,6 +10,8 @@ interface Props {
   /** Maximum committed value — enforced on blur only. */
   max?: number;
   step?: number | string;
+  integer?: boolean;
+  "aria-label"?: string;
   className?: string;
   title?: string;
   placeholder?: string;
@@ -27,17 +29,20 @@ interface Props {
  * clobber an in-progress edit, while genuine external changes (undo, presets) still
  * re-sync the draft.
  */
-export function NumberInput({ value, onCommit, min, max, step, className, title, placeholder }: Props) {
+export function NumberInput({ value, onCommit, min, max, step, integer = false, className, title, placeholder, "aria-label": ariaLabel }: Props) {
   const [draft, setDraft] = useState(String(value));
   const lastEmitted = useRef<number | null>(null);
 
   useEffect(() => {
     // Ignore the echo of a value we just committed; sync on real external changes.
     if (lastEmitted.current !== null && value === lastEmitted.current) return;
+    lastEmitted.current = null;
     setDraft(String(value));
   }, [value]);
 
   const emit = (n: number) => {
+    if (integer) n = Math.round(n);
+    if (integer && !Number.isSafeInteger(n)) return;
     lastEmitted.current = n;
     onCommit(n);
   };
@@ -47,8 +52,11 @@ export function NumberInput({ value, onCommit, min, max, step, className, title,
       type="number"
       className={className}
       title={title}
+      aria-label={ariaLabel}
       placeholder={placeholder}
-      step={step}
+      min={min}
+      max={max}
+      step={integer ? 1 : step ?? "any"}
       value={draft}
       onChange={(e) => {
         setDraft(e.target.value);
@@ -62,10 +70,15 @@ export function NumberInput({ value, onCommit, min, max, step, className, title,
           setDraft(String(value)); // revert to last good value
           return;
         }
+        const rounded = integer ? Math.round(n) : n;
+        if (integer && !Number.isSafeInteger(rounded)) {
+          setDraft(String(value));
+          return;
+        }
         const clamped =
           min !== undefined || max !== undefined
-            ? Math.min(max ?? Infinity, Math.max(min ?? -Infinity, n))
-            : n;
+            ? Math.min(max ?? Infinity, Math.max(min ?? -Infinity, rounded))
+            : rounded;
         setDraft(String(clamped));
         if (clamped !== value) emit(clamped);
       }}

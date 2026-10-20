@@ -8,16 +8,7 @@ import { stationFrameSize } from "./stationMetrics";
  * Mirrors what helper_imgui_station_basics.hps sets for each widget type.
  */
 export const FRAME_GFX_DEFAULTS: Partial<Record<WidgetType, Record<string, string>>> = {
-  "frame": {
-    "mFrameGfx.mGfxCornerTopLeft":     "stationV2/button/small_corner_topleft",
-    "mFrameGfx.mGfxCornerTopRight":    "stationV2/button/small_corner_topright",
-    "mFrameGfx.mGfxCornerBottomLeft":  "stationV2/button/small_corner_bottomleft",
-    "mFrameGfx.mGfxCornerBottomRight": "stationV2/button/small_corner_bottomright",
-    "mFrameGfx.mGfxBorderTop":         "stationV2/button/small_border_top",
-    "mFrameGfx.mGfxBorderRight":       "stationV2/button/small_border_right",
-    "mFrameGfx.mGfxBorderBottom":      "stationV2/button/small_border_bottom",
-    "mFrameGfx.mGfxBorderLeft":        "stationV2/button/small_border_left",
-  },
+  "frame": {},
   // Gauge uses bar/ corners only — borders are color-transparent in the factory.
   "gauge": {
     "mGfxFrame.mGfxCornerTopLeft":     "station/bar/small_framing_upper_left",

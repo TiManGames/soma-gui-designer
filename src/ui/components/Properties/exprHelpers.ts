@@ -3,6 +3,8 @@
 // { kind: "expr", path: <field>, expr: <angelscript expr> }.
 
 import type { PaletteColor } from "@core/schema/api-schema.types";
+import { parseNumberLiteral, floatLiteral } from "@core/model/literals";
+export { parseNumberLiteral as parseFloatExpr, floatLiteral as floatExpr } from "@core/model/literals";
 
 export interface Rgba {
   r: number;
@@ -30,17 +32,18 @@ export function parseColorExpr(expr: string, palette: PaletteColor[]): Rgba | nu
   if (named) return { r: named.r, g: named.g, b: named.b, a: named.a };
   if (NAMED_COLORS[trimmed]) return NAMED_COLORS[trimmed];
 
-  const m = /cColor\s*\(([^)]*)\)/.exec(expr);
+  const m = /^cColor\s*\(([^)]*)\)$/.exec(trimmed);
   if (!m) return null;
-  const nums = m[1].split(",").map((s) => parseFloat(s.replace(/f/g, "").trim()));
-  if (nums.some((n) => !Number.isFinite(n))) return null;
+  const parsed = m[1].split(",").map(parseNumberLiteral);
+  if (parsed.some((n) => n === null)) return null;
+  const nums = parsed as number[];
   // HPL3 supports several cColor constructors:
   //   cColor(grey)              -> r=g=b=grey, a=1
   //   cColor(grey, alpha)       -> r=g=b=grey, a=alpha
   //   cColor(r, g, b[, a])
   if (nums.length === 1) return { r: nums[0], g: nums[0], b: nums[0], a: 1 };
   if (nums.length === 2) return { r: nums[0], g: nums[0], b: nums[0], a: nums[1] };
-  if (nums.length >= 3) return { r: nums[0], g: nums[1], b: nums[2], a: nums[3] ?? 1 };
+  if (nums.length === 3 || nums.length === 4) return { r: nums[0], g: nums[1], b: nums[2], a: nums[3] ?? 1 };
   return null;
 }
 
@@ -70,50 +73,38 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   };
 }
 
-/** Parse a float expr like "0.5f" -> 0.5. Returns null if not a plain number. */
-export function parseFloatExpr(expr: string): number | null {
-  const cleaned = expr.replace(/f\b/g, "").trim();
-  const n = Number(cleaned);
-  return Number.isFinite(n) && /^[-\d.]+$/.test(cleaned) ? n : null;
-}
-
-export function floatExpr(n: number): string {
-  const s = Number(n).toString();
-  return (s.includes(".") ? s : s + ".0") + "f";
-}
-
 /**
  * Parse the components of a `cVector2f(x, y)` / `cVector3f(x, y, z)` literal.
  * Returns an array of numbers, or null if the expression isn't a plain vector
  * literal (e.g. a helper-function call the user hand-wrote).
  */
 export function parseVec(expr: string): number[] | null {
-  const m = /cVector[23]f\s*\(([^)]*)\)/.exec(expr);
+  const m = /^cVector([23])f\s*\(([^)]*)\)$/.exec(expr.trim());
   if (!m) return null;
-  const parts = m[1].split(",");
-  const nums = parts.map((s) => parseFloat(s.replace(/f/g, "").trim()));
-  if (nums.some((n) => !Number.isFinite(n))) return null;
-  return nums;
+  const nums = m[2].split(",").map(parseNumberLiteral);
+  if (nums.some((n) => n === null)) return null;
+  const dims = Number(m[1]);
+  if (nums.length === 1) return Array(dims).fill(nums[0]) as number[];
+  return nums.length === dims ? nums as number[] : null;
 }
 
 export function vec2Expr(x: number, y: number): string {
-  const f = (n: number) => floatExpr(n);
+  const f = floatLiteral;
   return `cVector2f(${f(x)}, ${f(y)})`;
 }
 
 export function vec3Expr(x: number, y: number, z: number): string {
-  const f = (n: number) => floatExpr(n);
+  const f = floatLiteral;
   return `cVector3f(${f(x)}, ${f(y)}, ${f(z)})`;
 }
 
 /** Parse `ImGui_NrmSizeKeepRatio(n)` -> n. Returns null if not that call. */
 export function parseSizeKeepRatio(expr: string): number | null {
-  const m = /ImGui_NrmSizeKeepRatio\s*\(([^)]*)\)/.exec(expr);
+  const m = /^ImGui_NrmSizeKeepRatio\s*\(([^)]*)\)$/.exec(expr.trim());
   if (!m) return null;
-  const n = parseFloat(m[1].replace(/f/g, "").trim());
-  return Number.isFinite(n) ? n : null;
+  return parseNumberLiteral(m[1]);
 }
 
 export function sizeKeepRatioExpr(n: number): string {
-  return `ImGui_NrmSizeKeepRatio(${floatExpr(n)})`;
+  return `ImGui_NrmSizeKeepRatio(${floatLiteral(n)})`;
 }

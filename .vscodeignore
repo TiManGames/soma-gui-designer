@@ -14,7 +14,11 @@ vite.config.ts
 tsconfig*.json
 .eslintrc.json
 .gitignore
+.cache/**
+docs/**
 *.vsix
+*.somagui.json
+MODLOG.md
 *.tsbuildinfo
 dist/assets/**
 dist/index.html

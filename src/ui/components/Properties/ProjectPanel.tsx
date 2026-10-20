@@ -59,6 +59,7 @@ export function ProjectPanel() {
             Width
             <NumberInput
               value={doc.previewResolution.x}
+              integer
               min={1}
               onCommit={(v) => setPreviewSize(v, doc.previewResolution.y)}
             />
@@ -67,6 +68,7 @@ export function ProjectPanel() {
             Height
             <NumberInput
               value={doc.previewResolution.y}
+              integer
               min={1}
               onCommit={(v) => setPreviewSize(doc.previewResolution.x, v)}
             />

@@ -6,6 +6,8 @@
 export type GfxResult =
   | { kind: "uri"; uri: string } // PNG/JPG: served directly via asWebviewUri
   | { kind: "tga"; bytes: string } // TGA: base64 bytes for webview-side decoding
+  | { kind: "dds"; bytes: string }
+  | { kind: "font"; text: string }
   | { kind: "none" }; // not found / unsupported (e.g. DDS) → CSS fallback
 
 /** Whether WYSIWYG rendering is enabled (mirrors the somaGui.wysiwyg.enabled setting). */
@@ -24,6 +26,7 @@ export type HostToWebview =
 
 /** Messages sent from the webview to the extension host. */
 export type WebviewToHost =
+  | { type: "previewStatus"; diagnostics: string[]; error: string; quads: number; readyResources: number }
   | { type: "ready" }
   | { type: "edit"; text: string }
   | { type: "copy"; text: string }

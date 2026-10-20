@@ -9,3 +9,5 @@ dist
 *.somagui.json
 /graphics
 .idea
+/.cache
+!/test/fixtures/*.somagui.json

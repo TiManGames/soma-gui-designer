@@ -11,6 +11,22 @@ export interface Rect {
   h: number;
 }
 
+/** Native layout cursor rules with the zero spacing emitted by LayoutBegin. */
+export function layoutRects(parent: Rect, type: string, nodes: WidgetNode[]): Map<string, Rect> {
+  const result = new Map<string, Rect>();
+  let x = 0, y = 0, rowHeight = 0;
+  for (const node of [...nodes].sort((a, b) => a.z - b.z)) {
+    const offsetX = node.xN * parent.w, offsetY = node.yN * parent.h;
+    const w = node.wN * parent.w, h = node.hN * parent.h;
+    if (type === "eImGuiLayout_XY" && x !== 0 && x + w + offsetX > parent.w) { x = 0; y += rowHeight; rowHeight = 0; }
+    result.set(node.id, { x: parent.x + x + offsetX, y: parent.y + y + offsetY, w, h });
+    rowHeight = Math.max(rowHeight, Math.max(0, offsetY + h));
+    if (type === "eImGuiLayout_Y") { y += rowHeight; rowHeight = 0; }
+    else if (type !== "eImGuiLayout_X_Tabbed") x += w;
+  }
+  return result;
+}
+
 export function previewSize(doc: SomaDocument): { x: number; y: number } {
   return {
     x: Math.max(1, doc.previewResolution.x || 1280),
@@ -31,6 +47,11 @@ export function parentAbsRect(doc: SomaDocument, node: WidgetNode | null): Rect 
 
 export function absoluteRect(doc: SomaDocument, node: WidgetNode): Rect {
   const parent = parentAbsRect(doc, node);
+  const owner = getNode(doc, node.parentId);
+  if (owner?.type === "layout") {
+    const resolved = layoutRects(parent, owner.layoutType, doc.nodes.filter(n => n.parentId === owner.id)).get(node.id);
+    if (resolved) return resolved;
+  }
   return {
     x: parent.x + node.xN * parent.w,
     y: parent.y + node.yN * parent.h,

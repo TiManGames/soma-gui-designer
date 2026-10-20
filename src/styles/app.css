@@ -671,7 +671,13 @@ button.scale-chip:not(.active) {
 .widget-wysiwyg {
   background: none !important;
   border: none !important;
+  overflow: visible;
 }
+.gui-render-surface { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.gui-grid-overlay { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); opacity: 0.4; }
+.preview-status { max-height: 120px; overflow: auto; font-size: 11px; padding: 5px 10px; color: var(--text-dim); }
+.preview-status summary { cursor: pointer; }
+.preview-help { font-size: 11px; color: var(--text-dim); margin: 0 0 8px; }
 .widget-window.widget-wysiwyg::before {
   display: none;
 }
@@ -765,6 +771,17 @@ button.scale-chip:not(.active) {
   align-items: end;
   margin-bottom: var(--s2);
 }
+
+.override-field { min-width: 0; }
+.override-name { font-family: var(--font-mono); overflow-wrap: anywhere; font-size: 11px; }
+.field-inherited { display: block; color: var(--text-faint); font-size: 10px; }
+.expression-control { min-width: 0; margin-top: 3px; }
+.expression-mode { display: flex; gap: 2px; margin-bottom: 3px; }
+.expression-mode button { padding: 1px 5px; font-size: 10px; }
+.expression-mode button[aria-pressed="true"] { color: var(--teal-bright); border-color: var(--teal-bright); }
+.expression-control > input[type="checkbox"] { width: auto; margin: 4px 0; }
+.content-field { margin-bottom: var(--s2); min-width: 0; }
+.content-field > span { display: block; margin-bottom: 3px; }
 .override-row label {
   margin: 0;
   min-width: 0;

@@ -30,7 +30,7 @@ import type {
   WidgetType
 } from "../model/nodes";
 import { gaugeFillExpr } from "../model/gaugeFill";
-import { escapeString } from "./format";
+import { escapeString, nrm } from "./format";
 import { safeId } from "../model/ids";
 import { posExpr, sizeExpr } from "./coordExpr";
 import { emitDataVar } from "./emitDataVar";
@@ -228,7 +228,7 @@ export const EMITTERS: EmitterMap = {
     emit(ctx, n: FrameNode) {
       const v = emitDataVar(ctx.lines, n, ctx.indent);
       ctx.lines.push(
-        `${ctx.indent}ImGui_DoFrame(${v}, ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)});`
+        `${ctx.indent}cLux_GetCurrentImGui().DoFrame(${v}, ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)});`
       );
     }
   },
@@ -317,7 +317,7 @@ export const EMITTERS: EmitterMap = {
     emit(ctx, n: TextReaderNode) {
       const v = emitDataVar(ctx.lines, n, ctx.indent);
       ctx.lines.push(
-        `${ctx.indent}StationGui_TextReaderSingle("${escapeString(n.caption)}", "${escapeString(n.text || n.caption)}", ${v}, ${posExpr(n, ctx.parentIsGroup)}, ${sizeExpr(n, ctx.parentIsGroup)});`
+        `${ctx.indent}StationGui_TextReaderSingle("${escapeString(n.caption)}", "${escapeString(n.text || n.caption)}", ${v}, cVector3f(${nrm(n.xN)}, ${nrm(n.yN)}, ${nrm(n.z)}), cVector2f(${nrm(n.wN)}, ${nrm(n.hN)}));`
       );
     }
   },

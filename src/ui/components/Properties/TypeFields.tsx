@@ -1,7 +1,8 @@
 import { useStore } from "../../state/store";
 import type { WidgetNode } from "@core/model/nodes";
-import { gaugeFillAmount } from "@core/model/gaugeFill";
 import { NumberInput } from "../NumberInput";
+import { TypedExpressionInput } from "./FieldEditor";
+import { GfxPicker } from "./GfxPicker";
 
 /** First-class, type-specific fields (caption, text, gfx, etc.). */
 export function TypeFields({ node }: { node: WidgetNode }) {
@@ -30,23 +31,20 @@ export function TypeFields({ node }: { node: WidgetNode }) {
       {label}
       <NumberInput
         step={step}
+        integer={key === "digits" || key === "columns"}
+        min={key === "digits" || key === "columns" ? 1 : undefined}
         value={value}
         onCommit={(v) => updateNode(node.id, { [key]: v } as Partial<WidgetNode>)}
       />
     </label>
   );
 
-  const gaugeFillField = () => (
-    <label>
-      Fill amount
-      <NumberInput
-        min={0}
-        max={1}
-        step={0.01}
-        value={gaugeFillAmount(node.type === "gauge" ? node.fillExpr : undefined)}
-        onCommit={(v) => updateNode(node.id, { fillExpr: String(v) } as Partial<WidgetNode>)}
-      />
-    </label>
+  const expressionField = (label: string, key: string, value: string, min?: number, max?: number) => (
+    <div className="content-field" key={key}>
+      <span>{label}</span>
+      <TypedExpressionInput field={{ name: label, type: "float", category: "float" }} value={value} min={min} max={max}
+        onChange={expr => updateNode(node.id, { [key]: expr } as Partial<WidgetNode>)} />
+    </div>
   );
 
   return (
@@ -70,7 +68,10 @@ export function TypeFields({ node }: { node: WidgetNode }) {
       {node.type === "text-frame" && textField("Text entry (lang key)", "text", node.text)}
       {node.type === "station-text-reader-single" && textField("Body text entry", "text", node.text)}
 
-      {node.type === "image" && textField("Gfx file/name", "gfx", node.gfx)}
+      {node.type === "image" && <div className="content-field"><span>Gfx file/name</span>
+        <GfxPicker value={node.gfx} onChange={gfx => updateNode(node.id, { gfx })}
+          onClear={() => updateNode(node.id, { gfx: "" })} />
+      </div>}
       {node.type === "image" && (
         <div className="checkbox-row">
           <label>
@@ -84,17 +85,17 @@ export function TypeFields({ node }: { node: WidgetNode }) {
         </div>
       )}
 
-      {node.type === "gauge" && gaugeFillField()}
+      {node.type === "gauge" && expressionField("Fill amount", "fillExpr", node.fillExpr, 0, 1)}
       {node.type === "label" && numField("Font size mul", "fontSizeMul", node.fontSizeMul, 0.1)}
       {node.type === "station-numpad" && numField("Digits", "digits", node.digits)}
       {node.type === "advanced-imgui" && textField("Raw HPS code", "code", node.code, true)}
 
       {(node.type === "slider-h" || node.type === "slider-v") && (
         <>
-          {textField("Default value", "defaultValue", node.defaultValue)}
-          {textField("Min", "min", node.min)}
-          {textField("Max", "max", node.max)}
-          {textField("Step", "step", node.step)}
+          {expressionField("Default value", "defaultValue", node.defaultValue)}
+          {expressionField("Min", "min", node.min)}
+          {expressionField("Max", "max", node.max)}
+          {expressionField("Step", "step", node.step)}
         </>
       )}
 
@@ -103,18 +104,10 @@ export function TypeFields({ node }: { node: WidgetNode }) {
       {node.type === "multi-toggle" && numField("Columns", "columns", node.columns)}
 
       {node.type === "layout" && (
-        <label>
-          Layout type
-          <select
-            value={node.layoutType}
-            onChange={(e) => updateNode(node.id, { layoutType: e.target.value })}
-          >
-            <option value="eImGuiLayout_X">X (horizontal)</option>
-            <option value="eImGuiLayout_Y">Y (vertical)</option>
-            <option value="eImGuiLayout_XY">XY (wrap)</option>
-            <option value="eImGuiLayout_X_Tabbed">X Tabbed</option>
-          </select>
-        </label>
+        <div className="content-field"><span>Layout type</span>
+          <TypedExpressionInput field={{ name: "Layout type", type: "eImGuiLayout", category: "enum", enumType: "eImGuiLayout" }}
+            value={node.layoutType} onChange={layoutType => updateNode(node.id, { layoutType })} />
+        </div>
       )}
     </div>
   );

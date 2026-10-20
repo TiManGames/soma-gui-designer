@@ -1,4 +1,10 @@
 import type { SomaDocument } from "./document";
+export function accumulatedZ(doc: SomaDocument, node: WidgetNode): number {
+  let z = 0, current: WidgetNode | undefined = node;
+  const seen = new Set<string>();
+  while (current && !seen.has(current.id)) { seen.add(current.id); z += current.z; current = doc.nodes.find(n => n.id === current!.parentId); }
+  return z;
+}
 import { ROOT, type WidgetNode } from "./nodes";
 import { isContainerType } from "./defaults";
 

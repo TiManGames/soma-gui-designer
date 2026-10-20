@@ -5,7 +5,9 @@ import {
   hexToRgb,
   parseColorExpr,
   parseFloatExpr,
-  rgbaToHex
+  rgbaToHex,
+  parseVec,
+  parseSizeKeepRatio
 } from "../src/ui/components/Properties/exprHelpers";
 import { paletteColors } from "../src/core/schema/loadSchema";
 
@@ -52,5 +54,24 @@ describe("float expressions", () => {
 
   it("returns null for non-numeric exprs", () => {
     expect(parseFloatExpr("ImGui_NrmSizeKeepRatio(0.035f)")).toBeNull();
+  });
+
+  it("accepts signed decimals and scientific notation without accepting formulas", () => {
+    expect(parseFloatExpr("+1.25e-3f")).toBe(0.00125);
+    expect(parseFloatExpr("-.5F")).toBe(-0.5);
+    for (const value of ["", "1.0f + offset", "1junk", "1f2", "Infinity", "NaN"]) expect(parseFloatExpr(value)).toBeNull();
+    expect(floatExpr(1e-7)).toBe("1.0e-7f");
+  });
+});
+
+describe("compound literals", () => {
+  it("requires full constructors, numeric components, and correct arity", () => {
+    expect(parseVec("cVector2f(0.25f)")).toEqual([0.25, 0.25]);
+    expect(parseVec("cVector3f(1,2,3)")).toEqual([1, 2, 3]);
+    for (const expr of ["cVector2f(1,2) * 2", "cVector2f(1 + offset,2)", "cVector2f(1,2,3)", "cVector3f(1,2)"]) expect(parseVec(expr)).toBeNull();
+    for (const expr of ["cColor(1,1,1) * fade", "cColor(1 + offset,0,0)", "cColor(1,2,3,4,5)"]) expect(parseColorExpr(expr, [])).toBeNull();
+    expect(parseSizeKeepRatio("ImGui_NrmSizeKeepRatio(0.02f) * scale")).toBeNull();
+    expect(parseSizeKeepRatio("ImGui_NrmSizeKeepRatio(0.02f + offset)")).toBeNull();
+    expect(parseSizeKeepRatio("ImGui_NrmSizeKeepRatio(2e-2f)")).toBe(0.02);
   });
 });

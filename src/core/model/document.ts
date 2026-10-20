@@ -37,6 +37,7 @@ export interface ResolutionPreset {
 
 // Ported verbatim from legacy/app.js:1-18.
 export const RESOLUTION_PRESETS: ResolutionPreset[] = [
+  { id: "768x613", label: "768 × 613 (Default Station Terminal)", x: 768, y: 613 },
   { id: "1280x720", label: "1280×720 (16:9 HD)", x: 1280, y: 720 },
   { id: "1600x900", label: "1600×900 (16:9)", x: 1600, y: 900 },
   { id: "1920x1080", label: "1920×1080 (16:9 Full HD)", x: 1920, y: 1080 },

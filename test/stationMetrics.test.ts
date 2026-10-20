@@ -55,7 +55,7 @@ describe("station window metrics", () => {
       x: 108,
       y: 50 + metrics.headerHeight + 10,
       w: 472,
-      h: 260
+      h: 300 - metrics.headerHeight - 10 - 30
     });
   });
 

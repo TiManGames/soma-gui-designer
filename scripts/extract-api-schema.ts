@@ -10,7 +10,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
-import { dirname } from "node:path";
+import { dirname, resolve, join } from "node:path";
 import type {
   ApiSchema,
   EnumDef,
@@ -30,8 +30,19 @@ void ROOT;
 const SOURCES = {
   api: "soma_scripts/hps_api.hps",
   wrapper: "soma_scripts/script/helpers/helper_imgui.hps",
-  station: "soma_scripts/script/custom_depth/helper_custom_depth_imgui/helper_imgui_station_basics.hps"
+  station: "soma_scripts/script/custom_depth/helper_custom_depth_imgui/helper_imgui_station_basics.hps",
+  apps: "soma_scripts/script/custom_depth/helper_custom_depth_imgui/helper_imgui_station_apps_common.hps"
 };
+
+/** Accept either a retail root, copied root/script layout, or flattened script tree. */
+export function discoverSources(root: string): typeof SOURCES | null {
+  const api = join(root, "hps_api.hps");
+  const script = existsSync(join(root, "script", "helpers", "helper_imgui.hps")) ? join(root, "script") : root;
+  const wrapper = join(script, "helpers", "helper_imgui.hps");
+  const station = join(script, "custom_depth", "helper_custom_depth_imgui", "helper_imgui_station_basics.hps");
+  const apps = join(dirname(station), "helper_imgui_station_apps_common.hps");
+  return [api, wrapper, station, apps].every(existsSync) ? { api, wrapper, station, apps } : null;
+}
 
 // Struct classes we surface for property editing.
 const STRUCT_CLASSES = [
@@ -45,6 +56,7 @@ const STRUCT_CLASSES = [
   "cImGuiMultiSelectData",
   "cImGuiFrameData",
   "cImGuiFont",
+  "cImGuiFrameGfx",
   "cImGuiGfx"
 ];
 
@@ -53,6 +65,7 @@ const ENUM_NAMES = [
   "eFontAlign",
   "eImGuiAlign",
   "eImGuiGfx",
+  "eImGuiWrapMode",
   "eImGuiLayout",
   "eImGuiWindowHeader",
   "eImGuiGaugeOrientation",
@@ -66,13 +79,18 @@ function categorize(type: string): { category: FieldCategory; enumType?: string 
     case "cColor":
       return { category: "color" };
     case "float":
+    case "double":
       return { category: "float" };
     case "int":
+    case "int64":
     case "uint":
     case "uint64":
       return { category: "int" };
     case "bool":
       return { category: "bool" };
+    case "tString":
+    case "string":
+      return { category: "string" };
     case "cVector2f":
       return { category: "vec2" };
     case "cVector3f":
@@ -116,11 +134,18 @@ function parseStruct(src: string, name: string): StructDef {
 
   const fields: StructField[] = [];
   const methods: string[] = [];
-  const fieldRe = /^([A-Za-z_][\w]*)\s+([A-Za-z_]\w*)\s*;$/;
+  const fieldRe = /^([A-Za-z_][\w]*)\s+([A-Za-z_]\w*)\s*(?:=[^;]*)?;$/;
   // Methods taking only float params (e.g. SetPadding(float, float, ...)).
   const methodRe = /^\s*(?:void\s+)?([A-Za-z_]\w*)\s*\(([^)]*)\)\s*;$/;
 
-  for (const line of body) {
+  let depth = 0;
+  for (const original of body) {
+    const line = original.replace(/\/\/.*$/, "").trim();
+    const previousDepth = depth;
+    // Skip constructor/method bodies; only class-level declarations are fields.
+    const unquoted = line.replace(/"(?:\\.|[^"\\])*"/g, '""');
+    depth += (unquoted.match(/\{/g)?.length ?? 0) - (unquoted.match(/\}/g)?.length ?? 0);
+    if (previousDepth > 0 || depth > 0) continue;
     const fm = fieldRe.exec(line);
     if (fm) {
       const [, type, fname] = fm;
@@ -208,10 +233,14 @@ function parsePalette(src: string): PaletteColor[] {
 
 function main() {
   const outPath = p("src/data/api-schema.json");
+  const flag = process.argv.indexOf("--game-root");
+  const explicit = flag >= 0 ? process.argv[flag + 1] : process.env.SOMA_ROOT;
+  const sources = discoverSources(resolve(explicit ?? p("soma_scripts")));
+  if (explicit && !sources) throw new Error(`SOMA source files are incomplete under ${explicit}`);
 
   // soma_scripts/ is gitignored ground truth. On a fresh clone without it, fall
   // back to the already-committed schema rather than failing the build.
-  if (!existsSync(p(SOURCES.api))) {
+  if (!sources) {
     if (existsSync(outPath)) {
       console.log(
         `soma_scripts/ not found; keeping committed ${outPath}. ` +
@@ -225,15 +254,22 @@ function main() {
     );
   }
 
-  const api = readFileSync(p(SOURCES.api), "utf8");
-  const wrapper = readFileSync(p(SOURCES.wrapper), "utf8");
-  const station = readFileSync(p(SOURCES.station), "utf8");
+  const api = readFileSync(sources.api, "utf8");
+  const wrapper = readFileSync(sources.wrapper, "utf8");
+  const station = readFileSync(sources.station, "utf8");
+  const apps = readFileSync(sources.apps, "utf8");
 
   const structs: Record<string, StructDef> = {};
   for (const name of STRUCT_CLASSES) structs[name] = parseStruct(api, name);
+  structs.cStationGui_TextReaderSettings = parseStruct(apps, "cStationGui_TextReaderSettings");
 
   const enums: Record<string, EnumDef> = {};
   for (const name of ENUM_NAMES) enums[name] = parseEnum(api, name);
+  for (const struct of Object.values(structs)) {
+    for (const field of struct.fields) {
+      if (field.enumType && !enums[field.enumType]) enums[field.enumType] = parseEnum(api, field.enumType);
+    }
+  }
 
   const schema: ApiSchema = {
     generatedFrom: Object.values(SOURCES),

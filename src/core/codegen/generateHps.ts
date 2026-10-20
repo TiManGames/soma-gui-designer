@@ -42,7 +42,9 @@ function emitNode(
     }
   };
   // Cast is safe: EMITTERS is keyed by the same discriminant as node.type.
+  if (!node.enabled) lines.push(`${indent}ImGui_PushModifiers();`, `${indent}ImGui_SetModUseInput(false);`);
   (EMITTERS[node.type].emit as (c: EmitCtx, n: WidgetNode) => void)(ctx, node);
+  if (!node.enabled) lines.push(`${indent}ImGui_PopModifiers();`);
 }
 
 // Ported from legacy/app.js:776-794.

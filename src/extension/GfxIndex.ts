@@ -1,18 +1,19 @@
 import * as vscode from "vscode";
+import { findResource } from "@core/preview/resourceIndex";
 
-const SUPPORTED_EXTS = [".png", ".jpg", ".jpeg", ".tga"] as const;
-const EXT_PROBE_ORDER = [".png", ".jpg", ".jpeg", ".tga"] as const;
+const SUPPORTED_EXTS = [".png", ".jpg", ".jpeg", ".tga", ".dds", ".fnt"] as const;
 
 /** How a resolved file should be delivered to the webview. */
 export type ResolvedGfx =
   | { kind: "uri"; fileUri: vscode.Uri } // PNG/JPG served via asWebviewUri
-  | { kind: "tga"; fileUri: vscode.Uri }; // TGA read as bytes, decoded in webview
+  | { kind: "tga" | "dds" | "font"; fileUri: vscode.Uri };
 
 interface Root {
   /** Absolute uri of a `graphics` folder. */
   uri: vscode.Uri;
   /** true if this is the mod folder (higher priority than the base game). */
   isMod: boolean;
+  prefix?: string;
 }
 
 /**
@@ -27,19 +28,18 @@ export class GfxIndex {
   private roots: Root[] = [];
   /** normalized-path (no ext) -> absolute file uri. Mod entries inserted last so they win. */
   private byPath = new Map<string, vscode.Uri>();
-  /** basename (no ext) -> absolute file uri, as a last-resort match. */
-  private byBase = new Map<string, vscode.Uri>();
+  private entries: { key: string; isMod: boolean; uri: vscode.Uri }[] = [];
 
   /** Rebuild the index from the current workspace configuration. */
   async reindex(): Promise<void> {
     this.byPath.clear();
-    this.byBase.clear();
+    this.entries = [];
     this.roots = resolveRoots();
 
     // Walk base first then mod, so mod overwrites base on key collisions.
     const ordered = [...this.roots].sort((a, b) => Number(a.isMod) - Number(b.isMod));
     for (const root of ordered) {
-      await this.walk(root.uri, root.uri);
+      await this.walk(root.uri, root.uri, root.prefix ?? "", root.isMod);
     }
   }
 
@@ -51,7 +51,7 @@ export class GfxIndex {
   /** The configured root URIs (mod first, then base), for use as dialog defaultUri. */
   rootUris(): vscode.Uri[] {
     const ordered = [...this.roots].sort((a, b) => Number(b.isMod) - Number(a.isMod));
-    return ordered.map((r) => r.uri);
+    return ordered.filter(r => !r.prefix).map((r) => r.uri);
   }
 
   /**
@@ -80,54 +80,15 @@ export class GfxIndex {
   }
 
   /**
-   * Resolve a gfx reference to a file. Returns null when nothing matches or the
-   * only candidate is an unsupported format (e.g. DDS) — the webview then falls
-   * back to CSS placeholder rendering.
+   * Resolve a graphics/font reference, retaining its extension for decoding.
+   * Missing or unsupported files are reported by the preview surface.
    */
   resolve(gfx: string): ResolvedGfx | null {
-    const norm = normalizeName(gfx);
-    if (!norm) return null;
-
-    const givenExt = extOf(norm);
-    // If the name already carries an extension, try it verbatim first.
-    const candidates: string[] = [];
-    if (givenExt) {
-      candidates.push(norm);
-      // Also try swapping to a supported ext if the given one is unsupported (e.g. .dds).
-      const stem = norm.slice(0, norm.length - givenExt.length);
-      for (const ext of EXT_PROBE_ORDER) candidates.push(stem + ext);
-    } else {
-      for (const ext of EXT_PROBE_ORDER) candidates.push(norm + ext);
-    }
-
-    for (const cand of candidates) {
-      const hit = this.lookup(cand);
-      if (hit) return classify(hit);
-    }
-    return null;
+    const hit = findResource(this.entries, gfx);
+    return hit ? classify(hit.uri) : null;
   }
 
-  /** Match a fully-extensioned normalized path by suffix, then by basename. */
-  private lookup(pathWithExt: string): vscode.Uri | null {
-    const key = stripExt(pathWithExt);
-    // Exact / suffix match against indexed normalized paths.
-    const exact = this.byPath.get(key);
-    if (exact && extMatches(exact, pathWithExt)) return exact;
-
-    // Suffix match: the requested path is a tail of an indexed path.
-    for (const [indexedKey, uri] of this.byPath) {
-      if (indexedKey.endsWith("/" + key) && extMatches(uri, pathWithExt)) return uri;
-    }
-
-    // Basename fallback.
-    const base = key.includes("/") ? key.slice(key.lastIndexOf("/") + 1) : key;
-    const byBase = this.byBase.get(base);
-    if (byBase && extMatches(byBase, pathWithExt)) return byBase;
-
-    return null;
-  }
-
-  private async walk(dir: vscode.Uri, root: vscode.Uri): Promise<void> {
+  private async walk(dir: vscode.Uri, root: vscode.Uri, prefix: string, isMod: boolean): Promise<void> {
     let entries: [string, vscode.FileType][];
     try {
       entries = await vscode.workspace.fs.readDirectory(dir);
@@ -137,15 +98,14 @@ export class GfxIndex {
     for (const [name, kind] of entries) {
       const child = vscode.Uri.joinPath(dir, name);
       if (kind === vscode.FileType.Directory) {
-        await this.walk(child, root);
+        await this.walk(child, root, prefix, isMod);
       } else if (kind === vscode.FileType.File) {
         const ext = extOf(name.toLowerCase());
         if (!SUPPORTED_EXTS.includes(ext as (typeof SUPPORTED_EXTS)[number])) continue;
         const rel = relativePath(root, child).toLowerCase();
-        const key = stripExt(rel);
+        const key = prefix + stripExt(rel);
+        this.entries.push({ key: prefix + rel, isMod, uri: child });
         this.byPath.set(key, child);
-        const base = key.includes("/") ? key.slice(key.lastIndexOf("/") + 1) : key;
-        this.byBase.set(base, child); // last writer wins → mod overrides base
       }
     }
   }
@@ -161,6 +121,10 @@ function resolveRoots(): Root[] {
   if (baseUri) roots.push({ uri: baseUri, isMod: false });
   const modUri = toUri(mod);
   if (modUri) roots.push({ uri: modUri, isMod: true });
+  const baseFont = toUri((cfg.get<string>("baseGameFontsPath") ?? "").trim()) ?? (baseUri ? vscode.Uri.joinPath(baseUri, "..", "fonts") : null);
+  const modFont = toUri((cfg.get<string>("modFontsPath") ?? "").trim()) ?? (modUri ? vscode.Uri.joinPath(modUri, "..", "fonts") : null);
+  if (baseFont) roots.push({ uri: baseFont, isMod: false, prefix: "@font/" });
+  if (modFont) roots.push({ uri: modFont, isMod: true, prefix: "@font/" });
   return roots;
 }
 
@@ -174,15 +138,6 @@ function toUri(p: string): vscode.Uri | null {
 
 function isAbsolute(p: string): boolean {
   return /^([a-zA-Z]:[\\/]|[\\/])/.test(p);
-}
-
-/** Normalize a gfx reference: strip quotes, backslashes, leading graphics/, lowercase. */
-function normalizeName(gfx: string): string {
-  let s = gfx.trim().replace(/^["']|["']$/g, "");
-  s = s.replace(/\\/g, "/").replace(/^\.\//, "");
-  s = s.replace(/^graphics\//i, "");
-  s = s.replace(/^\/+/, "");
-  return s.toLowerCase();
 }
 
 function relativePath(root: vscode.Uri, child: vscode.Uri): string {
@@ -201,14 +156,7 @@ function stripExt(name: string): string {
   return ext ? name.slice(0, name.length - ext.length) : name;
 }
 
-function extMatches(uri: vscode.Uri, wanted: string): boolean {
-  const wantExt = extOf(wanted);
-  if (!wantExt) return true;
-  return extOf(uri.path.toLowerCase()) === wantExt;
-}
-
 function classify(fileUri: vscode.Uri): ResolvedGfx {
-  return extOf(fileUri.path.toLowerCase()) === ".tga"
-    ? { kind: "tga", fileUri }
-    : { kind: "uri", fileUri };
+  const ext = extOf(fileUri.path.toLowerCase());
+  return { kind: ext === ".tga" ? "tga" : ext === ".dds" ? "dds" : ext === ".fnt" ? "font" : "uri", fileUri };
 }

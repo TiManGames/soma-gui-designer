@@ -2,11 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "../../state/store";
 import { previewSize, absoluteRect } from "@core/model/geometry";
 import { findDropTarget } from "@core/model/hitTest";
-import { nodeDepth } from "@core/model/tree";
+import { accumulatedZ } from "@core/model/tree";
 import { WidgetView } from "./WidgetView";
 import { CanvasToolbar } from "./CanvasToolbar";
 import { ContextMenu, type ContextMenuEntry } from "./ContextMenu";
 import { canvasScale, scaledCanvasSize } from "@core/model/canvasScale";
+import { WysiwygCanvas } from "./WysiwygCanvas";
+import { usePreview } from "../../state/previewStore";
 
 interface CtxState {
   x: number;
@@ -28,6 +30,11 @@ export function Canvas() {
   const cutNode = useStore((s) => s.cutNode);
   const pasteNode = useStore((s) => s.pasteNode);
   const deleteNode = useStore((s) => s.deleteNode);
+  const wysiwyg = useStore(s => s.wysiwygEnabled);
+  const preview = usePreview(s => s.scene);
+  const previewDoc = usePreview(s => s.doc);
+  const diagnostics = usePreview(s => s.diagnostics);
+  const error = usePreview(s => s.error);
 
   const size = previewSize(doc);
   const scale = canvasScale(size);
@@ -72,7 +79,8 @@ export function Canvas() {
           const rect = canvas.getBoundingClientRect();
           const px = (e.clientX - rect.left) / scale;
           const py = (e.clientY - rect.top) / scale;
-          const target = findDropTarget(useStore.getState().doc, drag.id, { x: px, y: py });
+          const current = usePreview.getState();
+          const target = findDropTarget(useStore.getState().doc, drag.id, { x: px, y: py }, current.scene?.rects);
           const currentParent = useStore.getState().doc.nodes.find((n) => n.id === drag.id)?.parentId;
           setDropTarget(target !== currentParent ? target : null);
         }
@@ -124,6 +132,7 @@ export function Canvas() {
   return (
     <>
       <CanvasToolbar />
+      {wysiwyg && (error || diagnostics.length > 0) && <details className="preview-status" open={!!error}><summary>{error || `${diagnostics.length} preview notice${diagnostics.length === 1 ? "" : "s"}`}</summary><ul>{diagnostics.map(message => <li key={message}>{message}</li>)}</ul></details>}
       <div
         className={`canvas-scroller${panning ? " panning" : ""}`}
         ref={scrollerRef}
@@ -165,12 +174,14 @@ export function Canvas() {
               if (e.target === e.currentTarget) openCtx(e, null);
             }}
           >
+            {wysiwyg && <WysiwygCanvas />}
+            {wysiwyg && gridVisible && <div className="gui-grid-overlay" style={{ backgroundSize: `${doc.gridSize}px ${doc.gridSize}px` }} />}
             {orderedNodes.map((node) => (
               <WidgetView
                 key={node.id}
                 node={node}
-                rect={absoluteRect(doc, node)}
-                zIndex={nodeDepth(doc, node) * 1000 + Math.round(node.z * 10)}
+                rect={wysiwyg && previewDoc === doc ? preview?.rects.get(node.id) ?? absoluteRect(doc, node) : absoluteRect(doc, node)}
+                zIndex={Math.max(1, 10000 + Math.round(accumulatedZ(doc, node) * 100))}
                 onContextMenu={openCtx}
               />
             ))}

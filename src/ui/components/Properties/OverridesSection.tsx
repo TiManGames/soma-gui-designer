@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useStore } from "../../state/store";
 import { WIDGETS } from "@core/model/defaults";
-import { getStruct } from "@core/schema/loadSchema";
+import { getStruct, getStructField } from "@core/schema/loadSchema";
 import type { FieldCategory, StructField } from "@core/schema/api-schema.types";
 import type { Override, WidgetNode, WidgetType } from "@core/model/nodes";
 import { getFrameGfxDefaults } from "@core/model/frameDefaults";
 import { FieldEditor } from "./FieldEditor";
 import { FrameGfxEditor } from "./FrameGfxEditor";
-import { GfxPicker } from "./GfxPicker";
+import { ExpressionControl } from "./ExpressionControl";
+import { clearFieldOverride, getGfxFieldValue, setFieldExpression } from "@core/model/overrides";
 
 // ---- Hand-authored param fields for bg-* widgets (no dataClass) ----------------
 
@@ -151,280 +152,81 @@ const WIDGET_FIELD_GROUPS: Partial<Record<WidgetType, FieldGroup[]>> = {
   ]
 };
 
-// ---- Helpers -------------------------------------------------------------------
-
-function upsertExpr(overrides: Override[], path: string, expr: string): Override[] {
-  const idx = overrides.findIndex((o) => o.kind === "expr" && o.path === path);
-  const next: Override = { kind: "expr", path, expr };
-  return idx >= 0 ? overrides.map((o, i) => (i === idx ? next : o)) : [...overrides, next];
-}
-
-function removeExpr(overrides: Override[], path: string): Override[] {
-  return overrides.filter((o) => !(o.kind === "expr" && o.path === path));
-}
-
-function upsertCall(overrides: Override[], call: string, matchPrefix: string): Override[] {
-  const idx = overrides.findIndex((o) => o.kind === "call" && o.call.startsWith(matchPrefix));
-  const next: Override = { kind: "call", call };
-  return idx >= 0 ? overrides.map((o, i) => (i === idx ? next : o)) : [...overrides, next];
-}
-
-function removeCall(overrides: Override[], matchPrefix: string): Override[] {
-  return overrides.filter((o) => !(o.kind === "call" && o.call.startsWith(matchPrefix)));
-}
-
-// ---- Main component ------------------------------------------------------------
+// ---- Shared field rendering ----------------------------------------------------
 
 export function OverridesSection({ node }: { node: WidgetNode }) {
-  const setOverrides = useStore((s) => s.setOverrides);
-  const previewHeight = useStore((s) => Math.max(1, s.doc.previewResolution.y));
-  const meta = WIDGETS[node.type];
+  const setOverrides = useStore(s => s.setOverrides);
+  const previewHeight = useStore(s => Math.max(1, s.doc.previewResolution.y));
   const [showAll, setShowAll] = useState(false);
-
-  const applyOverrides = (overrides: Override[]) => setOverrides(node.id, overrides);
-
-  // ---- bg-* widgets (no dataClass) ----
-  if (!meta.dataClass) {
-    const bgFields = BG_PARAM_FIELDS[node.type];
-    if (!bgFields) return null;
-
-    const exprByPath = new Map<string, string>();
-    node.overrides.forEach((ov) => {
-      if (ov.kind === "expr") exprByPath.set(ov.path, ov.expr);
-    });
-
-    return (
-      <div className="field-group">
-        <h3>Parameters</h3>
-        {bgFields.map((field) => {
-          if (field.category === "gfx") {
-            // file field: stored as quoted expr, e.g. "station/scanlines/standard_tileable"
-            const raw = exprByPath.get(field.name) ?? "";
-            const path = raw.replace(/^["']|["']$/g, "");
-            return (
-              <div key={field.name} className="override-row" style={{ opacity: path ? 1 : 0.75 }}>
-                <label style={{ margin: 0 }}>
-                  <span style={{ fontFamily: "monospace" }}>{field.name}</span>
-                  <GfxPicker
-                    value={path}
-                    onChange={(p) => applyOverrides(upsertExpr(node.overrides, field.name, `"${p}"`))}
-                    onClear={path ? () => applyOverrides(removeExpr(node.overrides, field.name)) : undefined}
-                  />
-                </label>
-                <span />
-              </div>
-            );
-          }
-          return (
-            <FieldEditor
-              key={field.name}
-              field={field}
-              value={exprByPath.get(field.name)}
-              onChange={(expr) => applyOverrides(upsertExpr(node.overrides, field.name, expr))}
-              onClear={() => applyOverrides(removeExpr(node.overrides, field.name))}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-
-  // ---- Widgets with a dataClass ----
+  const meta = WIDGETS[node.type];
   const struct = getStruct(meta.dataClass);
-
-  // Index expr overrides by path for FieldEditor.
+  const fields = struct?.fields ?? BG_PARAM_FIELDS[node.type] ?? [];
+  const apply = (overrides: Override[]) => setOverrides(node.id, overrides);
   const exprByPath = new Map<string, string>();
-  const calls: { index: number; call: string }[] = [];
-  node.overrides.forEach((ov, index) => {
-    if (ov.kind === "expr") exprByPath.set(ov.path, ov.expr);
-    else calls.push({ index, call: ov.call });
-  });
+  node.overrides.forEach(o => { if (o.kind === "expr") exprByPath.set(o.path, o.expr); });
+  const defaults = getFrameGfxDefaults(node.type, previewHeight);
 
-  const updateCall = (index: number, call: string) =>
-    applyOverrides(node.overrides.map((o, i) => (i === index ? { kind: "call", call } : o)));
-  const removeCallAt = (index: number) =>
-    applyOverrides(node.overrides.filter((_, i) => i !== index));
-  const addCall = () => applyOverrides([...node.overrides, { kind: "call", call: "" }]);
-
-  // No schema — raw call editor fallback.
-  if (!struct) {
-    return (
-      <div className="field-group">
-        <h3>Overrides ({meta.dataClass})</h3>
-        <p style={{ color: "var(--text-faint)", fontSize: 11.5, margin: "0 0 var(--s2)" }}>
-          No struct schema; edit method calls below.
-        </p>
-        {calls.map(({ index, call }) => (
-          <div className="override-row" key={index}>
-            <input value={call} onChange={(e) => updateCall(index, e.target.value)} />
-            <button className="danger" onClick={() => removeCallAt(index)}>×</button>
-          </div>
-        ))}
-        <div className="button-row">
-          <button onClick={addCall}>+ Method</button>
+  const renderField = (field: StructField) => {
+    const value = field.type === "cImGuiGfx" ? getGfxFieldValue(node.overrides, field.name) : exprByPath.get(field.name);
+    const onChange = (expr: string) => apply(setFieldExpression(node.overrides, field.name, expr, field.type === "cImGuiGfx"));
+    const onClear = () => apply(clearFieldOverride(node.overrides, field.name));
+    if (field.type === "cImGuiFrameGfx") {
+      return <div className="override-row" key={field.name}>
+        <div className="override-field"><span className="override-name">{field.name}</span>
+          <ExpressionControl label={field.name} value={value} canEditValue={value === undefined} onChange={onChange}>
+            <FrameGfxEditor fieldName={field.name} overrides={node.overrides} defaults={defaults} onChange={apply} />
+          </ExpressionControl>
         </div>
-      </div>
-    );
-  }
+        {value !== undefined ? <button type="button" className="danger" aria-label={`Remove ${field.name} override`} title={`Remove ${field.name} override`} onClick={onClear}>×</button> : <span />}
+      </div>;
+    }
+    return <FieldEditor key={field.name} field={field} value={value} onChange={onChange} onClear={onClear} />;
+  };
 
-  // Build a field lookup for the struct.
-  const fieldByName = new Map(struct.fields.map((f) => [f.name, f]));
+  const groups = WIDGET_FIELD_GROUPS[node.type] ?? [];
+  const grouped = new Set(groups.flatMap(g => g.frameGfx ? [g.frameGfx] : g.fields));
+  const isActive = (field: StructField) => node.overrides.some(o => o.kind === "expr"
+    ? o.path === field.name || o.path.startsWith(field.name + ".")
+    : o.call.trim().startsWith(field.name + "."));
+  const remaining = fields.filter(f => !grouped.has(f.name));
+  const visible = remaining.filter(f => !meta.dataClass || showAll || isActive(f));
+  // Existing nested/unknown assignments remain editable instead of disappearing.
+  const extraPaths = new Set([...exprByPath.keys(), ...node.overrides.flatMap(o => {
+    const match = o.kind === "call" ? /^([\w.]+)\.SetFile\(/.exec(o.call.trim()) : null;
+    return match ? [match[1]] : [];
+  })]);
+  const additional = [...extraPaths].filter(path => !fields.some(f => f.name === path))
+    .filter(path => !fields.some(f => f.type === "cImGuiFrameGfx" && path.startsWith(f.name + ".mGfx") && path.split(".").length === 2))
+    .map(path => meta.dataClass ? getStructField(meta.dataClass, path)
+      ?? { name: path, type: "AngelScript", category: "unknown" as const }
+      : { name: path, type: "AngelScript", category: "unknown" as const });
+  const calls = node.overrides.flatMap((o, index) => o.kind === "call" ? [{ call: o.call, index }] : []);
 
-  // ---- Curated groups layout ----
-  const groups = WIDGET_FIELD_GROUPS[node.type as WidgetType];
-
-  if (groups) {
-    return (
-      <>
-        {groups.map((group) => {
-          // FrameGfx group
-          if (group.frameGfx) {
-            const defs = getFrameGfxDefaults(node.type as WidgetType, previewHeight);
-            return (
-              <div className="field-group" key={group.frameGfx}>
-                <h3>{group.title}</h3>
-                <FrameGfxEditor
-                  fieldName={group.frameGfx}
-                  overrides={node.overrides}
-                  defaults={defs}
-                  onChange={applyOverrides}
-                />
-              </div>
-            );
-          }
-
-          // Regular field group — skip empty groups
-          const renderable = group.fields
-            .map((name) => fieldByName.get(name))
-            .filter((f): f is (typeof struct.fields)[0] => f !== undefined);
-          if (renderable.length === 0) return null;
-
-          return (
-            <div className="field-group" key={group.title}>
-              <h3>{group.title}</h3>
-              {renderable.map((field) => {
-                if (field.type === "cImGuiGfx") {
-                  // Single-texture GfxPicker → stored as kind:"call" SetFile
-                  const callPrefix = `${field.name}.SetFile(`;
-                  const existing = node.overrides.find(
-                    (o) => o.kind === "call" && o.call.startsWith(callPrefix)
-                  );
-                  const currentPath = existing?.kind === "call"
-                    ? (existing.call.match(/SetFile\(["']([^"']+)["']\)/) ?? [])[1] ?? ""
-                    : "";
-                  return (
-                    <div key={field.name} className="override-row" style={{ opacity: currentPath ? 1 : 0.75 }}>
-                      <label style={{ margin: 0 }}>
-                        <span style={{ fontFamily: "monospace" }}>{field.name}</span>
-                        <GfxPicker
-                          value={currentPath}
-                          onChange={(path) =>
-                            applyOverrides(upsertCall(node.overrides, `${field.name}.SetFile("${path}")`, callPrefix))
-                          }
-                          onClear={currentPath ? () => applyOverrides(removeCall(node.overrides, callPrefix)) : undefined}
-                        />
-                      </label>
-                      <span />
-                    </div>
-                  );
-                }
-                return (
-                  <FieldEditor
-                    key={field.name}
-                    field={field}
-                    value={exprByPath.get(field.name)}
-                    onChange={(expr) => applyOverrides(upsertExpr(node.overrides, field.name, expr))}
-                    onClear={() => applyOverrides(removeExpr(node.overrides, field.name))}
-                  />
-                );
-              })}
-            </div>
-          );
-        })}
-
-        {/* Method calls (padding etc.) */}
-        {struct.methods.length > 0 && (
-          <div className="field-group">
-            <h3>Method calls</h3>
-            {calls.map(({ index, call }) => (
-              <div className="override-row" key={index}>
-                <input
-                  list={`methods-${node.id}`}
-                  value={call}
-                  placeholder="SetPadding(20,20,20,20)"
-                  onChange={(e) => updateCall(index, e.target.value)}
-                />
-                <button className="danger" onClick={() => removeCallAt(index)}>×</button>
-              </div>
-            ))}
-            <datalist id={`methods-${node.id}`}>
-              {struct.methods.map((m) => (
-                <option key={m} value={`${m}()`} />
-              ))}
-            </datalist>
-            <div className="button-row">
-              <button onClick={addCall}>+ Method</button>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  }
-
-  // ---- Fallback: all fields (widgets not in WIDGET_FIELD_GROUPS, e.g. checkbox) ----
-  const visibleFields = struct.fields.filter(
-    (f) => showAll || exprByPath.has(f.name)
-      || calls.some((c) => c.call.startsWith(f.name + "."))
-  );
-
-  return (
-    <div className="field-group">
-      <h3>
-        Overrides{" "}
-        <span style={{ color: "var(--muted)", textTransform: "none" }}>({meta.dataClass})</span>
-      </h3>
-
-      {visibleFields.map((field) => (
-        <FieldEditor
-          key={field.name}
-          field={field}
-          value={exprByPath.get(field.name)}
-          onChange={(expr) => applyOverrides(upsertExpr(node.overrides, field.name, expr))}
-          onClear={() => applyOverrides(removeExpr(node.overrides, field.name))}
-          onGfxChange={(call) => applyOverrides(upsertCall(node.overrides, call, field.name + ".SetFile("))}
-        />
-      ))}
-
-      <div className="button-row">
-        <button onClick={() => setShowAll((v) => !v)}>
-          {showAll ? "Show overridden only" : `Show all ${struct.fields.length} fields`}
-        </button>
-      </div>
-
-      {struct.methods.length > 0 && (
-        <>
-          <h3 style={{ marginTop: 12 }}>Method calls</h3>
-          {calls.map(({ index, call }) => (
-            <div className="override-row" key={index}>
-              <input
-                list={`methods-${node.id}`}
-                value={call}
-                placeholder="SetPadding(20,20,20,20)"
-                onChange={(e) => updateCall(index, e.target.value)}
-              />
-              <button className="danger" onClick={() => removeCallAt(index)}>×</button>
-            </div>
-          ))}
-          <datalist id={`methods-${node.id}`}>
-            {struct.methods.map((m) => (
-              <option key={m} value={`${m}()`} />
-            ))}
-          </datalist>
-          <div className="button-row">
-            <button onClick={addCall}>+ Method</button>
-          </div>
-        </>
-      )}
-    </div>
-  );
+  if (!fields.length && !additional.length && !meta.dataClass) return null;
+  return <>
+    {groups.map(group => {
+      const names = group.frameGfx ? [group.frameGfx] : group.fields;
+      const entries = names.map(name => fields.find(f => f.name === name)).filter((f): f is StructField => !!f);
+      return entries.length ? <div className="field-group" key={group.title}><h3>{group.title}</h3>{entries.map(renderField)}</div> : null;
+    })}
+    {(remaining.length > 0 || additional.length > 0 || !struct && meta.dataClass) && <div className="field-group">
+      <h3>{!meta.dataClass ? "Parameters" : groups.length ? "Other overrides" : "Overrides"}</h3>
+      {visible.map(renderField)}
+      {additional.map(renderField)}
+      {meta.dataClass && remaining.length > 0 && <button type="button" onClick={() => setShowAll(v => !v)}>
+        {showAll ? "Show overridden only" : `Show all ${remaining.length} fields`}
+      </button>}
+    </div>}
+    {(struct?.methods.length || calls.length || meta.dataClass && !struct) ? <div className="field-group">
+      <details><summary>Method calls (AngelScript expressions)</summary>
+        {calls.map(({ call, index }) => <div className="override-row" key={index}>
+          <input type="text" aria-label={`Method expression ${index + 1}`} list={`methods-${node.id}`} value={call}
+            placeholder="SetPadding(20,20,20,20)" onChange={e => apply(node.overrides.map((o, i) => i === index ? { kind: "call", call: e.target.value } : o))} />
+          <button type="button" className="danger" title="Remove method call" onClick={() => apply(node.overrides.filter((_, i) => i !== index))}>×</button>
+        </div>)}
+        <datalist id={`methods-${node.id}`}>{struct?.methods.map(m => <option key={m} value={`${m}()`} />)}</datalist>
+        <button type="button" onClick={() => apply([...node.overrides, { kind: "call", call: "" }])}>+ Method expression</button>
+      </details>
+    </div> : null}
+  </>;
 }

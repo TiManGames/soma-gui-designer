@@ -1,4 +1,32 @@
 import type { Override } from "./nodes";
+import { parseGfxLiteral, stringLiteral } from "./literals";
+
+function isFileCall(override: Override, path: string): boolean {
+  return override.kind === "call" && override.call.trim().startsWith(`${path}.SetFile(`);
+}
+
+/** Read the last assignment or SetFile call in emission order, including formulas. */
+export function getGfxFieldValue(overrides: Override[], path: string): string | undefined {
+  for (const o of [...overrides].reverse()) {
+    if (o.kind === "expr" && o.path === path) return o.expr;
+    if (isFileCall(o, path) && o.kind === "call") {
+      const args = o.call.trim().slice(`${path}.SetFile(`.length).replace(/\)\s*;?$/, "");
+      return `cImGuiGfx(${args})`;
+    }
+  }
+  return undefined;
+}
+
+export function clearFieldOverride(overrides: Override[], path: string): Override[] {
+  return overrides.filter(o => !(o.kind === "expr" && o.path === path) && !isFileCall(o, path));
+}
+
+export function setFieldExpression(overrides: Override[], path: string, expr: string, gfx = false): Override[] {
+  const file = gfx ? parseGfxLiteral(expr) : null;
+  const next: Override = file === null ? { kind: "expr", path, expr }
+    : { kind: "call", call: `${path}.SetFile(${stringLiteral(file)})` };
+  return [...clearFieldOverride(overrides, path), next];
+}
 
 /**
  * Read a named `expr`-kind parameter from a node's overrides, falling back to a
@@ -6,7 +34,7 @@ import type { Override } from "./nodes";
  * WYSIWYG canvas so both interpret override values identically.
  */
 export function getParam(overrides: Override[], path: string, def: string): string {
-  const found = overrides.find((o) => o.kind === "expr" && o.path === path);
+  const found = [...overrides].reverse().find((o) => o.kind === "expr" && o.path === path);
   return found && found.kind === "expr" ? found.expr : def;
 }
 
@@ -18,17 +46,6 @@ export function getParam(overrides: Override[], path: string, def: string): stri
  * Falls back to `def` if neither form is found.
  */
 export function getFileParam(overrides: Override[], path: string, def: string): string {
-  const expr = overrides.find((o) => o.kind === "expr" && o.path === path);
-  if (expr && expr.kind === "expr") {
-    const m = expr.expr.match(/["']([^"']+)["']/);
-    if (m) return m[1];
-  }
-  const call = overrides.find(
-    (o) => o.kind === "call" && o.call.startsWith(path + ".SetFile(")
-  );
-  if (call && call.kind === "call") {
-    const m = call.call.match(/SetFile\(["']([^"']+)["']\)/);
-    if (m) return m[1];
-  }
-  return def;
+  const value = getGfxFieldValue(overrides, path);
+  return value === undefined ? def : parseGfxLiteral(value) ?? def;
 }

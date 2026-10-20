@@ -13,10 +13,14 @@ import { dataVarName } from "./format";
  */
 export function emitDataVar(lines: string[], node: WidgetNode, indent: string): string {
   const meta = WIDGETS[node.type];
-  if (!meta.dataClass || !meta.factory) return "";
+  if (!meta.dataClass) return "";
+  const nativeDefaults: Partial<Record<WidgetNode["type"], string>> = {
+    checkbox: "ImGui_GetDefaultCheckBox()", "slider-h": "ImGui_GetDefaultSliderHorizontal()",
+    "slider-v": "ImGui_GetDefaultSliderVertical()", "multi-select": "ImGui_GetDefaultMultiSelect()"
+  };
 
   const varName = dataVarName(node.id);
-  lines.push(`${indent}${meta.dataClass} ${varName} = ${meta.factory};`);
+  lines.push(`${indent}${meta.dataClass} ${varName} = ${meta.factory ?? nativeDefaults[node.type] ?? `${meta.dataClass}()`};`);
 
   for (const ov of node.overrides) {
     if (ov.kind === "expr") {

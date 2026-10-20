@@ -1,9 +1,12 @@
 import * as vscode from "vscode";
-import { SomaEditorProvider } from "./SomaEditorProvider";
+import { SomaEditorProvider, previewReports } from "./SomaEditorProvider";
 import { createDefaultDocument } from "@core/model/createDefaultDocument";
 
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(SomaEditorProvider.register(context));
+  if (context.extensionMode !== vscode.ExtensionMode.Production) {
+    context.subscriptions.push(vscode.commands.registerCommand("somaGui.development.previewReports", () => Object.fromEntries(previewReports)));
+  }
 
   context.subscriptions.push(
     vscode.commands.registerCommand("somaGui.newProject", () => newProject())

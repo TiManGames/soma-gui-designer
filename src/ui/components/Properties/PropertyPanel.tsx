@@ -5,6 +5,7 @@ import { CommonProps } from "./CommonProps";
 import { TypeFields } from "./TypeFields";
 import { OverridesSection } from "./OverridesSection";
 import { ProjectPanel } from "./ProjectPanel";
+import { PreviewControls } from "./PreviewControls";
 
 export function PropertyPanel() {
   const selectedId = useStore((s) => s.selectedId);
@@ -26,8 +27,9 @@ export function PropertyPanel() {
         <strong>{node.id}</strong>
       </div>
       <CommonProps node={node} />
-      <TypeFields node={node} />
-      <OverridesSection node={node} />
+      <TypeFields key={`content-${node.id}`} node={node} />
+      <PreviewControls node={node} />
+      <OverridesSection key={`overrides-${node.id}`} node={node} />
       <div className="button-row">
         <button onClick={() => duplicateNode(node.id)}>Duplicate</button>
         <button className="danger" onClick={() => deleteNode(node.id)}>

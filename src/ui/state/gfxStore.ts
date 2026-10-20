@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import type { GfxResult } from "@core/protocol";
 import { postToHost } from "../vscodeApi";
-import { tgaToDataUrl } from "../gfx/decodeTga";
+import { decodeTga, type DecodedImage } from "../gfx/decodeTga";
+import { decodeDds } from "../gfx/decodeDds";
+import { parseBitmapFont, type BitmapFont } from "@core/preview/bitmapFont";
 
 export type GfxStatus = "pending" | "ready" | "missing";
 
@@ -12,6 +14,8 @@ export interface GfxEntry {
   /** Natural pixel dimensions, when known (used for aspect-correct placement). */
   w?: number;
   h?: number;
+  pixels?: Uint8ClampedArray;
+  font?: BitmapFont;
 }
 
 interface GfxState {
@@ -37,6 +41,15 @@ function base64ToBytes(b64: string): Uint8Array {
   return out;
 }
 
+function imageEntry(img: DecodedImage): GfxEntry {
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width; canvas.height = img.height;
+  const ctx = canvas.getContext("2d")!;
+  const data = ctx.createImageData(img.width, img.height);
+  data.data.set(img.rgba); ctx.putImageData(data, 0, 0);
+  return { status: "ready", src: canvas.toDataURL("image/png"), w: img.width, h: img.height, pixels: img.rgba };
+}
+
 export const useGfx = create<GfxState>((set, get) => ({
   cache: new Map(),
   pending: new Map(),
@@ -56,25 +69,40 @@ export const useGfx = create<GfxState>((set, get) => ({
     return entry;
   },
 
-  onResolved: (requestId, result) => {
+  onResolved: async (requestId, result) => {
     const s = get();
     const gfx = s.pending.get(requestId);
     if (!gfx) return;
 
     let entry: GfxEntry;
     if (result.kind === "uri") {
-      entry = { status: "ready", src: result.uri };
-    } else if (result.kind === "tga") {
-      const decoded = tgaToDataUrl(base64ToBytes(result.bytes));
-      entry = decoded
-        ? { status: "ready", src: decoded.url, w: decoded.w, h: decoded.h }
-        : { status: "missing" };
+      entry = await new Promise<GfxEntry>(resolve => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          try {
+            const canvas = document.createElement("canvas"); canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d")!; ctx.drawImage(img, 0, 0);
+            resolve({ status: "ready", src: result.uri, w: canvas.width, h: canvas.height, pixels: ctx.getImageData(0, 0, canvas.width, canvas.height).data });
+          } catch { resolve({ status: "missing" }); }
+        };
+        img.onerror = () => resolve({ status: "missing" }); img.src = result.uri;
+      });
+    } else if (result.kind === "tga" || result.kind === "dds") {
+      const decoded = (result.kind === "dds" ? decodeDds : decodeTga)(base64ToBytes(result.bytes));
+      entry = decoded ? imageEntry(decoded) : { status: "missing" };
+    } else if (result.kind === "font") {
+      const font = parseBitmapFont(result.text);
+      entry = font ? { status: "ready", font } : { status: "missing" };
     } else {
       entry = { status: "missing" };
     }
 
-    const cache = new Map(s.cache).set(gfx, entry);
-    const pending = new Map(s.pending);
+    // More resources may have completed while a browser image was loading.
+    const current = get();
+    if (!current.pending.has(requestId)) return;
+    const cache = new Map(current.cache).set(gfx, entry);
+    const pending = new Map(current.pending);
     pending.delete(requestId);
     set({ cache, pending });
   },

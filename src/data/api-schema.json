@@ -2,7 +2,8 @@
   "generatedFrom": [
     "soma_scripts/hps_api.hps",
     "soma_scripts/script/helpers/helper_imgui.hps",
-    "soma_scripts/script/custom_depth/helper_custom_depth_imgui/helper_imgui_station_basics.hps"
+    "soma_scripts/script/custom_depth/helper_custom_depth_imgui/helper_imgui_station_basics.hps",
+    "soma_scripts/script/custom_depth/helper_custom_depth_imgui/helper_imgui_station_apps_common.hps"
   ],
   "structs": {
     "cImGuiButtonData": {
@@ -855,6 +856,77 @@
       ],
       "methods": []
     },
+    "cImGuiFrameGfx": {
+      "name": "cImGuiFrameGfx",
+      "fields": [
+        {
+          "name": "mGfxBackground",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxCornerTopRight",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxCornerBottomRight",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxCornerBottomLeft",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxCornerTopLeft",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxBorderTop",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxBorderRight",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxBorderBottom",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mGfxBorderLeft",
+          "type": "cImGuiGfx",
+          "category": "gfx"
+        },
+        {
+          "name": "mColorCornerTopLeft",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorCornerTopRight",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorCornerBotRight",
+          "type": "cColor",
+          "category": "color"
+        },
+        {
+          "name": "mColorCornerBotLeft",
+          "type": "cColor",
+          "category": "color"
+        }
+      ],
+      "methods": []
+    },
     "cImGuiGfx": {
       "name": "cImGuiGfx",
       "fields": [
@@ -938,6 +1010,52 @@
         }
       ],
       "methods": []
+    },
+    "cStationGui_TextReaderSettings": {
+      "name": "cStationGui_TextReaderSettings",
+      "fields": [
+        {
+          "name": "msCustomHeader",
+          "type": "tString",
+          "category": "string"
+        },
+        {
+          "name": "mvTextFontSize",
+          "type": "cVector2f",
+          "category": "vec2"
+        },
+        {
+          "name": "mWindow",
+          "type": "cImGuiWindowData",
+          "category": "unknown"
+        },
+        {
+          "name": "mButton",
+          "type": "cImGuiButtonData",
+          "category": "unknown"
+        },
+        {
+          "name": "mfFileListButtonHeight",
+          "type": "float",
+          "category": "float"
+        },
+        {
+          "name": "mbDrawAppIcon",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbCorrectImageRatioForUV",
+          "type": "bool",
+          "category": "bool"
+        },
+        {
+          "name": "mbFullScreen",
+          "type": "bool",
+          "category": "bool"
+        }
+      ],
+      "methods": []
     }
   },
   "enums": {
@@ -971,6 +1089,13 @@
         "eImGuiGfx_Texture",
         "eImGuiGfx_TextureAnimated",
         "eImGuiGfx_Special"
+      ]
+    },
+    "eImGuiWrapMode": {
+      "name": "eImGuiWrapMode",
+      "members": [
+        "eImGuiWrapMode_Wrap",
+        "eImGuiWrapMode_Mirror"
       ]
     },
     "eImGuiLayout": {

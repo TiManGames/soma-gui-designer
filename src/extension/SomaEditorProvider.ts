@@ -3,6 +3,9 @@ import type { WebviewToHost, HostToWebview, GfxConfig } from "@core/protocol";
 import { getHtml } from "./getHtml";
 import { GfxIndex } from "./GfxIndex";
 
+/** Local development diagnostics, used by the real webview integration check. */
+export const previewReports = new Map<string, { diagnostics: string[]; error: string; quads: number; readyResources: number }>();
+
 /** Read the current WYSIWYG-related config into the shape sent to the webview. */
 function readGfxConfig(): GfxConfig {
   const cfg = vscode.workspace.getConfiguration("somaGui");
@@ -14,11 +17,11 @@ function graphicsRoots(): vscode.Uri[] {
   const cfg = vscode.workspace.getConfiguration("somaGui");
   const ws = vscode.workspace.workspaceFolders?.[0]?.uri;
   const roots: vscode.Uri[] = [];
-  for (const key of ["baseGameGraphicsPath", "modGraphicsPath"] as const) {
+  for (const key of ["baseGameGraphicsPath", "modGraphicsPath", "baseGameFontsPath", "modFontsPath"] as const) {
     const p = (cfg.get<string>(key) ?? "").trim();
     if (!p) continue;
-    if (/^([a-zA-Z]:[\\/]|[\\/])/.test(p)) roots.push(vscode.Uri.file(p));
-    else if (ws) roots.push(vscode.Uri.joinPath(ws, p));
+    const uri = /^([a-zA-Z]:[\\/]|[\\/])/.test(p) ? vscode.Uri.file(p) : ws ? vscode.Uri.joinPath(ws, p) : null;
+    if (uri) { roots.push(uri); if (key.endsWith("GraphicsPath")) roots.push(vscode.Uri.joinPath(uri, "..", "fonts")); }
   }
   return roots;
 }
@@ -92,12 +95,16 @@ export class SomaEditorProvider implements vscode.CustomTextEditorProvider {
     });
 
     webviewPanel.onDidDispose(() => {
+      previewReports.delete(document.uri.toString());
       changeSub.dispose();
       configSub.dispose();
     });
 
     webview.onDidReceiveMessage(async (msg: WebviewToHost) => {
       switch (msg.type) {
+        case "previewStatus":
+          previewReports.set(document.uri.toString(), { diagnostics: msg.diagnostics, error: msg.error, quads: msg.quads, readyResources: msg.readyResources });
+          break;
         case "ready":
           post({ type: "init", text: document.getText() });
           post({ type: "gfxConfig", config: readGfxConfig() });
@@ -139,7 +146,7 @@ export class SomaEditorProvider implements vscode.CustomTextEditorProvider {
             canSelectMany: false,
             openLabel: "Select texture",
             defaultUri: roots[0],
-            filters: { Textures: ["tga", "png", "jpg", "jpeg"] }
+            filters: { Textures: ["tga", "png", "jpg", "jpeg", "dds"] }
           });
           const picked = uris?.[0] ?? null;
           let gfxPath: string | null = null;
@@ -183,7 +190,9 @@ export class SomaEditorProvider implements vscode.CustomTextEditorProvider {
         post({
           type: "gfxResolved",
           requestId,
-          result: { kind: "tga", bytes: Buffer.from(bytes).toString("base64") }
+          result: hit.kind === "font"
+            ? { kind: "font", text: Buffer.from(bytes).toString("utf8") }
+            : { kind: hit.kind, bytes: Buffer.from(bytes).toString("base64") }
         });
       }
     } catch {

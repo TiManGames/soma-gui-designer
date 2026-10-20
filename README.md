@@ -78,6 +78,12 @@ is rejected on load (bump `CURRENT_SCHEMA_VERSION` when the shape changes).
 
 ## Features
 
+WYSIWYG uses a shared WebGL2 renderer with local SOMA bitmap fonts, native material
+blending, independent frame corners, and editor-only widget state controls.
+Configure your game `graphics` directory; fonts are found alongside it or through
+the optional font-path settings. See [rendering fidelity and validation](docs/GUI-RENDERING.md)
+for source findings, coverage, local visual checks, and remaining limits.
+
 - Palette of containers (window, group), elements (button, toggle, label, text frame,
   image, gauge, fill), helpers (numpad, text reader), and an advanced raw-HPS block.
 - Canvas with move/resize, grid snap, and **drag-to-reparent** into windows/groups

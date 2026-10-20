@@ -1,6 +1,7 @@
 import type { Override } from "@core/model/nodes";
-import { getFileParam } from "@core/model/overrides";
-import { GfxPicker } from "./GfxPicker";
+import { clearFieldOverride, getGfxFieldValue, setFieldExpression } from "@core/model/overrides";
+import { stringLiteral } from "@core/model/literals";
+import { FieldEditor } from "./FieldEditor";
 
 interface Props {
   /** Top-level field name on the data struct, e.g. "mGfxFrame" or "mGfxWindowData". */
@@ -23,22 +24,6 @@ const SLOTS = [
   { key: "mGfxBorderLeft",       label: "Border Left" },
 ] as const;
 
-function upsertCall(overrides: Override[], callStr: string, matchPrefix: string): Override[] {
-  const idx = overrides.findIndex(
-    (o) => o.kind === "call" && o.call.startsWith(matchPrefix)
-  );
-  const next: Override = { kind: "call", call: callStr };
-  return idx >= 0
-    ? overrides.map((o, i) => (i === idx ? next : o))
-    : [...overrides, next];
-}
-
-function removeCall(overrides: Override[], matchPrefix: string): Override[] {
-  return overrides.filter(
-    (o) => !(o.kind === "call" && o.call.startsWith(matchPrefix))
-  );
-}
-
 /**
  * Renders 9 GfxPicker rows for a cImGuiFrameGfx field (background + 4 corners + 4 borders).
  * Each change emits a kind:"call" override like:
@@ -50,29 +35,12 @@ export function FrameGfxEditor({ fieldName, overrides, defaults, onChange }: Pro
       {SLOTS.map(({ key, label }) => {
         const fullPath = `${fieldName}.${key}`;
         const def = defaults[fullPath] ?? "";
-        const current = getFileParam(overrides, fullPath, def);
-        const isOverridden = overrides.some(
-          (o) => o.kind === "call" && o.call.startsWith(`${fullPath}.SetFile(`)
-        );
+        const value = getGfxFieldValue(overrides, fullPath);
 
-        return (
-          <div key={key} style={{ display: "grid", gridTemplateColumns: "72px minmax(0, 1fr)", gap: 4, alignItems: "center" }}>
-            <span style={{
-              fontSize: 10.5, color: isOverridden ? "var(--teal-bright)" : "var(--text-dim)",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            }}>
-              {label}
-            </span>
-            <GfxPicker
-              value={current}
-              onChange={(path) => {
-                const callStr = `${fullPath}.SetFile("${path}")`;
-                onChange(upsertCall(overrides, callStr, `${fullPath}.SetFile(`));
-              }}
-              onClear={isOverridden ? () => onChange(removeCall(overrides, `${fullPath}.SetFile(`)) : undefined}
-            />
-          </div>
-        );
+        return <FieldEditor key={key} label={label} field={{ name: fullPath, type: "cImGuiGfx", category: "gfx" }}
+          active={value !== undefined} value={value ?? `cImGuiGfx(${stringLiteral(def)})`}
+          onChange={expr => onChange(setFieldExpression(overrides, fullPath, expr, true))}
+          onClear={() => onChange(clearFieldOverride(overrides, fullPath))} />;
       })}
     </div>
   );

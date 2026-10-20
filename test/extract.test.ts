@@ -8,7 +8,7 @@ import {
   parseWrappers,
   parsePalette,
   categorize,
-  SOURCES
+  discoverSources
 } from "../scripts/extract-api-schema";
 import { WIDGETS } from "../src/core/model/defaults";
 
@@ -16,11 +16,28 @@ function read(rel: string): string {
   return readFileSync(fileURLToPath(new URL(`../${rel}`, import.meta.url)), "utf8");
 }
 
-const api = read(SOURCES.api);
-const station = read(SOURCES.station);
-const wrapper = read(SOURCES.wrapper);
+const sample = read("test/fixtures/extractor-sample.hps");
+const api = sample, station = sample, wrapper = sample;
+
+it("does not invent source paths for an incomplete tree", () => {
+  expect(discoverSources(fileURLToPath(new URL("./fixtures", import.meta.url)))).toBeNull();
+});
 
 describe("struct extraction", () => {
+  it("extracts initialized fields and strings, excluding constructor locals", () => {
+    const s = parseStruct(`class Settings {
+      Settings()
+      {
+        float local = 2.0f;
+      }
+      tString msHeader;
+      float mfHeight = 0.1f;
+      bool mbEnabled = true;
+    }`, "Settings");
+    expect(s.fields.map(f => [f.name, f.category])).toEqual([
+      ["msHeader", "string"], ["mfHeight", "float"], ["mbEnabled", "bool"]
+    ]);
+  });
   it("extracts cImGuiButtonData fields with categories", () => {
     const s = parseStruct(api, "cImGuiButtonData");
     const base = s.fields.find((f) => f.name === "mColorBase");

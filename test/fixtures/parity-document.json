@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 4,
+  "target": "terminal-on-gui",
+  "functionName": "GeneratedTerminal_OnGui",
+  "translationCategory": "",
+  "previewResolution": {
+    "x": 800,
+    "y": 600
+  },
+  "resolutionPreset": "custom",
+  "gridSize": 10,
+  "snapToGrid": true,
+  "nodes": [
+    {
+      "id": "blackBackdrop",
+      "parentId": "screen",
+      "xN": 0,
+      "yN": 0,
+      "wN": 1,
+      "hN": 1,
+      "z": -100,
+      "enabled": true,
+      "overrides": [
+        {
+          "kind": "expr",
+          "path": "color",
+          "expr": "cColor(0,1)"
+        },
+        {
+          "kind": "expr",
+          "path": "zDepth",
+          "expr": "-100.0f"
+        }
+      ],
+      "type": "bg-flat-color",
+      "caption": "Black backdrop"
+    },
+    {
+      "id": "stationwindow",
+      "parentId": "screen",
+      "xN": 0.025,
+      "yN": 0.03333333333333333,
+      "wN": 0.9375,
+      "hN": 0.9333333333333333,
+      "z": 1,
+      "enabled": true,
+      "overrides": [
+        {
+          "kind": "expr",
+          "path": "mColorBase",
+          "expr": "gStationGuiColor_FocusedAndSelected"
+        }
+      ],
+      "type": "station-window",
+      "caption": "MainWindow"
+    },
+    {
+      "id": "gauge",
+      "parentId": "stationwindow",
+      "xN": 0.046875,
+      "yN": 0.25462962962962965,
+      "wN": 0.90625,
+      "hN": 0.06944444444444445,
+      "z": 1,
+      "enabled": true,
+      "overrides": [
+        {
+          "kind": "expr",
+          "path": "mOrientation",
+          "expr": "eImGuiGaugeOrientation_Hori"
+        },
+        {
+          "kind": "expr",
+          "path": "mColorBase",
+          "expr": "gStationGuiColor_Highlight"
+        }
+      ],
+      "type": "gauge",
+      "caption": "Gauge",
+      "fillExpr": "0.65f"
+    },
+    {
+      "id": "label",
+      "parentId": "stationwindow",
+      "xN": 0.05333333333333334,
+      "yN": 0.14285714285714285,
+      "wN": 0.4,
+      "hN": 0.08,
+      "z": 1,
+      "enabled": true,
+      "overrides": [],
+      "type": "label",
+      "caption": "Window Test Hello",
+      "fontSizeMul": 2
+    },
+    {
+      "id": "textframe",
+      "parentId": "stationwindow",
+      "xN": 0.046875,
+      "yN": 0.37037037037037035,
+      "wN": 0.9066666666666666,
+      "hN": 0.10714285714285714,
+      "z": 1,
+      "enabled": true,
+      "overrides": [],
+      "type": "text-frame",
+      "caption": "A vry long wall of text that will be loaded in side the GUI",
+      "text": ""
+    },
+    {
+      "id": "group",
+      "parentId": "stationwindow",
+      "xN": 0.05333333333333334,
+      "yN": 0.4642857142857143,
+      "wN": 0.8933333333333333,
+      "hN": 0.26785714285714285,
+      "z": 1,
+      "enabled": true,
+      "overrides": [],
+      "type": "group",
+      "caption": "Group"
+    },
+    {
+      "id": "stationbutton",
+      "parentId": "stationwindow",
+      "xN": 0.08,
+      "yN": 0.75,
+      "wN": 0.25,
+      "hN": 0.1,
+      "z": 1,
+      "enabled": true,
+      "overrides": [
+        {
+          "kind": "expr",
+          "path": "mColorText",
+          "expr": "gStationGuiColor_Highlight"
+        }
+      ],
+      "type": "station-button",
+      "caption": "Confirm"
+    },
+    {
+      "id": "stationtogglebutton",
+      "parentId": "group",
+      "xN": 0.7164179104477612,
+      "yN": 0.6266666666666667,
+      "wN": 0.2798507462686567,
+      "hN": 0.37333333333333335,
+      "z": 1,
+      "enabled": true,
+      "overrides": [
+        {
+          "kind": "expr",
+          "path": "mColorTriggeredAndInFocus",
+          "expr": "cColor(1f, 0f, 0.969f, 1f)"
+        },
+        {
+          "kind": "expr",
+          "path": "mColorInFocus",
+          "expr": "cColor(1f, 0.867f, 0f, 1f)"
+        },
+        {
+          "kind": "expr",
+          "path": "mColorBase",
+          "expr": "cColor(0.894f, 0.145f, 0.145f, 1.0f)"
+        }
+      ],
+      "type": "station-toggle-button",
+      "caption": "Toggle"
+    },
+    {
+      "id": "gauge1",
+      "parentId": "group",
+      "xN": 0.014925373134328358,
+      "yN": 0.2,
+      "wN": 0.5074626865671642,
+      "hN": 0.2,
+      "z": 1,
+      "enabled": true,
+      "overrides": [],
+      "type": "gauge",
+      "caption": "Gauge",
+      "fillExpr": "0.1f"
+    },
+    {
+      "id": "gauge11",
+      "parentId": "group",
+      "xN": 0.014925373134328358,
+      "yN": 0.4666666666666667,
+      "wN": 0.6417910447761194,
+      "hN": 0.2,
+      "z": 1,
+      "enabled": true,
+      "overrides": [],
+      "type": "gauge",
+      "caption": "Gauge",
+      "fillExpr": "0.5f"
+    },
+    {
+      "id": "gauge12",
+      "parentId": "group",
+      "xN": 0.014925373134328358,
+      "yN": 0.7333333333333333,
+      "wN": 0.5074626865671642,
+      "hN": 0.2,
+      "z": 1,
+      "enabled": true,
+      "overrides": [
+        {
+          "kind": "expr",
+          "path": "mColorBase",
+          "expr": "gStationGuiColor_Normal"
+        }
+      ],
+      "type": "gauge",
+      "caption": "Gauge",
+      "fillExpr": "0.9f"
+    }
+  ]
+}

@@ -12,11 +12,11 @@ describe("geometry", () => {
     // parent window abs: x=128, y=80, w=1024, h=576
     // A station window translates its child group below the height-relative header.
     // image abs: x = 128 + 0.05*1024 = 179.2,
-    // y = 80 + 0.047*800 + 0.1*576 = 175.2
+    // Child group height is 576 - 37.6 = 538.4.
     expect(rect.x).toBeCloseTo(179.2, 3);
-    expect(rect.y).toBeCloseTo(175.2, 3);
+    expect(rect.y).toBeCloseTo(171.44, 3);
     expect(rect.w).toBeCloseTo(358.4, 3);
-    expect(rect.h).toBeCloseTo(259.2, 3);
+    expect(rect.h).toBeCloseTo(242.28, 3);
   });
 
   it("renormalize is the inverse of absoluteRect for the same parent", () => {
@@ -39,7 +39,7 @@ describe("geometry", () => {
     const norm = renormalizeToParent(doc, abs, "screen");
     // Under screen (1280x800): xN = 179.2/1280, yN = 175.2/800
     expect(norm.xN).toBeCloseTo(179.2 / 1280, 4);
-    expect(norm.yN).toBeCloseTo(175.2 / 800, 4);
+    expect(norm.yN).toBeCloseTo(171.44 / 800, 4);
   });
 
   it("uses the outer window origin when its header is disabled", () => {

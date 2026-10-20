@@ -280,6 +280,6 @@ export function stationWindowChildFrame<T extends { x: number; y: number; w: num
     x: outer.x + padding.left,
     y: outer.y + metrics.headerHeight + padding.top,
     w: Math.max(1, outer.w - padding.left - padding.right),
-    h: Math.max(1, outer.h - padding.top - padding.bottom)
+    h: Math.max(1, outer.h - metrics.headerHeight - padding.top - padding.bottom)
   };
 }

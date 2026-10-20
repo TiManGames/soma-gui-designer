@@ -17,6 +17,7 @@ import {
 import { canvasScale } from "@core/model/canvasScale";
 import { clamp } from "@core/model/ids";
 import { postToHost } from "../vscodeApi";
+import { usePreview } from "./previewStore";
 
 const HISTORY_LIMIT = 100;
 const EDIT_DEBOUNCE_MS = 200;
@@ -353,8 +354,10 @@ export const useStore = create<DesignerState>((set, get) => ({
       if (!canReparent(s.doc, id, newParentId)) return {};
       const node = getNode(s.doc, id);
       if (!node) return {};
-      const abs = absoluteRect(s.doc, node);
-      const norm = renormalizeToParent(s.doc, abs, newParentId);
+      const preview = usePreview.getState();
+      const abs = s.wysiwygEnabled && preview.doc === s.doc ? preview.scene?.rects.get(id) ?? absoluteRect(s.doc, node) : absoluteRect(s.doc, node);
+      const target = s.wysiwygEnabled && preview.doc === s.doc ? preview.scene?.frames.get(newParentId) : undefined;
+      const norm = target ? { xN: clamp((abs.x - target.x) / target.w, 0, 1 - abs.w / target.w), yN: clamp((abs.y - target.y) / target.h, 0, 1 - abs.h / target.h), wN: clamp(abs.w / target.w, 0.001, 1), hN: clamp(abs.h / target.h, 0.001, 1) } : renormalizeToParent(s.doc, abs, newParentId);
       const nodes = s.doc.nodes.map((n) =>
         n.id === id ? ({ ...n, parentId: newParentId, ...norm } as WidgetNode) : n
       );
@@ -373,7 +376,8 @@ export const useStore = create<DesignerState>((set, get) => ({
     const node = getNode(s.doc, s.drag.id);
     if (!node) return;
 
-    const parent = parentAbsRect(s.doc, node);
+    const preview = usePreview.getState();
+    const parent = s.wysiwygEnabled && preview.doc === s.doc ? preview.scene?.frames.get(node.parentId) ?? parentAbsRect(s.doc, node) : parentAbsRect(s.doc, node);
     const scale = canvasScale(previewSize(s.doc));
     const dxPx = (clientX - s.drag.startClientX) / scale;
     const dyPx = (clientY - s.drag.startClientY) / scale;

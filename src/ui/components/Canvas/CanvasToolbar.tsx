@@ -39,6 +39,7 @@ export function CanvasToolbar() {
         <NumberInput
           className="ct-num"
           value={doc.previewResolution.x}
+          integer
           min={1}
           title="Width (px)"
           onCommit={(v) => setPreviewSize(v, doc.previewResolution.y)}
@@ -47,6 +48,7 @@ export function CanvasToolbar() {
         <NumberInput
           className="ct-num"
           value={doc.previewResolution.y}
+          integer
           min={1}
           title="Height (px)"
           onCommit={(v) => setPreviewSize(doc.previewResolution.x, v)}
@@ -63,6 +65,7 @@ export function CanvasToolbar() {
         <NumberInput
           className="ct-num"
           value={doc.gridSize}
+          integer
           min={1}
           title="Grid size (px)"
           onCommit={(v) => setMeta({ gridSize: v })}

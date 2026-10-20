@@ -25,6 +25,7 @@ export function decodeTga(bytes: Uint8Array): DecodedImage | null {
   const descriptor = bytes[17];
 
   if (width <= 0 || height <= 0) return null;
+  if (width > 8192 || height > 8192 || width * height > 32e6) return null;
   if (colorMapType !== 0) return null; // color-mapped images not needed for SOMA gfx
 
   const bytesPerPixel = pixelDepth >> 3;
@@ -74,6 +75,7 @@ export function decodeTga(bytes: Uint8Array): DecodedImage | null {
       if (offset >= bytes.length) return null;
       const packet = bytes[offset++];
       const count = (packet & 0x7f) + 1;
+      if (i + count > pixelCount) return null;
       if (packet & 0x80) {
         // RLE packet: one pixel repeated `count` times.
         if (offset + bytesPerPixel > bytes.length) return null;
@@ -101,6 +103,13 @@ export function decodeTga(bytes: Uint8Array): DecodedImage | null {
     for (let y = 0; y < height; y++) {
       const srcRow = (height - 1 - y) * rowBytes;
       rgba.set(src.subarray(srcRow, srcRow + rowBytes), y * rowBytes);
+    }
+  }
+
+  if (descriptor & 0x10) {
+    for (let y = 0; y < height; y++) for (let x = 0; x < Math.floor(width / 2); x++) {
+      const a = (y * width + x) * 4, b = (y * width + width - 1 - x) * 4;
+      for (let c = 0; c < 4; c++) { const t = rgba[a + c]; rgba[a + c] = rgba[b + c]; rgba[b + c] = t; }
     }
   }
 

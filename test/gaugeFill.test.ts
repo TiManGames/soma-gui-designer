@@ -17,6 +17,11 @@ describe("gauge fill values", () => {
     expect(gaugeFillExpr("0.65")).toBe("0.65f");
     expect(gaugeFillExpr("0")).toBe("0.0f");
     expect(gaugeFillExpr(0.5)).toBe("0.5f");
-    expect(gaugeFillExpr("not-a-number")).toBe("0.5f");
+    expect(gaugeFillExpr("")).toBe("0.0f");
+  });
+
+  it("preserves runtime expressions while keeping a preview fallback", () => {
+    expect(gaugeFillExpr("GetBatteryLevel() * 0.01f")).toBe("GetBatteryLevel() * 0.01f");
+    expect(gaugeFillAmount("GetBatteryLevel() * 0.01f")).toBe(0.5);
   });
 });

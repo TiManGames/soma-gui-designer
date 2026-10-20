@@ -53,7 +53,7 @@ export function GfxPicker({ value, onChange, onClear }: Props) {
       </div>
 
       {/* Filename display */}
-      <span style={{
+      <span title={value || "No texture selected"} style={{
         flex: 1, fontSize: 11, fontFamily: "var(--font-mono)",
         color: value ? "var(--text)" : "var(--text-faint)",
         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -67,6 +67,7 @@ export function GfxPicker({ value, onChange, onClear }: Props) {
         type="button"
         className="icon-btn"
         title="Browse texture…"
+        aria-label="Browse texture…"
         onClick={handleBrowse}
         style={{ padding: "2px 6px", fontSize: 11, flexShrink: 0 }}
       >
@@ -79,6 +80,7 @@ export function GfxPicker({ value, onChange, onClear }: Props) {
           type="button"
           className="danger icon-btn"
           title="Clear"
+          aria-label="Clear texture"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClear(); }}
           style={{ padding: "2px 5px", fontSize: 11, flexShrink: 0 }}
         >

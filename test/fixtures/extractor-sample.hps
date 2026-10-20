@@ -1,0 +1,50 @@
+// Authored minimal syntax fixture; not a copy of SOMA's source.
+class cImGuiButtonData
+{
+  cColor mColorBase;
+  bool mbUseFrame;
+  eFontAlign mFontAlign;
+  cImGuiFont mFont;
+}
+class cImGuiWindowData
+{
+  void SetPadding(float a, float b, float c, float d);
+  void SetLabelPadding(float a, float b, float c, float d);
+}
+enum eFontAlign
+{
+  eFontAlign_Left,
+  eFontAlign_Right,
+  eFontAlign_Center,
+  eFontAlign_LastEnum
+}
+enum eImGuiAlign
+{
+  eImGuiAlign_CenterCenter,
+  eImGuiAlign_LastEnum
+}
+cImGuiButtonData StationGui_CreateDefaultButtonData()
+{
+}
+cImGuiWindowData StationGui_CreateDefaultWindowData()
+{
+}
+cImGuiButtonData StationGui_CreateToggleButtonData()
+{
+}
+cImGuiSliderData StationGui_CreateDefaultSliderData()
+{
+}
+cImGuiTextFrameData StationGui_CreateDefaultTextFrameData()
+{
+}
+cImGuiGaugeData StationGui_CreateDefaultGaugeData()
+{
+}
+cColor gStationGuiColor_Warning = cColor(0.706f, 0.208f, 0.082f);
+bool ImGui_DoButtonExt(const tString&in asName, const tString&in asText)
+{
+}
+void ImGui_DoWindowStart(const tString&in asCaption)
+{
+}

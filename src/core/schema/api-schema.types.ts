@@ -3,6 +3,7 @@
 
 /** UI editor category derived from an AngelScript field type. */
 export type FieldCategory =
+  | "string" // tString
   | "color" // cColor
   | "float" // float
   | "int" // int / uint

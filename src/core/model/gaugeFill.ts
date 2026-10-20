@@ -1,3 +1,5 @@
+import { parseNumberLiteral } from "./literals";
+
 export const DEFAULT_GAUGE_FILL = 0.5;
 
 /**
@@ -12,8 +14,9 @@ export function gaugeFillAmount(value: string | number | undefined): number {
   return Math.max(0, Math.min(1, parsed));
 }
 
-/** Format a gauge amount as an AngelScript float literal such as `0.65f`. */
+/** Format literal amounts; runtime expressions pass through to AngelScript intact. */
 export function gaugeFillExpr(value: string | number | undefined): string {
+  if (typeof value === "string" && value.trim() && parseNumberLiteral(value) === null) return value;
   const amount = Number(gaugeFillAmount(value).toFixed(6));
   const text = amount.toString();
   return `${text.includes(".") ? text : `${text}.0`}f`;
