@@ -21,7 +21,7 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
   if (hidden) return null;
   const background = node.type.startsWith("bg-");
   const beginDrag = (e: React.MouseEvent, resize: boolean) => {
-    if (locked) return; e.preventDefault(); e.stopPropagation();
+    if (locked || e.button !== 0) return; e.preventDefault(); e.stopPropagation();
     startDrag({ id: node.id, resize, startClientX: e.clientX, startClientY: e.clientY, startXN: node.xN, startYN: node.yN, startWN: node.wN, startHN: node.hN });
   };
   const label = node.caption ? `${node.id} · ${node.caption}` : node.id;
@@ -32,6 +32,7 @@ export function WidgetView({ node, rect, zIndex, onContextMenu }: Props) {
     onMouseDown={background || locked ? undefined : e => beginDrag(e, false)}
     onContextMenu={background ? undefined : e => { e.preventDefault(); e.stopPropagation(); onContextMenu(e, node.id); }} title={label}>
     {!real && <span className="widget-title">{label}</span>}
+    {selected && <span className="selection-label">{node.id}</span>}
     {!background && !locked && <div className="resize-handle" onMouseDown={e => beginDrag(e, true)} />}
   </div>;
 }

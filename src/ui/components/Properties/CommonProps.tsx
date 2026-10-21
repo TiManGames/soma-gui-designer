@@ -1,10 +1,11 @@
 import { useStore } from "../../state/store";
 import { ROOT, type WidgetNode } from "@core/model/nodes";
-import { getNode } from "@core/model/tree";
+import { canReparent } from "@core/model/tree";
 import { WIDGETS } from "@core/model/defaults";
 import { clamp } from "@core/model/ids";
 import { parentAbsRect, snapPx } from "@core/model/geometry";
 import { NumberInput } from "../NumberInput";
+import { PropertyGroup } from "./PropertyGroup";
 
 function pct(n: number): number {
   return Math.round(n * 10000) / 100;
@@ -50,8 +51,7 @@ export function CommonProps({ node }: { node: WidgetNode }) {
 
   return (
     <>
-      <div className="field-group">
-        <h3>Identity</h3>
+      <PropertyGroup title="Identity" defaultOpen={false}>
 
         <label>
           ID
@@ -66,11 +66,6 @@ export function CommonProps({ node }: { node: WidgetNode }) {
         </label>
 
         <label>
-          Type
-          <input value={WIDGETS[node.type].label} disabled />
-        </label>
-
-        <label>
           Parent
           <select
             value={node.parentId}
@@ -78,22 +73,18 @@ export function CommonProps({ node }: { node: WidgetNode }) {
           >
             <option value={ROOT}>screen (root)</option>
             {containers.map((c) => (
-              <option key={c.id} value={c.id} disabled={getNode(doc, c.id) === node}>
+              <option key={c.id} value={c.id} disabled={c.id !== node.parentId && !canReparent(doc, node.id, c.id)}>
                 {c.id}
               </option>
             ))}
           </select>
         </label>
-      </div>
+      </PropertyGroup>
 
-      <div className="field-group">
-        <h3
-          style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
-        >
-          <span>Layout</span>
-          <span className="unit-toggle">
+      <PropertyGroup title="Layout" right={<span className="unit-toggle" role="group" aria-label="Layout units">
             <button
               type="button"
+              aria-pressed={!isPx}
               className={!isPx ? "active" : ""}
               onClick={() => setLayoutUnit("pct")}
             >
@@ -101,13 +92,13 @@ export function CommonProps({ node }: { node: WidgetNode }) {
             </button>
             <button
               type="button"
+              aria-pressed={isPx}
               className={isPx ? "active" : ""}
               onClick={() => setLayoutUnit("px")}
             >
               px
             </button>
-          </span>
-        </h3>
+          </span>}>
 
         <div className="four-col">
           <label>
@@ -148,7 +139,7 @@ export function CommonProps({ node }: { node: WidgetNode }) {
             </label>
           </div>
         </div>
-      </div>
+      </PropertyGroup>
     </>
   );
 }

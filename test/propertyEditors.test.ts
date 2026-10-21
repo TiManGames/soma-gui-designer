@@ -36,6 +36,16 @@ describe("widget input audit", () => {
     }
   });
 
+  it("displays inherited factory colors in Style without creating overrides", () => {
+    const node = makeNode("station-button", "Button");
+    const before = JSON.stringify(node);
+    const markup = render(createElement(OverridesSection, { node, view: "style" }));
+    expect(markup).toContain('value="#3a828e"');
+    expect(markup).toContain('aria-label="mColorBase expression mode"');
+    expect(markup).toContain('title="mColorBase · Default (no override)"');
+    expect(JSON.stringify(node)).toBe(before);
+  });
+
   it("renders matching controls for every scalar/schema field", () => {
     const controls: Record<string, string> = { bool: 'type="checkbox"', float: 'type="number"', int: 'type="number"',
       string: 'type="text"', enum: "<select", color: 'type="color"', vec2: 'type="number"', vec3: 'type="number"', gfx: "Browse texture" };

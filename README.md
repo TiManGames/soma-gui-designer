@@ -96,6 +96,31 @@ for source findings, coverage, local visual checks, and remaining limits.
 - Undo/redo (in-canvas), with native VS Code save/undo at the file level.
 - Resolution presets and normalized layout that survives resolution changes.
 
+## Workspace controls
+
+- **Insert** opens a searchable widget picker while keeping Layers visible. Use
+  Down Arrow to focus its first result, Enter to insert, and Escape to close.
+- **Design / Style / Advanced** organize the inspector. Style shows inherited
+  factory values without creating overrides; **fx** switches a field to an
+  AngelScript expression. Hover a field label for its exact API name. Property
+  groups remember whether you left them expanded or collapsed.
+- **Project settings** is always available in the top toolbar. It contains the
+  callback, function name, translation category, custom resolution, and reset
+  action, and preserves the current widget selection.
+- **Fit** uses the available width and height. Choose **100%** for actual pixels,
+  or zoom from **10–400%**. **Ctrl/Cmd + scroll** zooms around the pointer;
+  **Space + drag** or middle-mouse drag pans. **Grid** visibility and **Snap** are
+  separate controls. **Game textures / Wireframe** changes canvas rendering.
+- Top-bar panel buttons collapse either sidebar. **Focus canvas** temporarily
+  hides both sidebars and the bottom dock; Escape restores the previous layout.
+- The code dock starts collapsed for new users. Click a **Problem** to reveal
+  its widget in Layers and the canvas, or open Project settings for screen issues.
+  Export contains **Copy HPS**, **Copy preload**, and **Write .hps file**.
+
+Panel sizes, collapsed groups, and inspector preferences stay in editor storage.
+Zoom, panning, and focus mode never modify project JSON or generated code. The
+existing schema v4 project format and game rendering remain unchanged.
+
 ## Notes
 
 Generated code still needs manual gameplay logic (button handlers, sounds, state

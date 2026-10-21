@@ -10,11 +10,12 @@ import { getNode, isContainer, removeNode, canReparent, descendantIds } from "@c
 import {
   absoluteRect,
   parentAbsRect,
-  previewSize,
   renormalizeToParent,
   snapPx
 } from "@core/model/geometry";
-import { canvasScale } from "@core/model/canvasScale";
+import { useViewport } from "./viewportStore";
+import { useWorkspace } from "./workspaceStore";
+import type { Rect } from "@core/model/geometry";
 import { clamp } from "@core/model/ids";
 import { postToHost } from "../vscodeApi";
 import { usePreview } from "./previewStore";
@@ -24,7 +25,7 @@ const EDIT_DEBOUNCE_MS = 200;
 
 export type PreviewTab = "hps" | "preload";
 export type SidebarTab = "layers" | "widgets" | "assets";
-export type DockTab = "problems" | "hps" | "preload" | "output";
+export type DockTab = "problems" | "hps" | "preload";
 export type LayoutUnit = "pct" | "px";
 
 const UI_PREFS_KEY = "soma-gui:ui-prefs";
@@ -41,14 +42,15 @@ function loadUiPrefs(): UiPrefs {
   const fallback: UiPrefs = {
     sidebarTab: "layers",
     dockTab: "problems",
-    dockOpen: true,
+    dockOpen: false,
     layoutUnit: "pct",
     paletteFavorites: []
   };
   try {
     const raw = localStorage.getItem(UI_PREFS_KEY);
     if (!raw) return fallback;
-    return { ...fallback, ...(JSON.parse(raw) as Partial<UiPrefs>) };
+    const saved = JSON.parse(raw) as Partial<UiPrefs>;
+    return { ...fallback, ...saved, dockTab: ["problems", "hps", "preload"].includes(saved.dockTab ?? "") ? saved.dockTab! : "problems" };
   } catch {
     return fallback;
   }
@@ -74,6 +76,8 @@ interface DragState {
   startHN: number;
   /** Document snapshot captured when the drag began, pushed to history on release. */
   docBeforeDrag: SomaDocument;
+  scale: number;
+  parentRect: Rect;
 }
 
 interface DesignerState {
@@ -140,7 +144,7 @@ interface DesignerState {
   pasteNode: () => void;
 
   // drag
-  startDrag: (params: Omit<DragState, "docBeforeDrag">) => void;
+  startDrag: (params: Omit<DragState, "docBeforeDrag" | "scale" | "parentRect">) => void;
   dragMove: (clientX: number, clientY: number) => void;
   endDrag: () => void;
   setDropTarget: (id: string | null) => void;
@@ -260,7 +264,7 @@ export const useStore = create<DesignerState>((set, get) => ({
   gridVisible: true,
   toggleGridVisible: () => set((s) => ({ gridVisible: !s.gridVisible })),
 
-  select: (id) => set({ selectedId: id }),
+  select: (id) => { useWorkspace.getState().showWidget(); set({ selectedId: id }); },
   setPreviewTab: (tab) => set({ previewTab: tab }),
 
   setMeta: (patch) => set((s) => withHistory(s, { ...s.doc, ...patch })),
@@ -289,6 +293,7 @@ export const useStore = create<DesignerState>((set, get) => ({
 
   addNode: (type) =>
     set((s) => {
+      useWorkspace.getState().showWidget();
       const selected = s.selectedId ? getNode(s.doc, s.selectedId) : null;
       const parentId = isContainer(selected) ? selected!.id : selected?.parentId ?? ROOT;
       const id = uniqueId(
@@ -365,10 +370,15 @@ export const useStore = create<DesignerState>((set, get) => ({
     }),
 
   startDrag: (params) =>
-    set((s) => ({
-      drag: { ...params, docBeforeDrag: s.doc },
-      selectedId: params.id
-    })),
+    set((s) => {
+      const node = getNode(s.doc, params.id);
+      if (!node) return {};
+      const preview = usePreview.getState();
+      const parentRect = s.wysiwygEnabled && preview.doc === s.doc
+        ? preview.scene?.frames.get(node.parentId) ?? parentAbsRect(s.doc, node) : parentAbsRect(s.doc, node);
+      useWorkspace.getState().showWidget();
+      return { drag: { ...params, docBeforeDrag: s.doc, scale: useViewport.getState().scale, parentRect }, selectedId: params.id };
+    }),
 
   dragMove: (clientX, clientY) => {
     const s = get();
@@ -376,9 +386,8 @@ export const useStore = create<DesignerState>((set, get) => ({
     const node = getNode(s.doc, s.drag.id);
     if (!node) return;
 
-    const preview = usePreview.getState();
-    const parent = s.wysiwygEnabled && preview.doc === s.doc ? preview.scene?.frames.get(node.parentId) ?? parentAbsRect(s.doc, node) : parentAbsRect(s.doc, node);
-    const scale = canvasScale(previewSize(s.doc));
+    const parent = s.drag.parentRect;
+    const scale = s.drag.scale;
     const dxPx = (clientX - s.drag.startClientX) / scale;
     const dyPx = (clientY - s.drag.startClientY) / scale;
 

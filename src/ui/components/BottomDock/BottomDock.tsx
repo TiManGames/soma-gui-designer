@@ -1,15 +1,14 @@
 import { useStore, type DockTab } from "../../state/store";
 import { generate } from "@core/codegen/generateHps";
-import { validateDocument } from "@core/validate/validateDocument";
-import { validateAgainstSchema } from "@core/validate/validateSchema";
+import { validationIssues } from "../../validation";
+import { Icon } from "../Icon";
 import { ValidationList } from "../ValidationList";
 import { postToHost } from "../../vscodeApi";
 
 const TABS: { id: DockTab; label: string }[] = [
   { id: "problems", label: "Problems" },
   { id: "hps", label: "Generated HPS" },
-  { id: "preload", label: "Preload" },
-  { id: "output", label: "Output" }
+  { id: "preload", label: "Preload" }
 ];
 
 export function BottomDock() {
@@ -19,7 +18,7 @@ export function BottomDock() {
   const dockOpen = useStore((s) => s.dockOpen);
   const toggleDock = useStore((s) => s.toggleDock);
 
-  const problemCount = [...validateDocument(doc), ...validateAgainstSchema(doc)].length;
+  const problemCount = validationIssues(doc).length;
 
   return (
     <div className="bottom-dock">
@@ -27,12 +26,15 @@ export function BottomDock() {
         {TABS.map((t) => (
           <button
             key={t.id}
+            aria-expanded={dockOpen && dockTab === t.id}
+            aria-controls="dock-content"
             className={`dock-tab${dockOpen && dockTab === t.id ? " active" : ""}`}
             onClick={() => {
               if (dockOpen && dockTab === t.id) toggleDock();
               else setDockTab(t.id);
             }}
           >
+            <Icon name={t.id === "problems" ? "alert" : "code"} />
             {t.label}
             {t.id === "problems" && (
               <span className={`dock-badge${problemCount === 0 ? " zero" : ""}`}>{problemCount}</span>
@@ -43,20 +45,18 @@ export function BottomDock() {
           <button
             className="dock-collapse"
             title={dockOpen ? "Collapse panel" : "Expand panel"}
+            aria-label={dockOpen ? "Collapse code panel" : "Expand code panel"}
             onClick={toggleDock}
           >
-            {dockOpen ? "▾" : "▴"}
+            <Icon name="down" style={{ transform: dockOpen ? "none" : "rotate(180deg)" }} />
           </button>
         </div>
       </div>
       {dockOpen && (
-        <div className="dock-body">
+        <div className="dock-body" id="dock-content" role="region" aria-label={TABS.find(t => t.id === dockTab)?.label}>
           {dockTab === "problems" && <ValidationList />}
           {dockTab === "hps" && <DockCode kind="hps" />}
           {dockTab === "preload" && <DockCode kind="preload" />}
-          {dockTab === "output" && (
-            <div className="palette-empty">Output log is empty. Write or copy generated code to see activity here.</div>
-          )}
         </div>
       )}
     </div>

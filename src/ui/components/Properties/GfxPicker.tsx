@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useGfx } from "../../state/gfxStore";
 import { useGfxBrowse } from "../../state/gfxBrowseStore";
+import { Icon } from "../Icon";
 
 interface Props {
   /** Current gfx path (no extension, no quotes), e.g. "stationV2/button/small_corner_topleft". Empty string = unset. */
@@ -71,7 +72,7 @@ export function GfxPicker({ value, onChange, onClear }: Props) {
         onClick={handleBrowse}
         style={{ padding: "2px 6px", fontSize: 11, flexShrink: 0 }}
       >
-        …
+        <Icon name="folder" />
       </button>
 
       {/* Clear button */}
@@ -84,7 +85,7 @@ export function GfxPicker({ value, onChange, onClear }: Props) {
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClear(); }}
           style={{ padding: "2px 5px", fontSize: 11, flexShrink: 0 }}
         >
-          ×
+          <Icon name="close" />
         </button>
       )}
     </div>

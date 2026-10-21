@@ -4,162 +4,105 @@ import { Canvas } from "./components/Canvas/Canvas";
 import { SidebarTabs } from "./components/Sidebar/SidebarTabs";
 import { PropertyPanel } from "./components/Properties/PropertyPanel";
 import { BottomDock } from "./components/BottomDock/BottomDock";
-import { Section } from "./components/Section";
+import { InsertPopover } from "./components/InsertPopover";
 import { useStore } from "./state/store";
+import { useWorkspace } from "./state/workspaceStore";
 
-const RIGHT_MIN = 280;
-const RIGHT_MAX = 680;
-const RIGHT_DEFAULT = 380;
-const LEFT_MIN = 200;
-const LEFT_MAX = 440;
-const LEFT_DEFAULT = 264;
-const DOCK_MIN = 120;
-const DOCK_MAX = 520;
-const DOCK_DEFAULT = 200;
-
-const KEY_RIGHT = "soma-gui:right-width";
-const KEY_LEFT = "soma-gui:left-width";
-const KEY_DOCK = "soma-gui:dock-height";
-
-function loadNum(key: string, min: number, max: number, fallback: number): number {
-  try {
-    const v = Number(localStorage.getItem(key));
-    if (v >= min && v <= max) return v;
-  } catch { /* ignore */ }
-  return fallback;
+const LIMITS = { left: [200, 440, 240], right: [280, 680, 340], dock: [120, 520, 200] } as const;
+type Side = keyof typeof LIMITS;
+const KEYS: Record<Side, string> = { left: "soma-gui:left-width", right: "soma-gui:right-width", dock: "soma-gui:dock-height" };
+function loadSize(side: Side) {
+  const [min, max, fallback] = LIMITS[side];
+  try { const n = Number(localStorage.getItem(KEYS[side])); return n >= min && n <= max ? n : fallback; } catch { return fallback; }
 }
-
-type ResizeSide = "left" | "right" | "dock";
-
+function isTyping(target: EventTarget | null) {
+  return target instanceof HTMLElement && !!target.closest("input,textarea,select,[contenteditable=true],dialog,[role=dialog]");
+}
 export function App() {
-  const undo = useStore((s) => s.undo);
-  const redo = useStore((s) => s.redo);
-  const dockOpen = useStore((s) => s.dockOpen);
+  const dockOpen = useStore(s => s.dockOpen);
+  const leftOpen = useWorkspace(s => s.leftOpen), rightOpen = useWorkspace(s => s.rightOpen);
+  const focusMode = useWorkspace(s => s.focusMode);
+  const [sizes, setSizes] = useState(() => ({ left: loadSize("left"), right: loadSize("right"), dock: loadSize("dock") }));
+  const [available, setAvailable] = useState(1280);
+  const workspace = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ side: Side; start: number; size: number } | null>(null);
+  const showLeft = leftOpen && !focusMode, showRight = rightOpen && !focusMode;
+  const showDock = !focusMode && dockOpen;
+  // Shrink rails proportionally before taking space from the artboard.
+  const requested = (showLeft ? sizes.left : 0) + (showRight ? sizes.right : 0);
+  const factor = requested ? Math.min(1, Math.max(160, available - 320 - 12) / requested) : 1;
+  const adjustSize = (side: Side, value: number) => setSizes(s => ({ ...s, [side]: Math.max(LIMITS[side][0], Math.min(LIMITS[side][1], value)) }));
 
-  const [rightWidth, setRightWidth] = useState(() => loadNum(KEY_RIGHT, RIGHT_MIN, RIGHT_MAX, RIGHT_DEFAULT));
-  const [leftWidth, setLeftWidth] = useState(() => loadNum(KEY_LEFT, LEFT_MIN, LEFT_MAX, LEFT_DEFAULT));
-  const [dockHeight, setDockHeight] = useState(() => loadNum(KEY_DOCK, DOCK_MIN, DOCK_MAX, DOCK_DEFAULT));
-
-  const dragRef = useRef<{ side: ResizeSide; startPos: number; startSize: number } | null>(null);
-
-  // Global undo/redo + delete keyboard shortcuts.
+  useEffect(() => {
+    const element = workspace.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setAvailable(element.clientWidth));
+    observer.observe(element); setAvailable(element.clientWidth);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    for (const side of Object.keys(KEYS) as Side[]) {
+      try { localStorage.setItem(KEYS[side], String(sizes[side])); } catch { /* Optional UI preferences. */ }
+    }
+  }, [sizes]);
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      const target = e.target as HTMLElement | null;
-      const typing = target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !typing) {
-        e.preventDefault();
-        if (e.shiftKey) redo();
-        else undo();
+      if (e.defaultPrevented || isTyping(e.target) || document.querySelector("dialog[open]")) return;
+      const state = useStore.getState(), ui = useWorkspace.getState();
+      if (e.key === "Escape" && ui.focusMode) { ui.toggleFocus(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault(); if (e.shiftKey) state.redo(); else state.undo();
       }
-      if ((e.key === "Delete" || e.key === "Backspace") && !typing) {
-        const { selectedId, deleteNode } = useStore.getState();
-        if (selectedId) deleteNode(selectedId);
+      if ((e.key === "Delete" || e.key === "Backspace") && state.selectedId) {
+        e.preventDefault(); state.deleteNode(state.selectedId);
       }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo]);
-
-  // Panel resize drag handlers (left rail, right rail, bottom dock).
-  useEffect(() => {
+    const finish = () => { drag.current = null; document.body.style.cursor = ""; document.body.style.userSelect = ""; };
     function onMove(e: MouseEvent) {
-      const d = dragRef.current;
-      if (!d) return;
-      if (d.side === "right") {
-        // Dragging leftward widens the right rail.
-        const delta = d.startPos - e.clientX;
-        setRightWidth(Math.min(RIGHT_MAX, Math.max(RIGHT_MIN, d.startSize + delta)));
-      } else if (d.side === "left") {
-        // Dragging rightward widens the left rail.
-        const delta = e.clientX - d.startPos;
-        setLeftWidth(Math.min(LEFT_MAX, Math.max(LEFT_MIN, d.startSize + delta)));
-      } else {
-        // Dragging upward grows the dock.
-        const delta = d.startPos - e.clientY;
-        setDockHeight(Math.min(DOCK_MAX, Math.max(DOCK_MIN, d.startSize + delta)));
-      }
+      const d = drag.current; if (!d) return;
+      const delta = d.side === "dock" ? d.start - e.clientY : d.side === "right" ? d.start - e.clientX : e.clientX - d.start;
+      adjustSize(d.side, d.size + delta);
     }
-    function onUp() {
-      if (!dragRef.current) return;
-      dragRef.current = null;
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    }
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
+    window.addEventListener("keydown", onKey); window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", finish); window.addEventListener("blur", finish);
+    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", finish); window.removeEventListener("blur", finish); };
   }, []);
+  const handle = (side: Side) => <div className={side === "dock" ? "dock-resize-handle" : "rail-resize-handle"}
+    style={{ gridArea: side === "dock" ? "dockhandle" : side === "left" ? "lefthandle" : "railhandle" }}
+    role="separator" aria-label={`Resize ${side} panel`} aria-orientation={side === "dock" ? "horizontal" : "vertical"}
+    aria-valuemin={LIMITS[side][0]} aria-valuemax={LIMITS[side][1]} aria-valuenow={sizes[side]} tabIndex={0}
+    onMouseDown={e => {
+      if (e.button !== 0) return; e.preventDefault();
+      drag.current = { side, start: side === "dock" ? e.clientY : e.clientX, size: sizes[side] };
+      document.body.style.cursor = side === "dock" ? "ns-resize" : "ew-resize"; document.body.style.userSelect = "none";
+    }}
+    onKeyDown={e => {
+      const negative = side === "dock" ? "ArrowDown" : side === "right" ? "ArrowRight" : "ArrowLeft";
+      const positive = side === "dock" ? "ArrowUp" : side === "right" ? "ArrowLeft" : "ArrowRight";
+      if (e.key === negative || e.key === positive) { e.preventDefault(); adjustSize(side, sizes[side] + (e.key === positive ? 16 : -16)); }
+    }} />;
 
-  // Persist sizes across sessions (UI prefs, never into the document).
-  useEffect(() => { try { localStorage.setItem(KEY_RIGHT, String(rightWidth)); } catch { /* ignore */ } }, [rightWidth]);
-  useEffect(() => { try { localStorage.setItem(KEY_LEFT, String(leftWidth)); } catch { /* ignore */ } }, [leftWidth]);
-  useEffect(() => { try { localStorage.setItem(KEY_DOCK, String(dockHeight)); } catch { /* ignore */ } }, [dockHeight]);
-
-  const startResize = (side: ResizeSide) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    const startPos = side === "dock" ? e.clientY : e.clientX;
-    const startSize = side === "dock" ? dockHeight : side === "left" ? leftWidth : rightWidth;
-    dragRef.current = { side, startPos, startSize };
-    document.body.style.cursor = side === "dock" ? "ns-resize" : "ew-resize";
-    document.body.style.userSelect = "none";
-  };
-
-  return (
-    <div className="app">
-      <Toolbar />
-      <div
-        className="workspace"
-        style={{
-          gridTemplateColumns: `${leftWidth}px 6px minmax(360px, 1fr) 6px ${rightWidth}px`,
-          gridTemplateRows: `1fr ${dockOpen ? "6px" : "0px"} ${dockOpen ? `${dockHeight}px` : "auto"}`,
-          gridTemplateAreas: `
-            "left lefthandle canvas railhandle right"
-            "dockhandle dockhandle dockhandle dockhandle dockhandle"
-            "dock dock dock dock dock"
-          `
-        }}
-      >
-        <aside className="rail left" style={{ gridArea: "left" }}>
-          <SidebarTabs />
-        </aside>
-
-        <div
-          className="rail-resize-handle"
-          style={{ gridArea: "lefthandle" }}
-          onMouseDown={startResize("left")}
-          title="Drag to resize sidebar"
-        />
-
-        <section className="canvas-panel" style={{ gridArea: "canvas" }}>
-          <Canvas />
-        </section>
-
-        <div
-          className="rail-resize-handle"
-          style={{ gridArea: "railhandle" }}
-          onMouseDown={startResize("right")}
-          title="Drag to resize panel"
-        />
-
-        <aside className="rail right" style={{ gridArea: "right" }}>
-          <Section title="Inspector">
-            <PropertyPanel />
-          </Section>
-        </aside>
-
-        {dockOpen && (
-          <div
-            className="dock-resize-handle"
-            onMouseDown={startResize("dock")}
-            title="Drag to resize panel"
-          />
-        )}
-        <BottomDock />
-      </div>
+  return <div className={`app${focusMode ? " focus-mode" : ""}`}>
+    <Toolbar />
+    <div className="workspace" ref={workspace} style={{
+      gridTemplateColumns: `${showLeft ? sizes.left * factor : 0}px ${showLeft ? 5 : 0}px minmax(0, 1fr) ${showRight ? 5 : 0}px ${showRight ? sizes.right * factor : 0}px`,
+      gridTemplateRows: `minmax(0, 1fr) ${showDock ? 5 : 0}px ${focusMode ? 0 : showDock ? `min(${sizes.dock}px, 45%)` : "34px"}`,
+      gridTemplateAreas: '"left lefthandle canvas railhandle right" "dockhandle dockhandle dockhandle dockhandle dockhandle" "dock dock dock dock dock"'
+    }}>
+      {showLeft && <aside className="rail left" style={{ gridArea: "left" }} aria-label="Elements and assets"><SidebarTabs /></aside>}
+      {showLeft && handle("left")}
+      <section className="canvas-panel" style={{ gridArea: "canvas" }} aria-label="Design canvas"><Canvas /></section>
+      {showRight && handle("right")}
+      {showRight && <aside className="rail right" style={{ gridArea: "right" }} aria-label="Inspector"><PropertyPanel /></aside>}
+      {showDock && handle("dock")}
+      {!focusMode && <BottomDock />}
     </div>
-  );
+    <StatusBar />
+    <InsertPopover />
+  </div>;
+}
+function StatusBar() {
+  const size = useStore(s => s.doc.previewResolution);
+  return <footer className="status-bar"><span>{size.x} × {size.y}</span><span className="navigation-hints">Space + drag to pan <span className="status-divider">|</span> Ctrl / ⌘ + scroll to zoom</span><span>Ready</span></footer>;
 }

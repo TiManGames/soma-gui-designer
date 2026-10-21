@@ -1,95 +1,42 @@
 import { useStore } from "../../state/store";
-import { previewSize } from "@core/model/geometry";
+import { useViewport } from "../../state/viewportStore";
 import { RESOLUTION_PRESETS } from "@core/model/document";
+import { MAX_ZOOM, MIN_ZOOM, type CanvasZoom } from "@core/model/canvasScale";
 import { NumberInput } from "../NumberInput";
-import { canvasScale } from "@core/model/canvasScale";
+import { Icon } from "../Icon";
 
-/**
- * Canvas toolbar: resolution preset + custom W/H, fit-only zoom readout,
- * grid size + snap, grid/guides visibility, and the WYSIWYG (Preview) toggle.
- * Zoom is fit-only — the canvas always scales to min(1, MAX/width); we only
- * display the resulting percentage, never drive it.
- */
-export function CanvasToolbar() {
-  const doc = useStore((s) => s.doc);
-  const setMeta = useStore((s) => s.setMeta);
-  const setResolutionPreset = useStore((s) => s.setResolutionPreset);
-  const setPreviewSize = useStore((s) => s.setPreviewSize);
-  const wysiwygEnabled = useStore((s) => s.wysiwygEnabled);
-  const toggleWysiwyg = useStore((s) => s.toggleWysiwyg);
-
-  const size = previewSize(doc);
-  const scale = canvasScale(size);
-
-  return (
-    <div className="canvas-toolbar">
-      <div className="ct-group">
-        <select
-          className="ct-select"
-          value={doc.resolutionPreset}
-          title="Resolution preset"
-          onChange={(e) => setResolutionPreset(e.target.value)}
-        >
-          {RESOLUTION_PRESETS.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label}
-            </option>
-          ))}
-        </select>
-        <NumberInput
-          className="ct-num"
-          value={doc.previewResolution.x}
-          integer
-          min={1}
-          title="Width (px)"
-          onCommit={(v) => setPreviewSize(v, doc.previewResolution.y)}
-        />
-        <span className="ct-label">×</span>
-        <NumberInput
-          className="ct-num"
-          value={doc.previewResolution.y}
-          integer
-          min={1}
-          title="Height (px)"
-          onCommit={(v) => setPreviewSize(doc.previewResolution.x, v)}
-        />
-      </div>
-
-      <div className="ct-group">
-        <span className="ct-label">Fit</span>
-        <span className="ct-readout">{Math.round(scale * 100)}%</span>
-      </div>
-
-      <div className="ct-group">
-        <span className="ct-label">Grid</span>
-        <NumberInput
-          className="ct-num"
-          value={doc.gridSize}
-          integer
-          min={1}
-          title="Grid size (px)"
-          onCommit={(v) => setMeta({ gridSize: v })}
-        />
-        <button
-          className={`ct-toggle${doc.snapToGrid ? " active" : ""}`}
-          title="Snap dragged widgets to the grid"
-          onClick={() => setMeta({ snapToGrid: !doc.snapToGrid })}
-        >
-          Snap
-        </button>
-      </div>
-
-      <div className="ct-spacer" />
-
-      <div className="ct-group">
-        <button
-          className={`ct-toggle${wysiwygEnabled ? " active" : ""}`}
-          title="Toggle rendering real game textures & colors on the canvas"
-          onClick={toggleWysiwyg}
-        >
-          Preview {wysiwygEnabled ? "on" : "off"}
-        </button>
-      </div>
+export function CanvasToolbar({ onZoom = zoom => useViewport.getState().setZoom(zoom) }: { onZoom?: (zoom: CanvasZoom) => void }) {
+  const doc = useStore(s => s.doc), setMeta = useStore(s => s.setMeta);
+  const preset = useStore(s => s.setResolutionPreset);
+  const wysiwyg = useStore(s => s.wysiwygEnabled), setWysiwyg = useStore(s => s.setWysiwygEnabled);
+  const grid = useStore(s => s.gridVisible), toggleGrid = useStore(s => s.toggleGridVisible);
+  const scale = useViewport(s => s.scale), zoom = useViewport(s => s.zoom);
+  return <div className="canvas-toolbar">
+    <div className="ct-group">
+      <select className="ct-select resolution-select" aria-label="Resolution preset" value={doc.resolutionPreset} onChange={e => preset(e.target.value)}>
+        {RESOLUTION_PRESETS.map(p => <option key={p.id} value={p.id}>{p.id === "custom" ? `Custom · ${doc.previewResolution.x} × ${doc.previewResolution.y}` : p.label}</option>)}
+      </select>
     </div>
-  );
+    <div className="ct-group zoom-controls">
+      <button className="ghost icon-btn" aria-label="Zoom out" disabled={scale <= MIN_ZOOM} onClick={() => onZoom(scale / 1.25)}><Icon name="minus" /></button>
+      <select aria-label="Canvas zoom" className="ct-select zoom-select" value={zoom === "fit" ? "fit" : String(Math.round(scale * 100))}
+        onChange={e => onZoom(e.target.value === "fit" ? "fit" : Number(e.target.value) / 100)}>
+        <option value="fit">Fit · {Math.round(scale * 100)}%</option>
+        {![10, 25, 50, 75, 100, 125, 150, 200, 300, 400].includes(Math.round(scale * 100)) && zoom !== "fit" && <option value={Math.round(scale * 100)}>{Math.round(scale * 100)}%</option>}
+        {[10, 25, 50, 75, 100, 125, 150, 200, 300, 400].map(n => <option key={n} value={n}>{n}%</option>)}
+      </select>
+      <button className="ghost icon-btn" aria-label="Zoom in" disabled={scale >= MAX_ZOOM} onClick={() => onZoom(scale * 1.25)}><Icon name="plus" /></button>
+      <button className={`ct-toggle${zoom === "fit" ? " active" : ""}`} aria-pressed={zoom === "fit"} onClick={() => onZoom("fit")}>Fit</button>
+    </div>
+    <div className="ct-group">
+      <button className={`ct-toggle${grid ? " active" : ""}`} aria-pressed={grid} onClick={toggleGrid} title="Show grid"><Icon name="grid" />Grid</button>
+      <NumberInput className="ct-num" value={doc.gridSize} integer min={1} aria-label="Grid size" title="Grid size (px)" onCommit={gridSize => setMeta({ gridSize })} />
+      <button className={`ct-toggle${doc.snapToGrid ? " active" : ""}`} aria-pressed={doc.snapToGrid} title="Snap widgets to grid" onClick={() => setMeta({ snapToGrid: !doc.snapToGrid })}><Icon name="snap" />Snap</button>
+    </div>
+    <div className="ct-spacer" />
+    <div className="render-switch" role="group" aria-label="Canvas rendering">
+      <button aria-pressed={wysiwyg} className={wysiwyg ? "active" : ""} onClick={() => setWysiwyg(true)}>Game textures</button>
+      <button aria-pressed={!wysiwyg} className={!wysiwyg ? "active" : ""} onClick={() => setWysiwyg(false)}>Wireframe</button>
+    </div>
+  </div>;
 }

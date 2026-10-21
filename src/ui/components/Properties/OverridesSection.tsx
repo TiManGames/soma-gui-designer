@@ -9,6 +9,16 @@ import { FieldEditor } from "./FieldEditor";
 import { FrameGfxEditor } from "./FrameGfxEditor";
 import { ExpressionControl } from "./ExpressionControl";
 import { clearFieldOverride, getGfxFieldValue, setFieldExpression } from "@core/model/overrides";
+import { PropertyGroup } from "./PropertyGroup";
+import { widgetDefaults } from "@core/preview/defaults";
+import { stringLiteral } from "@core/model/literals";
+
+function fieldLabel(name: string): string {
+  const labels: Record<string, string> = { mColorBase: "Base", mColorText: "Text", mColorInFocus: "Focused", mColorTriggered: "Triggered", mColorDisabled: "Disabled", mbUseInFocusColor: "Use focus color", mbUseTriggeredColor: "Use triggered color", mbUseDisabledColor: "Use disabled color" };
+  if (labels[name]) return labels[name];
+  return name.replace(/^m(?:b|f|v|s|l)(?=[A-Z])/, "").replace(/^m(?=[A-Z])/, "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/Gfx/g, "graphics").replace(/^./, c => c.toUpperCase());
+}
 
 // ---- Hand-authored param fields for bg-* widgets (no dataClass) ----------------
 
@@ -154,7 +164,7 @@ const WIDGET_FIELD_GROUPS: Partial<Record<WidgetType, FieldGroup[]>> = {
 
 // ---- Shared field rendering ----------------------------------------------------
 
-export function OverridesSection({ node }: { node: WidgetNode }) {
+export function OverridesSection({ node, view = "all" }: { node: WidgetNode; view?: "all" | "style" | "advanced" }) {
   const setOverrides = useStore(s => s.setOverrides);
   const previewHeight = useStore(s => Math.max(1, s.doc.previewResolution.y));
   const [showAll, setShowAll] = useState(false);
@@ -165,6 +175,16 @@ export function OverridesSection({ node }: { node: WidgetNode }) {
   const exprByPath = new Map<string, string>();
   node.overrides.forEach(o => { if (o.kind === "expr") exprByPath.set(o.path, o.expr); });
   const defaults = getFrameGfxDefaults(node.type, previewHeight);
+  const inherited = widgetDefaults(node.type, previewHeight);
+  const inheritedExpr = (field: StructField): string | undefined => {
+    const value = inherited[field.name];
+    if (Array.isArray(value)) return `${field.type}(${value.join(",")})`;
+    if (typeof value === "boolean" || typeof value === "number") return String(value);
+    if (typeof value === "string") return field.category === "string" ? stringLiteral(value) : value;
+    const file = inherited[field.name + ".file"];
+    if (field.type === "cImGuiGfx" && typeof file === "string") return `cImGuiGfx(${stringLiteral(file)})`;
+    return undefined;
+  };
 
   const renderField = (field: StructField) => {
     const value = field.type === "cImGuiGfx" ? getGfxFieldValue(node.overrides, field.name) : exprByPath.get(field.name);
@@ -172,7 +192,7 @@ export function OverridesSection({ node }: { node: WidgetNode }) {
     const onClear = () => apply(clearFieldOverride(node.overrides, field.name));
     if (field.type === "cImGuiFrameGfx") {
       return <div className="override-row" key={field.name}>
-        <div className="override-field"><span className="override-name">{field.name}</span>
+        <div className="override-field"><span className="override-name" title={field.name}>{view === "style" ? fieldLabel(field.name) : field.name}</span>
           <ExpressionControl label={field.name} value={value} canEditValue={value === undefined} onChange={onChange}>
             <FrameGfxEditor fieldName={field.name} overrides={node.overrides} defaults={defaults} onChange={apply} />
           </ExpressionControl>
@@ -180,15 +200,21 @@ export function OverridesSection({ node }: { node: WidgetNode }) {
         {value !== undefined ? <button type="button" className="danger" aria-label={`Remove ${field.name} override`} title={`Remove ${field.name} override`} onClick={onClear}>×</button> : <span />}
       </div>;
     }
-    return <FieldEditor key={field.name} field={field} value={value} onChange={onChange} onClear={onClear} />;
+    return <FieldEditor key={field.name} field={field} label={view === "style" ? fieldLabel(field.name) : undefined} value={value} onChange={onChange} onClear={onClear}
+      compact={view === "style"} inheritedValue={view === "style" ? inheritedExpr(field) : undefined} />;
   };
 
   const groups = WIDGET_FIELD_GROUPS[node.type] ?? [];
+  const groupOrder = ["Frame", "Window Frame", "Label Frame", "Colors", "Text"];
+  const shownGroups = view === "style" ? [...groups].sort((a, b) => {
+    const rank = (title: string) => { const index = groupOrder.indexOf(title); return index < 0 ? groupOrder.length : index; };
+    return rank(a.title) - rank(b.title);
+  }) : groups;
   const grouped = new Set(groups.flatMap(g => g.frameGfx ? [g.frameGfx] : g.fields));
   const isActive = (field: StructField) => node.overrides.some(o => o.kind === "expr"
     ? o.path === field.name || o.path.startsWith(field.name + ".")
     : o.call.trim().startsWith(field.name + "."));
-  const remaining = fields.filter(f => !grouped.has(f.name));
+  const remaining = fields.filter(f => view === "advanced" || !grouped.has(f.name));
   const visible = remaining.filter(f => !meta.dataClass || showAll || isActive(f));
   // Existing nested/unknown assignments remain editable instead of disappearing.
   const extraPaths = new Set([...exprByPath.keys(), ...node.overrides.flatMap(o => {
@@ -202,23 +228,23 @@ export function OverridesSection({ node }: { node: WidgetNode }) {
       : { name: path, type: "AngelScript", category: "unknown" as const });
   const calls = node.overrides.flatMap((o, index) => o.kind === "call" ? [{ call: o.call, index }] : []);
 
-  if (!fields.length && !additional.length && !meta.dataClass) return null;
+  if (!fields.length && !additional.length && !meta.dataClass) return <p className="inspector-help">This element has no additional properties.</p>;
+  if (view === "style" && !groups.length) return <PropertyGroup title="Appearance" preferenceKey={`style-${node.type}`}>{fields.map(renderField)}</PropertyGroup>;
   return <>
-    {groups.map(group => {
+    {view !== "advanced" && shownGroups.map(group => {
       const names = group.frameGfx ? [group.frameGfx] : group.fields;
       const entries = names.map(name => fields.find(f => f.name === name)).filter((f): f is StructField => !!f);
-      return entries.length ? <div className="field-group" key={group.title}><h3>{group.title}</h3>{entries.map(renderField)}</div> : null;
+      return entries.length ? <PropertyGroup title={group.title} preferenceKey={`${node.type}-${group.title}`} defaultOpen={view === "all" || group.title === "Colors"} key={group.title}>{entries.map(renderField)}</PropertyGroup> : null;
     })}
-    {(remaining.length > 0 || additional.length > 0 || !struct && meta.dataClass) && <div className="field-group">
-      <h3>{!meta.dataClass ? "Parameters" : groups.length ? "Other overrides" : "Overrides"}</h3>
+    {view !== "style" && (remaining.length > 0 || additional.length > 0 || !struct && meta.dataClass) && <PropertyGroup title={!meta.dataClass ? "Parameters" : groups.length ? "Other overrides" : "Overrides"} preferenceKey={`overrides-${node.type}`}>
       {visible.map(renderField)}
       {additional.map(renderField)}
       {meta.dataClass && remaining.length > 0 && <button type="button" onClick={() => setShowAll(v => !v)}>
         {showAll ? "Show overridden only" : `Show all ${remaining.length} fields`}
       </button>}
-    </div>}
-    {(struct?.methods.length || calls.length || meta.dataClass && !struct) ? <div className="field-group">
-      <details><summary>Method calls (AngelScript expressions)</summary>
+    </PropertyGroup>}
+    {view !== "style" && (struct?.methods.length || calls.length || meta.dataClass && !struct) ? <PropertyGroup title="Method calls" defaultOpen={false}>
+      <p className="inspector-help">AngelScript method expressions are emitted in order.</p>
         {calls.map(({ call, index }) => <div className="override-row" key={index}>
           <input type="text" aria-label={`Method expression ${index + 1}`} list={`methods-${node.id}`} value={call}
             placeholder="SetPadding(20,20,20,20)" onChange={e => apply(node.overrides.map((o, i) => i === index ? { kind: "call", call: e.target.value } : o))} />
@@ -226,7 +252,6 @@ export function OverridesSection({ node }: { node: WidgetNode }) {
         </div>)}
         <datalist id={`methods-${node.id}`}>{struct?.methods.map(m => <option key={m} value={`${m}()`} />)}</datalist>
         <button type="button" onClick={() => apply([...node.overrides, { kind: "call", call: "" }])}>+ Method expression</button>
-      </details>
-    </div> : null}
+    </PropertyGroup> : null}
   </>;
 }

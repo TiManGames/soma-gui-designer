@@ -1,6 +1,8 @@
 import { useStore } from "../../state/store";
 import { RESOLUTION_PRESETS, type Target } from "@core/model/document";
 import { NumberInput } from "../NumberInput";
+import { PropertyGroup } from "./PropertyGroup";
+import { Icon } from "../Icon";
 
 /**
  * Inspector "Project" mode — shown when nothing is selected. Holds screen-level
@@ -15,10 +17,7 @@ export function ProjectPanel() {
 
   return (
     <>
-      <div className="inspector-mode-label">Project settings</div>
-
-      <div className="field-group">
-        <h3>Screen</h3>
+      <PropertyGroup title="Screen" preferenceKey="project-screen">
         <label>
           Target callback
           <select value={doc.target} onChange={(e) => setMeta({ target: e.target.value as Target })}>
@@ -40,10 +39,9 @@ export function ProjectPanel() {
             onChange={(e) => setMeta({ translationCategory: e.target.value })}
           />
         </label>
-      </div>
+      </PropertyGroup>
 
-      <div className="field-group">
-        <h3>Resolution</h3>
+      <PropertyGroup title="Resolution" preferenceKey="project-resolution">
         <label>
           Preset
           <select value={doc.resolutionPreset} onChange={(e) => setResolutionPreset(e.target.value)}>
@@ -74,7 +72,13 @@ export function ProjectPanel() {
             />
           </label>
         </div>
-      </div>
+      </PropertyGroup>
+      <PropertyGroup title="Reset layout" defaultOpen={false}>
+        <p className="inspector-help">Replace this screen with the starter layout. You can undo this change.</p>
+        <button className="danger" onClick={() => {
+          if (confirm("Replace this design with the starter layout? You can undo this change.")) useStore.getState().newDocument();
+        }}><Icon name="undo" />Reset to starter layout</button>
+      </PropertyGroup>
     </>
   );
 }

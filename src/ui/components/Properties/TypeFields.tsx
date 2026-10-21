@@ -3,6 +3,7 @@ import type { WidgetNode } from "@core/model/nodes";
 import { NumberInput } from "../NumberInput";
 import { TypedExpressionInput } from "./FieldEditor";
 import { GfxPicker } from "./GfxPicker";
+import { PropertyGroup } from "./PropertyGroup";
 
 /** First-class, type-specific fields (caption, text, gfx, etc.). */
 export function TypeFields({ node }: { node: WidgetNode }) {
@@ -48,8 +49,7 @@ export function TypeFields({ node }: { node: WidgetNode }) {
   );
 
   return (
-    <div className="field-group">
-      <h3>Content</h3>
+    <PropertyGroup title="Content" preferenceKey={`content-${node.type}`}>
       {"caption" in node && textField("Caption", "caption", node.caption)}
 
       {node.type === "station-window" && (
@@ -109,6 +109,6 @@ export function TypeFields({ node }: { node: WidgetNode }) {
             value={node.layoutType} onChange={layoutType => updateNode(node.id, { layoutType })} />
         </div>
       )}
-    </div>
+    </PropertyGroup>
   );
 }

@@ -14,6 +14,8 @@ interface ValueProps {
   onChange: (expr: string) => void;
   min?: number;
   max?: number;
+  inheritedValue?: string;
+  compact?: boolean;
 }
 
 export function canEditFieldValue(field: StructField, value: string | undefined): boolean {
@@ -46,7 +48,8 @@ function BooleanInput({ name, value, onChange }: { name: string; value?: string;
 }
 
 /** Shared by first-class content fields, curated groups, and the full schema view. */
-export function TypedExpressionInput({ field, value, onChange, min, max }: ValueProps) {
+export function TypedExpressionInput({ field, value: overrideValue, onChange, min, max, inheritedValue, compact }: ValueProps) {
+  const value = overrideValue ?? inheritedValue;
   const canEdit = canEditFieldValue(field, value);
   const name = field.name;
   const control = () => {
@@ -98,15 +101,15 @@ export function TypedExpressionInput({ field, value, onChange, min, max }: Value
       default: return null;
     }
   };
-  return <ExpressionControl label={name} value={value} canEditValue={canEdit} onChange={onChange}>{control()}</ExpressionControl>;
+  return <ExpressionControl label={name} value={overrideValue} canEditValue={canEdit} onChange={onChange} compact={compact}>{control()}</ExpressionControl>;
 }
 
-export function FieldEditor({ field, value, onChange, onClear, active = value !== undefined, label }: ValueProps & { onClear: () => void; active?: boolean; label?: string }) {
-  return <div className="override-row" style={{ opacity: active ? 1 : 0.75 }}>
+export function FieldEditor({ field, value, onChange, onClear, active = value !== undefined, label, inheritedValue, compact }: ValueProps & { onClear: () => void; active?: boolean; label?: string }) {
+  return <div className={`override-row${compact ? " compact-field" : ""}`} style={{ opacity: active || compact ? 1 : 0.75 }}>
     <div className="override-field">
-      <span className="override-name" title={field.name}>{label ?? field.name}</span>
-      {!active && <span className="field-inherited">Default (no override)</span>}
-      <TypedExpressionInput field={field} value={value} onChange={onChange} />
+      <span className="override-name" title={`${field.name}${!active ? " · Default (no override)" : ""}`}>{label ?? field.name}</span>
+      {!active && <span className="field-inherited">{compact ? "Default" : "Default (no override)"}</span>}
+      <TypedExpressionInput field={field} value={value} onChange={onChange} inheritedValue={inheritedValue} compact={compact} />
     </div>
     {active ? <button type="button" className="danger" aria-label={`Remove ${field.name} override`} title={`Remove ${field.name} override`} onClick={onClear}>×</button> : <span />}
   </div>;

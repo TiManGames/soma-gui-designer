@@ -11,7 +11,7 @@ export function WysiwygCanvas() {
   const doc = useStore(s => s.doc), hidden = useStore(s => s.hidden), states = usePreview(s => s.states), cache = useGfx(s => s.cache);
   useEffect(() => {
     const el = canvas.current!;
-    const lost = (event: Event) => { event.preventDefault(); renderer.current = null; usePreview.setState({ error: "Graphics context lost. Toggle Preview to rebuild it, or continue in wireframe mode." }); };
+    const lost = (event: Event) => { event.preventDefault(); renderer.current = null; usePreview.setState({ error: "Graphics context lost. Switch to Wireframe and back to Game textures to rebuild it." }); };
     el.addEventListener("webglcontextlost", lost);
     return () => { el.removeEventListener("webglcontextlost", lost); renderer.current?.dispose(); renderer.current = null; };
   }, []);

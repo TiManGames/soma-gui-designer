@@ -1,29 +1,18 @@
 import { useStore } from "../state/store";
-import { validateDocument } from "@core/validate/validateDocument";
-import { validateAgainstSchema } from "@core/validate/validateSchema";
+import { useWorkspace } from "../state/workspaceStore";
+import { validationIssues } from "../validation";
+import { Icon } from "./Icon";
 
 export function ValidationList() {
-  const doc = useStore((s) => s.doc);
-  const errors = [...validateDocument(doc), ...validateAgainstSchema(doc)];
-
-  if (errors.length === 0) {
-    return (
-      <div className="validation">
-        <div className="v-ok">
-          <span>✓</span> No validation issues.
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="validation">
-      {errors.map((err, i) => (
-        <div className="v-item" key={i}>
-          <span aria-hidden>▸</span>
-          <span>{err}</span>
-        </div>
-      ))}
-    </div>
-  );
+  const doc = useStore(s => s.doc), issues = validationIssues(doc);
+  if (!issues.length) return <div className="validation"><div className="v-ok"><Icon name="check" />No validation issues.</div></div>;
+  return <div className="validation">
+    {issues.map(({ message, nodeId }, i) => <button className="v-item" key={i} onClick={() => {
+      if (nodeId) {
+        useStore.getState().select(nodeId);
+        useStore.getState().setSidebarTab("layers");
+        useWorkspace.getState().revealNode(nodeId);
+      } else useWorkspace.getState().showProject();
+    }} title={nodeId ? `Reveal ${nodeId}` : "Open project settings"}><Icon name="alert" /><span>{message}</span><Icon name="right" /></button>)}
+  </div>;
 }
