@@ -3,11 +3,10 @@ import type { WidgetNode } from "./nodes";
 export type Target = "terminal-on-gui" | "map-on-gui" | "helper-function";
 
 /**
- * Current document schema version. There is intentionally NO migration between
- * versions — a document whose schemaVersion differs is rejected on load. Bump
- * this when the document shape changes.
+ * Current document schema version. Only the explicit v4-to-v5 upgrade below is
+ * supported; other versions are rejected. Bump when the document shape changes.
  */
-export const CURRENT_SCHEMA_VERSION = 4 as const;
+export const CURRENT_SCHEMA_VERSION = 5 as const;
 
 export interface SomaDocument {
   schemaVersion: typeof CURRENT_SCHEMA_VERSION;
@@ -25,7 +24,19 @@ export interface SomaDocument {
 export function isSomaDocument(value: unknown): value is SomaDocument {
   if (!value || typeof value !== "object") return false;
   const doc = value as Partial<SomaDocument>;
-  return doc.schemaVersion === CURRENT_SCHEMA_VERSION && Array.isArray(doc.nodes);
+  return doc.schemaVersion === CURRENT_SCHEMA_VERSION && Array.isArray(doc.nodes)
+    && doc.nodes.every(node => node && typeof node === "object" && typeof node.allowOverflow === "boolean");
+}
+
+/** Read a current document or upgrade v4 in memory without rewriting the file. */
+export function readDocument(value: unknown): SomaDocument | null {
+  if (isSomaDocument(value)) return value;
+  if (!value || typeof value !== "object") return null;
+  const legacy = value as Record<string, unknown>;
+  if (legacy.schemaVersion !== 4 || !Array.isArray(legacy.nodes)
+    || !legacy.nodes.every(node => node && typeof node === "object" && !Array.isArray(node))) return null;
+  return { ...legacy, schemaVersion: CURRENT_SCHEMA_VERSION,
+    nodes: legacy.nodes.map(node => ({ ...node, allowOverflow: false })) } as SomaDocument;
 }
 
 export interface ResolutionPreset {

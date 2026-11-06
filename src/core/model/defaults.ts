@@ -154,7 +154,7 @@ export function makeNode(type: WidgetType, id: string, patch: Partial<WidgetNode
   const base = {
     id, parentId: "screen",
     xN: rect.xN, yN: rect.yN, wN: rect.wN, hN: rect.hN, z: rect.z,
-    enabled: true, overrides: [] as Override[]
+    enabled: true, allowOverflow: false, overrides: [] as Override[]
   };
   const caption = DEFAULT_CAPTION[type];
 

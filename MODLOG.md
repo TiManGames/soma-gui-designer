@@ -1,5 +1,23 @@
 # GUI renderer work log
 
+## 2026-10-22 — SOMA GUI Designer 0.7.0
+
+- Added per-widget Allow overflow in Design → Layout, allowing signed positions
+  and sizes beyond the parent through dragging, resizing, and px/% inputs.
+  Grid snapping remains independent; turning overflow off fits the widget
+  inside its parent as one undoable edit.
+- Preserved overflow through copy/paste, duplication, and reparenting. Dragging
+  beyond a parent no longer automatically detaches an overflow-enabled widget.
+  Existing screen clipping and HPS coordinate emission remain unchanged.
+- Introduced schema v5 with a narrow v4 upgrade that defaults overflow off,
+  preserves existing geometry/code, and writes nothing until the next edit.
+- Deferred viewport ResizeObserver updates to the next animation frame to avoid
+  scrollbar feedback warnings when panels change the available viewport.
+- Verified 147 automated tests, 35 overflow browser scenarios, 84 Fit regression
+  cases, resize/reparent gestures at 25/100/200% zoom, 125% interface scaling,
+  lint, both TypeScript targets, and the production build. Browser checks used
+  headless Chrome and included WebGL pixel checks for off-screen image clipping.
+
 ## 2026-10-21 — SOMA GUI Designer 0.6.2
 
 - Fixed automatic Fit oscillating when selection labels or other canvas content

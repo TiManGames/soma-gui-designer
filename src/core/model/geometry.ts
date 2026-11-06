@@ -11,6 +11,38 @@ export interface Rect {
   h: number;
 }
 
+export type NormalizedRect = Pick<WidgetNode, "xN" | "yN" | "wN" | "hN">;
+export const MIN_NORMALIZED_SIZE = 0.001;
+
+/** Fit a rectangle, or retain overflow. Resizing keeps the existing origin. */
+export function constrainGeometry(rect: NormalizedRect, allowOverflow: boolean, resizing = false): NormalizedRect {
+  const finite = (value: number, fallback: number) => Number.isFinite(value) ? value : fallback;
+  let xN = finite(rect.xN, 0), yN = finite(rect.yN, 0);
+  let wN = Math.max(MIN_NORMALIZED_SIZE, finite(rect.wN, MIN_NORMALIZED_SIZE));
+  let hN = Math.max(MIN_NORMALIZED_SIZE, finite(rect.hN, MIN_NORMALIZED_SIZE));
+  if (!allowOverflow) {
+    if (resizing) {
+      xN = clamp(xN, 0, 1 - MIN_NORMALIZED_SIZE);
+      yN = clamp(yN, 0, 1 - MIN_NORMALIZED_SIZE);
+    }
+    wN = Math.min(wN, resizing ? 1 - xN : 1);
+    hN = Math.min(hN, resizing ? 1 - yN : 1);
+    xN = clamp(xN, 0, 1 - wN);
+    yN = clamp(yN, 0, 1 - hN);
+  }
+  return { xN, yN, wN, hN };
+}
+
+/** Numeric layout edits use the same snapping and normalized bounds as dragging. */
+export function layoutValuePatch(doc: SomaDocument, node: WidgetNode, key: keyof NormalizedRect,
+  value: number, unit: "px" | "pct"): Partial<NormalizedRect> {
+  if (!Number.isFinite(value)) return {};
+  const parent = parentAbsRect(doc, node);
+  const normalized = unit === "px" ? snapPx(value, doc) / (key === "xN" || key === "wN" ? parent.w : parent.h) : value / 100;
+  if (!Number.isFinite(normalized)) return {};
+  return constrainGeometry({ ...node, [key]: normalized }, node.allowOverflow, key === "wN" || key === "hN");
+}
+
 /** Native layout cursor rules with the zero spacing emitted by LayoutBegin. */
 export function layoutRects(parent: Rect, type: string, nodes: WidgetNode[]): Map<string, Rect> {
   const result = new Map<string, Rect>();
@@ -80,17 +112,16 @@ export function snapPx(value: number, doc: SomaDocument): number {
 /**
  * Given a node's current absolute pixel rect and a new parent id, produce the
  * normalized coords that keep the node visually in place under the new parent.
- * Inverse of absoluteRect. Clamped to stay inside the parent.
+ * Inverse of absoluteRect. Clamped unless the widget allows overflow.
  */
 export function renormalizeToParent(
   doc: SomaDocument,
   abs: Rect,
-  newParentId: string
+  newParentId: string,
+  allowOverflow = false,
+  parentRect?: Rect
 ): { xN: number; yN: number; wN: number; hN: number } {
-  const p = absRectOfParent(doc, newParentId);
-  const wN = clamp(abs.w / p.w, 0.001, 1);
-  const hN = clamp(abs.h / p.h, 0.001, 1);
-  const xN = clamp((abs.x - p.x) / p.w, 0, 1 - wN);
-  const yN = clamp((abs.y - p.y) / p.h, 0, 1 - hN);
-  return { xN, yN, wN, hN };
+  const p = parentRect ?? absRectOfParent(doc, newParentId);
+  return constrainGeometry({ wN: abs.w / p.w, hN: abs.h / p.h,
+    xN: (abs.x - p.x) / p.w, yN: (abs.y - p.y) / p.h }, allowOverflow);
 }

@@ -2,8 +2,7 @@ import { useStore } from "../../state/store";
 import { ROOT, type WidgetNode } from "@core/model/nodes";
 import { canReparent } from "@core/model/tree";
 import { WIDGETS } from "@core/model/defaults";
-import { clamp } from "@core/model/ids";
-import { parentAbsRect, snapPx } from "@core/model/geometry";
+import { parentAbsRect, layoutValuePatch } from "@core/model/geometry";
 import { NumberInput } from "../NumberInput";
 import { PropertyGroup } from "./PropertyGroup";
 
@@ -30,22 +29,9 @@ export function CommonProps({ node }: { node: WidgetNode }) {
   const dispW = isPx ? Math.round(node.wN * parent.w) : pct(node.wN);
   const dispH = isPx ? Math.round(node.hN * parent.h) : pct(node.hN);
 
-  const setX = (v: number) => {
-    const xN = isPx ? snapPx(v, doc) / parent.w : v / 100;
-    updateNode(node.id, { xN: clamp(xN, 0, 1 - node.wN) });
-  };
-  const setY = (v: number) => {
-    const yN = isPx ? snapPx(v, doc) / parent.h : v / 100;
-    updateNode(node.id, { yN: clamp(yN, 0, 1 - node.hN) });
-  };
-  const setW = (v: number) => {
-    const wN = isPx ? snapPx(v, doc) / parent.w : v / 100;
-    updateNode(node.id, { wN: clamp(wN, 0.001, 1 - node.xN) });
-  };
-  const setH = (v: number) => {
-    const hN = isPx ? snapPx(v, doc) / parent.h : v / 100;
-    updateNode(node.id, { hN: clamp(hN, 0.001, 1 - node.yN) });
-  };
+  const setLayout = (key: "xN" | "yN" | "wN" | "hN", value: number) =>
+    updateNode(node.id, layoutValuePatch(doc, node, key, value, layoutUnit));
+  const positioned = !node.type.startsWith("bg-") && node.type !== "advanced-imgui";
 
   const unit = isPx ? "px" : "%";
 
@@ -103,21 +89,29 @@ export function CommonProps({ node }: { node: WidgetNode }) {
         <div className="four-col">
           <label>
             X {unit}
-            <NumberInput value={dispX} onCommit={setX} />
+            <NumberInput value={dispX} onCommit={v => setLayout("xN", v)} />
           </label>
           <label>
             Y {unit}
-            <NumberInput value={dispY} onCommit={setY} />
+            <NumberInput value={dispY} onCommit={v => setLayout("yN", v)} />
           </label>
           <label>
             W {unit}
-            <NumberInput value={dispW} onCommit={setW} />
+            <NumberInput value={dispW} onCommit={v => setLayout("wN", v)} />
           </label>
           <label>
             H {unit}
-            <NumberInput value={dispH} onCommit={setH} />
+            <NumberInput value={dispH} onCommit={v => setLayout("hN", v)} />
           </label>
         </div>
+
+        {positioned && <div className="checkbox-row">
+          <label title="Allow movement and resizing beyond parent edges. Turning off fits this widget inside its parent.">
+            <input type="checkbox" checked={node.allowOverflow}
+              onChange={e => updateNode(node.id, { allowOverflow: e.target.checked })} />
+            Allow overflow
+          </label>
+        </div>}
 
         <div className="two-col">
           <label>

@@ -55,7 +55,9 @@ test/          codegen parity, geometry/reparent, validation, extraction, serial
   the extension host (esbuild → `dist/extension.js`) both import the pure `src/core/`
   library. An ESLint rule forbids React/DOM/vscode imports inside `core/`.
 - **Data model** — a discriminated union of widget nodes over a shared base;
-  coordinates normalized 0..1 relative to the parent (root = `"screen"`); `z` is draw depth.
+  coordinates normalized relative to the parent (root = `"screen"`); `z` is draw depth.
+  Positions and sizes normally stay within 0..1; widgets with **Allow overflow**
+  enabled may extend outside that range.
 - **Code generation** — a data-driven emitter registry (one entry per widget type)
   produces the include block, function header, `ImGui_SetTransCategory`, z-sorted widget
   calls, and `StationGui_*`/`ImGui_*` API calls. Locked by a golden-fixture parity test.
@@ -68,13 +70,14 @@ test/          codegen parity, geometry/reparent, validation, extraction, serial
 
 ## Persistence
 
-A project is a `*.somagui.json` file (schema v4) edited via a VS Code **custom text
+A project is a `*.somagui.json` file (schema v5) edited via a VS Code **custom text
 editor**. The file is the single source of truth: the webview posts edits to the host,
 which applies them to the `TextDocument` — so **save (Ctrl+S), dirty state, undo/redo,
 and hot-exit are native VS Code behaviors**. Every widget's layout, properties, and
-overrides live in that file, independent of the game scripts. There is **no migration
-between schema versions**: a document whose `schemaVersion` differs from the current one
-is rejected on load (bump `CURRENT_SCHEMA_VERSION` when the shape changes).
+overrides live in that file, independent of the game scripts. Schema-v4 projects
+upgrade in memory with every widget's `allowOverflow` set to `false`, preserving
+their existing layout and generated HPS. Opening a v4 file does not rewrite it;
+the next document edit writes v5. Other schema versions are rejected on load.
 
 ## Features
 
@@ -95,6 +98,11 @@ for source findings, coverage, local visual checks, and remaining limits.
   generated AngelScript to a file) via native VS Code dialogs.
 - Undo/redo (in-canvas), with native VS Code save/undo at the file level.
 - Resolution presets and normalized layout that survives resolution changes.
+- Per-widget **Allow overflow** in Design → Layout permits dragging, resizing,
+  and signed X/Y edits beyond canvas or parent edges. Grid snapping remains
+  independent. Turning it off fits that widget inside its parent in one undoable
+  edit. It does not change child settings or game clipping. Fully off-screen
+  widgets remain selectable in Layers and editable through their layout fields.
 
 ## Workspace controls
 

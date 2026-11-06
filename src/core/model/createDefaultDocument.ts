@@ -1,4 +1,5 @@
 import type { SomaDocument } from "./document";
+import { CURRENT_SCHEMA_VERSION } from "./document";
 import { makeNode } from "./defaults";
 
 /** Deep clone via structured JSON (documents are JSON-serializable). */
@@ -12,7 +13,7 @@ export function cloneDoc(doc: SomaDocument): SomaDocument {
  */
 export function createDefaultDocument(): SomaDocument {
   return {
-    schemaVersion: 4,
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     target: "terminal-on-gui",
     functionName: "DrawGeneratedCustomScreen",
     translationCategory: "GeneratedTerminal",

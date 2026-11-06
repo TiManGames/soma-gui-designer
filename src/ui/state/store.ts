@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { SomaDocument, Target } from "@core/model/document";
-import { detectPreset, RESOLUTION_PRESETS, isSomaDocument } from "@core/model/document";
+import { detectPreset, RESOLUTION_PRESETS, readDocument } from "@core/model/document";
 import type { Override, WidgetNode, WidgetType } from "@core/model/nodes";
 import { ROOT } from "@core/model/nodes";
 import { makeNode, isContainerType } from "@core/model/defaults";
@@ -11,12 +11,12 @@ import {
   absoluteRect,
   parentAbsRect,
   renormalizeToParent,
-  snapPx
+  snapPx,
+  constrainGeometry
 } from "@core/model/geometry";
 import { useViewport } from "./viewportStore";
 import { useWorkspace } from "./workspaceStore";
 import type { Rect } from "@core/model/geometry";
-import { clamp } from "@core/model/ids";
 import { postToHost } from "../vscodeApi";
 import { usePreview } from "./previewStore";
 
@@ -309,7 +309,16 @@ export const useStore = create<DesignerState>((set, get) => ({
 
   updateNode: (id, patch) =>
     set((s) => {
-      const nodes = s.doc.nodes.map((n) => (n.id === id ? ({ ...n, ...patch } as WidgetNode) : n));
+      const node = getNode(s.doc, id);
+      if (!node) return {};
+      const keys = ["xN", "yN", "wN", "hN"] as const;
+      if (keys.some(key => key in patch && !Number.isFinite(patch[key]))) return {};
+      const next = { ...node, ...patch } as WidgetNode;
+      if (keys.some(key => key in patch) || patch.allowOverflow === false) {
+        const resizing = patch.allowOverflow !== false && !("xN" in patch || "yN" in patch) && ("wN" in patch || "hN" in patch);
+        Object.assign(next, constrainGeometry(next, next.allowOverflow, resizing));
+      }
+      const nodes = s.doc.nodes.map(n => n.id === id ? next : n);
       return withHistory(s, { ...s.doc, nodes });
     }),
 
@@ -347,8 +356,7 @@ export const useStore = create<DesignerState>((set, get) => ({
       const copy: WidgetNode = {
         ...JSON.parse(JSON.stringify(src)),
         id: newId,
-        xN: clamp(src.xN + 0.025, 0, 1 - src.wN),
-        yN: clamp(src.yN + 0.025, 0, 1 - src.hN),
+        ...constrainGeometry({ ...src, xN: src.xN + 0.025, yN: src.yN + 0.025 }, src.allowOverflow),
         z: src.z + 0.1
       };
       return withHistory(s, { ...s.doc, nodes: [...s.doc.nodes, copy] }, { selectedId: newId });
@@ -362,7 +370,7 @@ export const useStore = create<DesignerState>((set, get) => ({
       const preview = usePreview.getState();
       const abs = s.wysiwygEnabled && preview.doc === s.doc ? preview.scene?.rects.get(id) ?? absoluteRect(s.doc, node) : absoluteRect(s.doc, node);
       const target = s.wysiwygEnabled && preview.doc === s.doc ? preview.scene?.frames.get(newParentId) : undefined;
-      const norm = target ? { xN: clamp((abs.x - target.x) / target.w, 0, 1 - abs.w / target.w), yN: clamp((abs.y - target.y) / target.h, 0, 1 - abs.h / target.h), wN: clamp(abs.w / target.w, 0.001, 1), hN: clamp(abs.h / target.h, 0.001, 1) } : renormalizeToParent(s.doc, abs, newParentId);
+      const norm = renormalizeToParent(s.doc, abs, newParentId, node.allowOverflow, target);
       const nodes = s.doc.nodes.map((n) =>
         n.id === id ? ({ ...n, parentId: newParentId, ...norm } as WidgetNode) : n
       );
@@ -390,22 +398,19 @@ export const useStore = create<DesignerState>((set, get) => ({
     const scale = s.drag.scale;
     const dxPx = (clientX - s.drag.startClientX) / scale;
     const dyPx = (clientY - s.drag.startClientY) / scale;
+    if (!Number.isFinite(dxPx) || !Number.isFinite(dyPx)) return;
 
     let patch: Partial<WidgetNode>;
     if (s.drag.resize) {
       const wPx = snapPx(s.drag.startWN * parent.w + dxPx, s.doc);
       const hPx = snapPx(s.drag.startHN * parent.h + dyPx, s.doc);
-      patch = {
-        wN: clamp(Math.max(4, wPx) / parent.w, 0.001, 1 - node.xN),
-        hN: clamp(Math.max(4, hPx) / parent.h, 0.001, 1 - node.yN)
-      };
+      patch = constrainGeometry({ ...node,
+        wN: Math.max(4, wPx) / parent.w, hN: Math.max(4, hPx) / parent.h
+      }, node.allowOverflow, true);
     } else {
       const xPx = snapPx(s.drag.startXN * parent.w + dxPx, s.doc);
       const yPx = snapPx(s.drag.startYN * parent.h + dyPx, s.doc);
-      patch = {
-        xN: clamp(xPx / parent.w, 0, 1 - node.wN),
-        yN: clamp(yPx / parent.h, 0, 1 - node.hN)
-      };
+      patch = constrainGeometry({ ...node, xN: xPx / parent.w, yN: yPx / parent.h }, node.allowOverflow);
     }
     // Live drag mutates without pushing history each frame.
     const nodes = s.doc.nodes.map((n) => (n.id === s.drag!.id ? ({ ...n, ...patch } as WidgetNode) : n));
@@ -474,8 +479,7 @@ export const useStore = create<DesignerState>((set, get) => ({
         ...n,
         id: idMap.get(n.id)!,
         parentId: n.id === root.id ? rootParent : (idMap.get(n.parentId) ?? rootParent),
-        xN: n.id === root.id ? clamp(n.xN + 0.02, 0, 1 - n.wN) : n.xN,
-        yN: n.id === root.id ? clamp(n.yN + 0.02, 0, 1 - n.hN) : n.yN
+        ...(n.id === root.id ? constrainGeometry({ ...n, xN: n.xN + 0.02, yN: n.yN + 0.02 }, n.allowOverflow) : {})
       })) as WidgetNode[];
 
       const nextDoc = { ...s.doc, nodes: [...s.doc.nodes, ...pasted] };
@@ -523,12 +527,12 @@ export const useStore = create<DesignerState>((set, get) => ({
       } catch {
         return {};
       }
-      if (!isSomaDocument(parsed)) return {};
+      const doc = readDocument(parsed);
+      if (!doc) return {};
       // Applying host content must not echo an edit back to the host, and must
       // not pollute undo history (VS Code owns file-level undo).
       suppressPush = true;
       try {
-        const doc = parsed;
         const selectedId =
           s.selectedId && doc.nodes.some((n) => n.id === s.selectedId)
             ? s.selectedId

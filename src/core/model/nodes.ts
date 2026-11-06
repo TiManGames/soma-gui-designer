@@ -1,6 +1,6 @@
 // Framework-agnostic widget node model.
 // Discriminated union keyed by `type` over a shared NodeBase.
-// Coordinates are normalized fractions (0..1) relative to the parent; the root
+// Coordinates are normalized fractions relative to the parent (may overflow); the root
 // parent is the sentinel "screen". `z` is the draw depth (painter order), packed
 // into the emitted cVector3f as its third component (mirrors the prototype).
 
@@ -58,6 +58,8 @@ export interface NodeBase {
   yN: number;
   wN: number;
   hN: number;
+  /** Permit this widget's geometry to extend outside its parent. */
+  allowOverflow: boolean;
   z: number;
   enabled: boolean;
   /** Structured customizations of the widget's data struct (override-only). */

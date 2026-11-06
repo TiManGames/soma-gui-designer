@@ -56,8 +56,15 @@ export function Canvas() {
         : { x: element.clientWidth, y: element.clientHeight });
     };
     sync();
-    const observer = new ResizeObserver(sync); observer.observe(element, { box: fit ? "border-box" : "content-box" });
-    return () => observer.disconnect();
+    // Updating placement can change scrollbars and resize this same viewport.
+    // Defer observer-driven updates so they do not feed back within its delivery.
+    let frame: number | undefined;
+    const observer = new ResizeObserver(() => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => { frame = undefined; sync(); });
+    });
+    observer.observe(element, { box: fit ? "border-box" : "content-box" });
+    return () => { observer.disconnect(); if (frame !== undefined) cancelAnimationFrame(frame); };
   }, [size.x, size.y, fit, rememberAnchor]);
   useLayoutEffect(() => {
     const element = scroller.current; if (!element) return;

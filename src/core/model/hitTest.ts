@@ -9,7 +9,8 @@ import { isContainer, canReparent, accumulatedZ } from "./tree";
  *
  * Candidates are containers whose absolute rect contains the point, excluding
  * the dragged node and its descendants (cycle-safe via canReparent). The
- * top-most (highest z, then deepest) candidate wins; ROOT is the fallback.
+ * top-most (highest z, then deepest) candidate wins. Without a candidate,
+ * overflowing widgets retain their parent; other widgets fall back to ROOT.
  */
 export function findDropTarget(
   doc: SomaDocument,
@@ -29,7 +30,11 @@ export function findDropTarget(
     );
   });
 
-  if (candidates.length === 0) return ROOT;
+  if (candidates.length === 0) {
+    const dragged = doc.nodes.find(n => n.id === draggedId);
+    // Crossing a parent's border is intentional for an overflowing widget.
+    return dragged?.allowOverflow ? dragged.parentId : ROOT;
+  }
 
   // Deepest + top-most: prefer higher z, then smaller area (more specific).
   candidates.sort((a, b) => {

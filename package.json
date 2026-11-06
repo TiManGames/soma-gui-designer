@@ -3,7 +3,7 @@
   "displayName": "SOMA GUI Designer",
   "publisher": "soma-modding",
   "private": true,
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "Visual builder for SOMA (HPL3) ImGui terminal GUIs — drag-and-drop widgets, generate AngelScript .hps code.",
   "license": "MIT",
   "repository": {
@@ -72,11 +72,13 @@
           "markdownDescription": "Absolute or workspace-relative path to your **mod's** `graphics` folder. Files here override the base game when rendering the WYSIWYG canvas."
         },
         "somaGui.baseGameFontsPath": {
-          "type": "string", "default": "",
+          "type": "string",
+          "default": "",
           "description": "Optional base-game fonts directory. Empty uses the fonts folder alongside the configured graphics folder."
         },
         "somaGui.modFontsPath": {
-          "type": "string", "default": "",
+          "type": "string",
+          "default": "",
           "description": "Optional mod fonts directory. Empty uses the fonts folder alongside the mod graphics folder."
         },
         "somaGui.wysiwyg.enabled": {

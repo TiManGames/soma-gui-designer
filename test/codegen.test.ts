@@ -6,6 +6,7 @@ import { makeNode } from "../src/core/model/defaults";
 import { generateHps } from "../src/core/codegen/generateHps";
 import { normalizeHpsFloatLiterals } from "../src/core/codegen/format";
 import type { SomaDocument } from "../src/core/model/document";
+import { CURRENT_SCHEMA_VERSION } from "../src/core/model/document";
 
 function fixture(name: string): string {
   const path = fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url));
@@ -48,7 +49,7 @@ describe("HPS float literal formatting", () => {
 describe("generateHps widget coverage", () => {
   function docWith(nodes: SomaDocument["nodes"]): SomaDocument {
     return {
-      schemaVersion: 4,
+      schemaVersion: CURRENT_SCHEMA_VERSION,
       target: "terminal-on-gui",
       functionName: "Screen",
       translationCategory: "Cat",

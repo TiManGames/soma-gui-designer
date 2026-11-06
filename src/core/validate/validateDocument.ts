@@ -28,10 +28,10 @@ export function validateDocument(doc: SomaDocument): string[] {
       else if (!isContainer(parent)) errors.push(`${node.id}: parent '${node.parentId}' is not a container.`);
     }
 
-    if (node.xN < 0 || node.yN < 0 || node.wN <= 0 || node.hN <= 0) {
-      errors.push(`${node.id}: normalized position/size must be positive.`);
+    if (![node.xN, node.yN, node.wN, node.hN].every(Number.isFinite) || node.wN <= 0 || node.hN <= 0) {
+      errors.push(`${node.id}: normalized position/size must be finite and sizes must be positive.`);
     }
-    if (node.xN + node.wN > 1.001 || node.yN + node.hN > 1.001) {
+    if (!node.allowOverflow && (node.xN < 0 || node.yN < 0 || node.xN + node.wN > 1.001 || node.yN + node.hN > 1.001)) {
       errors.push(`${node.id}: element extends outside its parent coordinate space.`);
     }
   }
